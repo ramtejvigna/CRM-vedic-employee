@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
 export const Leave = () => {
-    const [activeTab, setActiveTab] = useState('New Requests');
+    const [activeTab, setActiveTab] = useState('Apply');
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'New Requests':
+            case 'Apply':
                 return <div>Apply Content</div>;
-            case 'In progress':
+            case 'Pending':
                 return <div>Pending Content</div>;
-            case 'Completed':
+            case 'History':
                 return <div>History Content</div>;
             default:
                 return null;
@@ -20,34 +20,34 @@ export const Leave = () => {
         <div className="flex flex-col items-center p-10">
             <div className="flex mb-4">
                 <button
-                    onClick={() => setActiveTab('New Requests')}
+                    onClick={() => setActiveTab('Apply')}
                     className={`px-4 py-2 text-sm rounded-l-md ${
-                        activeTab === 'New Requests'
+                        activeTab === 'Apply'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
                     }`}
                 >
-                    New Requests
+                    Apply
                 </button>
                 <button
-                    onClick={() => setActiveTab('In progress')}
+                    onClick={() => setActiveTab('Pending')}
                     className={`px-4 py-2 text-sm ${
-                        activeTab === 'In progress'
+                        activeTab === 'Pending'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
                     }`}
                 >
-                    In progress
+                    Pending
                 </button>
                 <button
-                    onClick={() => setActiveTab('Completed')}
+                    onClick={() => setActiveTab('History')}
                     className={`px-4 py-2 text-sm rounded-r-md ${
-                        activeTab === 'Completed'
+                        activeTab === 'History'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
                     }`}
                 >
-                    Completed
+                    History
                 </button>
             </div>
 
