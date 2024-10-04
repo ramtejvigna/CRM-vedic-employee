@@ -17,13 +17,13 @@ import { jwtDecode } from "jwt-decode";
 
 export function SignIn() {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { username, password });
+      const response = await axios.post('http://localhost:3000/login', { username, phone });
       Cookies.set('token', response.data.token, { expires: 1 });
       
       // Decode the token to get the user role
@@ -51,7 +51,7 @@ export function SignIn() {
       >
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4 text-gray-900 dark:text-white">Sign In</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">Enter your email or username and password to Sign In.</Typography>
+          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">Enter your email or username and phone to Sign In.</Typography>
         </div>
         <form className="mt-8 mb-2" onSubmit={handleLogin}>
           <div className="mb-4">
@@ -71,15 +71,14 @@ export function SignIn() {
           </div>
           <div className="mb-4">
             <Typography variant="small" color="blue-gray" className="mb-2 font-medium text-gray-600 dark:text-gray-400">
-              Password
+              Phone
             </Typography>
             <Input
-              type="password"
+              type="text"
               size="lg"
-              placeholder="********"
               className="border-t-blue-gray-200 focus:border-t-gray-900 dark:bg-gray-700 dark:text-white"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
@@ -88,7 +87,7 @@ export function SignIn() {
           <Button className="mt-6 w-full" type="submit">
             Sign In
           </Button>
-          <div className="flex items-center justify-between gap-2 mt-6">
+          {/* <div className="flex items-center justify-between gap-2 mt-6"> */}
             {/* <Checkbox
               label={
                 <Typography
@@ -101,12 +100,12 @@ export function SignIn() {
               }
               containerProps={{ className: "-ml-2.5" }}
             /> */}
-            <Typography variant="small" className="font-medium text-gray-900 dark:text-gray-400">
+            {/* <Typography variant="small" className="font-medium text-gray-900 dark:text-gray-400">
               <a href="#" className="text-blue-500 hover:underline">
-                Forgot Password
+                Forgot phone
               </a>
-            </Typography>
-          </div>
+            </Typography> */}
+          {/* </div> */}
           {/* <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4 text-gray-600 dark:text-gray-400">
             Not registered?
             <Link to="/auth/sign-up" className="text-blue-500 hover:underline ml-1">Create account</Link>
