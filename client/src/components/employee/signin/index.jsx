@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  Input,
-  Checkbox,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
-import { Link, useNavigate } from "react-router-dom";
+import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
-import Cookies from 'js-cookie';
-import { jwtDecode } from "jwt-decode";
-
+import Cookies from 'js-cookie'; // Correct import for js-cookie
+import {jwtDecode} from "jwt-decode"; // Correct way to import jwt_decode
 
 export function SignIn() {
   const [username, setUsername] = useState('');
@@ -23,13 +16,22 @@ export function SignIn() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      // Make API request to login
       const response = await axios.post('http://localhost:5000/api/login', { username, password });
-      Cookies.set('token', response.data.token, { expires: 1 });
+      const token = response.data.token;
       
-      // Decode the token to get the user role
-      const decodedToken = jwtDecode(response.data.token);
+      // Store token in cookies
+      Cookies.set('token', token, { expires: 1 });
+      
+      // Decode the token to get user details
+      const decodedToken = jwtDecode(token);
       const isAdmin = decodedToken.isAdmin;
-        console.log(decodedToken)
+      const usernameFromToken = decodedToken.username; // If username is encoded in the token
+      
+      // Store username in cookies (you can also store email or any other user details)
+      Cookies.set('username', usernameFromToken, { expires: 1 });
+      
+      // Show success message and navigate based on user role
       toast.success('Login successful!');
       if (isAdmin) {
         navigate('/admin/dashboard');
@@ -37,6 +39,7 @@ export function SignIn() {
         navigate('/employee/home');
       }
     } catch (error) {
+      console.error(error);
       toast.error('Invalid credentials');
     }
   };
@@ -50,8 +53,12 @@ export function SignIn() {
         className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
       >
         <div className="text-center">
-          <Typography variant="h2" className="font-bold mb-4 text-gray-900 dark:text-white">Sign In</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">Enter your email or username and password to Sign In.</Typography>
+          <Typography variant="h2" className="font-bold mb-4 text-gray-900 dark:text-white">
+            Sign In
+          </Typography>
+          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">
+            Enter your email or username and password to Sign In.
+          </Typography>
         </div>
         <form className="mt-8 mb-2" onSubmit={handleLogin}>
           <div className="mb-4">
@@ -88,29 +95,6 @@ export function SignIn() {
           <Button className="mt-6 w-full" type="submit">
             Sign In
           </Button>
-          <div className="flex items-center justify-between gap-2 mt-6">
-            {/* <Checkbox
-              label={
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="flex items-center justify-start font-medium text-gray-600 dark:text-gray-400"
-                >
-                  Subscribe me to newsletter
-                </Typography>
-              }
-              containerProps={{ className: "-ml-2.5" }}
-            /> */}
-            <Typography variant="small" className="font-medium text-gray-900 dark:text-gray-400">
-              <a href="#" className="text-blue-500 hover:underline">
-                Forgot Password
-              </a>
-            </Typography>
-          </div>
-          {/* <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4 text-gray-600 dark:text-gray-400">
-            Not registered?
-            <Link to="/auth/sign-up" className="text-blue-500 hover:underline ml-1">Create account</Link>
-          </Typography> */}
         </form>
       </motion.div>
     </section>
