@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
-import { FaHome, FaBell, FaCog, FaChevronDown, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUserCircle } from 'react-icons/fa'; // Import dark/light mode icons
+import { FaHome, FaCog, FaChevronDown, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUserCircle } from 'react-icons/fa'; // Import dark/light mode icons
 import { useStore } from '../../../store';
 import NotificationButton from './NotificationButton';
 
 const Navbar = () => {
   const { setOpenSidenav } = useStore();
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // State to control user dropdown
   const { activeRoute, isDarkMode, toggleDarkMode } = useStore(); // Access theme state and toggle function
-
-  const notifications = [
-    { id: 1, message: 'New message from John', time: '5 minutes ago' },
-    { id: 2, message: 'Your report is ready', time: '1 hour ago' },
-    { id: 3, message: 'Meeting in 30 minutes', time: '25 minutes ago' },
-  ];
 
   const handleLogout = () => {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -23,12 +16,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={``}>
+    <nav className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-
           <div className="flex items-center">
-            <span className="logo "></span>
+            <span className="logo"></span>
           </div>
 
           <div className="flex flex-row justify-between items-center w-full">
