@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import {
   Card,
   Input,
-  Checkbox,
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
 import Cookies from 'js-cookie';
-import { jwtDecode } from "jwt-decode";
-
 
 export function SignIn() {
   const [username, setUsername] = useState('');
@@ -24,20 +21,21 @@ export function SignIn() {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/login', { username, phone });
-      Cookies.set('token', response.data.token, { expires: 1 });
       
-      // Decode the token to get the user role
-      const decodedToken = jwtDecode(response.data.token);
-      const isAdmin = decodedToken.isAdmin;
-        console.log(decodedToken)
+      // Extract token and user details from the response
+      const token = response.data.token;
+      const employeeId = response.data.userId;
+      
+      // Set token and employeeId as cookies
+      Cookies.set('token', token, { expires: 1 });
+      Cookies.set('employeeId', employeeId, { expires: 1 });
+
+      // Display success message
       toast.success('Login successful!');
-      if (isAdmin) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/employee/home');
-      }
+      
+      navigate('/employee/home');
     } catch (error) {
-      toast.error('Invalid credentials');
+      toast.error('Invalid credentials. Please try again.');
     }
   };
 
@@ -51,7 +49,9 @@ export function SignIn() {
       >
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4 text-gray-900 dark:text-white">Sign In</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">Enter your email or username and phone to Sign In.</Typography>
+          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">
+            Enter your email or username and phone to Sign In.
+          </Typography>
         </div>
         <form className="mt-8 mb-2" onSubmit={handleLogin}>
           <div className="mb-4">
@@ -87,29 +87,6 @@ export function SignIn() {
           <Button className="mt-6 w-full" type="submit">
             Sign In
           </Button>
-          {/* <div className="flex items-center justify-between gap-2 mt-6"> */}
-            {/* <Checkbox
-              label={
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="flex items-center justify-start font-medium text-gray-600 dark:text-gray-400"
-                >
-                  Subscribe me to newsletter
-                </Typography>
-              }
-              containerProps={{ className: "-ml-2.5" }}
-            /> */}
-            {/* <Typography variant="small" className="font-medium text-gray-900 dark:text-gray-400">
-              <a href="#" className="text-blue-500 hover:underline">
-                Forgot phone
-              </a>
-            </Typography> */}
-          {/* </div> */}
-          {/* <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4 text-gray-600 dark:text-gray-400">
-            Not registered?
-            <Link to="/auth/sign-up" className="text-blue-500 hover:underline ml-1">Create account</Link>
-          </Typography> */}
         </form>
       </motion.div>
     </section>

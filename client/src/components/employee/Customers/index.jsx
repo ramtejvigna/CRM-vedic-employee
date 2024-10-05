@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios"
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const Customers = () => {
     const [customerData, setCustomerData] = useState({
@@ -9,46 +10,54 @@ export const Customers = () => {
     });
     const [activeTab, setActiveTab] = useState('New Requests');
 
+    // Get employeeId from cookies
+    const employeeId = Cookies.get('employeeId');
+
     // Fetch customer data from backend
     useEffect(() => {
-        axios.get('http://localhost:3000/customers/getCustomersRequests')
-            .then(response => {
-                setCustomerData(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching customer data:', error);
-            });
-    }, []);
+        if (employeeId) {
+            axios
+                .get(`http://localhost:3000/customers/employees/${employeeId}/customers`)
+                .then((response) => {
+                    setCustomerData(response.data);
+                })
+                .catch((error) => {
+                    console.error('Error fetching customer data:', error);
+                });
+        } else {
+            console.error('Employee ID not found in cookies');
+        }
+    }, [employeeId]);
 
     // Move customer from one section to another (trigger backend call)
     const moveCustomer = (customer, fromSection, toSection) => {
         const updatedCustomer = { ...customer };
-    
+
         // Handle different section moves
         if (toSection === 'inProgress') {
-            updatedCustomer.paymentStatus = true;  // Moving to In Progress, mark as paid
+            updatedCustomer.paymentStatus = true; // Moving to In Progress, mark as paid
         } else if (toSection === 'completed') {
-            updatedCustomer.pdfGenerated += 1;     // Increment PDF count for completed
+            updatedCustomer.pdfGenerated += 1; // Increment PDF count for completed
         } else if (toSection === 'newRequests') {
             updatedCustomer.paymentStatus = false; // Move to New Requests, mark as unpaid
-            updatedCustomer.pdfGenerated = 0;      // Reset PDF count for new requests
+            updatedCustomer.pdfGenerated = 0; // Reset PDF count for new requests
         }
-    
+
         // Make PUT request to update customer using axios
-        axios.put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+        axios
+            .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
             .then(() => {
                 // Update customer data in the frontend
                 setCustomerData((prevData) => ({
                     ...prevData,
-                    [fromSection]: prevData[fromSection].filter(c => c._id !== customer._id),
+                    [fromSection]: prevData[fromSection].filter((c) => c._id !== customer._id),
                     [toSection]: [...prevData[toSection], updatedCustomer],
                 }));
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Error moving customer:', error);
             });
     };
-    
 
     // Render table content based on activeTab
     const renderTable = (customers, fromSection, nextSection) => (
@@ -60,14 +69,12 @@ export const Customers = () => {
                     <th className="py-2 px-4 border">Email</th>
                     <th className="py-2 px-4 border">Payment Status</th>
                     <th className="py-2 px-4 border">No. of PDFs Generated</th>
-                    {fromSection === 'inProgress' && (
-                        <th className="py-2 px-4 border">Feedback</th>
-                    )}
+                    {fromSection === 'inProgress' && <th className="py-2 px-4 border">Feedback</th>}
                 </tr>
             </thead>
             <tbody>
                 {customers.map((customer) => (
-                    <tr key={customer.id}>
+                    <tr key={customer._id}>
                         <td className="py-2 px-4 border text-center">
                             {nextSection ? (
                                 <input
@@ -93,7 +100,11 @@ export const Customers = () => {
                         </td>
                         <td className="py-2 px-4 border">{customer.username}</td>
                         <td className="py-2 px-4 border">{customer.email}</td>
-                        {customer.paymentStatus ? (<td className="py-2 px-4 border">Paid</td>) : (<td className="py-2 px-4 border">Not Paid</td>) }
+                        {customer.paymentStatus ? (
+                            <td className="py-2 px-4 border">Paid</td>
+                        ) : (
+                            <td className="py-2 px-4 border">Not Paid</td>
+                        )}
                         <td className="py-2 px-4 border">{customer.pdfGenerated}</td>
                         {fromSection === 'inProgress' && (
                             <td className="py-2 px-4 border">
@@ -136,40 +147,37 @@ export const Customers = () => {
             <div className="flex mb-4">
                 <button
                     onClick={() => setActiveTab('New Requests')}
-                    className={`px-4 py-2 text-sm rounded-l-md ${
-                        activeTab === 'New Requests'
+                    className={`px-4 py-2 text-sm rounded-l-md ${activeTab === 'New Requests'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
-                    }`}
+                        }`}
                 >
                     New Requests
                 </button>
                 <button
                     onClick={() => setActiveTab('In progress')}
-                    className={`px-4 py-2 text-sm ${
-                        activeTab === 'In progress'
+                    className={`px-4 py-2 text-sm ${activeTab === 'In progress'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
-                    }`}
+                        }`}
                 >
                     In progress
                 </button>
                 <button
                     onClick={() => setActiveTab('Completed')}
-                    className={`px-4 py-2 text-sm rounded-r-md ${
-                        activeTab === 'Completed'
+                    className={`px-4 py-2 text-sm rounded-r-md ${activeTab === 'Completed'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
-                    }`}
+                        }`}
                 >
                     Completed
                 </button>
             </div>
 
             {/* Tab Content - Customer Tables */}
-            <div className="p-4 bg-white shadow-md w-full max-w-2xl">
-                {renderContent()}
-            </div>
+            <div className="p-4 bg-white shadow-md w-full max-w-2xl">{renderContent()}</div>
         </div>
     );
 };
+
+export default Customers;
