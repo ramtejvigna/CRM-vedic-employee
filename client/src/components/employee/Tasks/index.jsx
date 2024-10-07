@@ -15,15 +15,12 @@ import {
   ListItemText,
   Divider,
   Collapse,
-  IconButton,
-  Box,
-  Switch
+  Box
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
-import Cookies from 'js-cookie';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useStore } from "../../../store";
+import Cookies from 'js-cookie';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -80,9 +77,14 @@ const Tasks = () => {
   };
 
   return (
-    <div className={`container mx-auto py-8 ${isDarkMode ? "bg-black text-white" : "bg-slate-50 text-black"}`}>
-     
-      <Typography variant="h4" gutterBottom>My Tasks</Typography>
+    <div className={`container mx-auto py-8 ${isDarkMode ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}>
+      <Box className="flex justify-between items-center mb-4">
+        <Typography variant="h4" fontWeight="bold">My Tasks</Typography>
+        <Button onClick={toggleDarkMode} variant="contained" color={isDarkMode ? "secondary" : "primary"}>
+          {isDarkMode ? "Light Mode" : "Dark Mode"}
+        </Button>
+      </Box>
+
       {loading ? (
         <CircularProgress />
       ) : tasks.length === 0 ? (
@@ -91,11 +93,15 @@ const Tasks = () => {
         tasks.map(task => (
           <Card key={task._id} className="mb-4" style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#fff', color: isDarkMode ? '#fff' : '#000' }}>
             <CardContent>
-              <Typography variant="h6">{task.title}</Typography>
-              <Typography variant="body2" color="textSecondary">{task.description}</Typography>
+              {/* Task Title and Description */}
+              <Typography variant="h5" fontWeight="bold" gutterBottom>{task.title}</Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                {task.description}
+              </Typography>
               <Typography variant="caption" color="textSecondary">Due: {new Date(task.endTime).toLocaleDateString()}</Typography>
-
-              <div className="flex justify-between items-center mt-4">
+              <Box className="flex justify-between items-center mt-4">
+              {/* Status Dropdown */}
+              <Box className="flex justify-between items-center m-2">
                 <TextField
                   select
                   label="Status"
@@ -111,9 +117,10 @@ const Tasks = () => {
                     </MenuItem>
                   ))}
                 </TextField>
-              </div>
+              </Box>
 
-              <Box mt={2}>
+              {/* Comments Section */}
+              <Box className='flex gap-3' mt={2}>
                 <TextField
                   label="Add a comment"
                   value={selectedTask === task._id ? comment : ''}
@@ -128,23 +135,22 @@ const Tasks = () => {
                 />
                 <Button
                   variant="contained"
+                  className='w-[100px] font-medium'
                   color="primary"
                   onClick={() => handleAddComment(task._id)}
-                  style={{ marginTop: '8px' }}
+                  style={{ marginTop: '1px' }}
                 >
-                  Add Comment
+                  Post
                 </Button>
               </Box>
-
-              <Button
-                onClick={() => handleExpandClick(task._id)}
-                style={{ marginTop: '16px' }}
-              >
-                Comments {expanded[task._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </Box>
+              {/* Expand Comments */}
+              <Button onClick={() => handleExpandClick(task._id)} style={{ marginTop: '16px', textTransform: 'none' }}>
+                {expanded[task._id] ? "Hide Comments" : "View Comments"} {expanded[task._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </Button>
 
               <Collapse in={expanded[task._id]} timeout="auto" unmountOnExit>
-                <List>
+                <List dense>
                   {task.comments.map((comment, index) => (
                     <React.Fragment key={index}>
                       <ListItem alignItems="flex-start">
@@ -164,7 +170,7 @@ const Tasks = () => {
                           }
                         />
                       </ListItem>
-                      <Divider variant="inset" component="li" />
+                      <Divider component="li" />
                     </React.Fragment>
                   ))}
                 </List>
