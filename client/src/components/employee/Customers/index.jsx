@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import CheckBoxListPage from './CheckBoxList';
 
 export const Customers = () => {
     const [customerData, setCustomerData] = useState({
@@ -9,6 +10,7 @@ export const Customers = () => {
         completed: [],
     });
     const [activeTab, setActiveTab] = useState('New Requests');
+    const [selectedCustomer, setSelectedCustomer] = useState(null); // Track selected customer for PDF generation
 
     // Get employeeId from cookies
     const employeeId = Cookies.get('employeeId');
@@ -59,6 +61,14 @@ export const Customers = () => {
             });
     };
 
+    const handleSelectCustomer = (customer) => {
+        if (selectedCustomer && selectedCustomer._id === customer._id) {
+          setSelectedCustomer(null); // Deselect if already selected
+        } else {
+          setSelectedCustomer(customer); // Select the customer
+        }
+      };
+
     // Render table content based on activeTab
     const renderTable = (customers, fromSection, nextSection) => (
         <table className="min-w-full bg-white">
@@ -70,58 +80,86 @@ export const Customers = () => {
                     <th className="py-2 px-4 border">Payment Status</th>
                     <th className="py-2 px-4 border">No. of PDFs Generated</th>
                     {fromSection === 'inProgress' && <th className="py-2 px-4 border">Feedback</th>}
+                    {fromSection === 'inProgress' && <th className="py-2 px-4 border">Generate PDF</th>}
                 </tr>
             </thead>
             <tbody>
                 {customers.map((customer) => (
-                    <tr key={customer._id}>
-                        <td className="py-2 px-4 border text-center">
-                            {nextSection ? (
-                                <input
-                                    type="checkbox"
-                                    onChange={() => moveCustomer(customer, fromSection, nextSection)}
-                                />
-                            ) : (
-                                <div className="flex justify-center space-x-2">
-                                    <button
-                                        onClick={() => moveCustomer(customer, 'completed', 'inProgress')}
-                                        className="bg-gray-500 text-white px-2 py-1 rounded"
-                                    >
-                                        Move to In Progress
-                                    </button>
-                                    <button
-                                        onClick={() => moveCustomer(customer, 'completed', 'newRequests')}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded"
-                                    >
-                                        Move to New Requests
-                                    </button>
-                                </div>
-                            )}
-                        </td>
-                        <td className="py-2 px-4 border">{customer.username}</td>
-                        <td className="py-2 px-4 border">{customer.email}</td>
-                        {customer.paymentStatus ? (
-                            <td className="py-2 px-4 border">Paid</td>
-                        ) : (
-                            <td className="py-2 px-4 border">Not Paid</td>
-                        )}
-                        <td className="py-2 px-4 border">{customer.pdfGenerated}</td>
-                        {fromSection === 'inProgress' && (
-                            <td className="py-2 px-4 border">
-                                <input
-                                    type="text"
-                                    placeholder="Enter feedback"
-                                    onBlur={(e) => {
-                                        const feedback = e.target.value;
-                                        if (feedback && customer.paymentStatus === 'Paid') {
-                                            moveCustomer(customer, 'inProgress', 'completed');
-                                        }
-                                    }}
-                                    className="border p-1 w-full"
-                                />
+                    <React.Fragment key={customer._id}>
+                        <tr>
+                            <td className="py-2 px-4 border text-center">
+                                {nextSection ? (
+                                    <input
+                                        type="checkbox"
+                                        onChange={() => moveCustomer(customer, fromSection, nextSection)}
+                                    />
+                                ) : (
+                                    <div className="flex justify-center space-x-2">
+                                        <button
+                                            onClick={() => moveCustomer(customer, 'completed', 'inProgress')}
+                                            className="bg-gray-500 text-white px-2 py-1 rounded"
+                                        >
+                                            Move to In Progress
+                                        </button>
+                                        <button
+                                            onClick={() => moveCustomer(customer, 'completed', 'newRequests')}
+                                            className="bg-blue-500 text-white px-2 py-1 rounded"
+                                        >
+                                            Move to New Requests
+                                        </button>
+                                    </div>
+                                )}
                             </td>
-                        )}
-                    </tr>
+                            <td className="py-2 px-4 border">{customer.username}</td>
+                            <td className="py-2 px-4 border">{customer.email}</td>
+                            {customer.paymentStatus ? (
+                                <td className="py-2 px-4 border">Paid</td>
+                            ) : (
+                                <td className="py-2 px-4 border">Not Paid</td>
+                            )}
+                            <td className="py-2 px-4 border">{customer.pdfGenerated}</td>
+
+                            {/* Display the "Feedback" input only for 'In Progress' customers */}
+                            {fromSection === 'inProgress' && (
+                                <td className="py-2 px-4 border">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter feedback"
+                                        onBlur={(e) => {
+                                            const feedback = e.target.value;
+                                            if (feedback && customer.paymentStatus === true) {
+                                                moveCustomer(customer, 'inProgress', 'completed');
+                                            }
+                                        }}
+                                        className="border p-1 w-full"
+                                    />
+                                </td>
+                            )}
+                            
+                            {fromSection === 'inProgress' && (
+                                <td className="py-2 px-4 border">
+                                <button
+                                    onClick={() => setSelectedCustomer(selectedCustomer === customer._id ? null : customer._id)} 
+                                    className="bg-green-500 text-white px-2 py-1 rounded"
+                                >
+                                    {selectedCustomer === customer._id ? 'Hide PDF Form' : 'Generate PDF'}
+                                </button>
+                                </td>
+                            )}
+                            </tr>
+
+                            {/* Show PDF content form below the selected customer row */}
+                            {selectedCustomer === customer._id && (
+                            <tr>
+                                <td colSpan="7">
+                                <div className="p-4 bg-gray-100">
+                                    {/* Pass the customer to the CheckBoxListPage */}
+                                    <CheckBoxListPage selectedCustomer={customer} handleClose={() => setSelectedCustomer(null)} />
+                                </div>
+                                </td>
+                            </tr>
+                            )}
+                    </React.Fragment>
                 ))}
             </tbody>
         </table>
