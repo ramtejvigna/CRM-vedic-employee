@@ -23,7 +23,7 @@ export function SignIn() {
       const decodedToken = jwtDecode(token);
       const isAdmin = decodedToken.isAdmin;
       const usernameFromToken = decodedToken.username; // If username is encoded in the token
-      
+      console.log(decodedToken)
       // Store username in cookies (you can also store email or any other user details)
       Cookies.set('username', usernameFromToken, { expires: 1 });
       
