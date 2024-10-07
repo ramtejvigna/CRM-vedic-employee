@@ -6,6 +6,7 @@ import SidenavEmp from "./Sidebar";
 import { useStore } from "../../store";
 import { Customers } from "./Customers";
 import { Leave } from "./Leave";
+import Tasks from "./Tasks";
 const EmployeeManagement = () => {
   const { isDarkMode } = useStore()
   return (
@@ -23,6 +24,8 @@ const EmployeeManagement = () => {
           <Route path="/home" element={<Home />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/leave" element={<Leave />} />
+          <Route path="/tasks" element={<Tasks />} />
+
         </Routes>
       </div>
     </div>

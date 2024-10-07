@@ -6,6 +6,8 @@ import { GiThreeLeaves } from "react-icons/gi";
 
 import Home from "./components/employee/Dashboard";
 import { Leave } from "./components/employee/Leave";
+import { element } from "prop-types";
+import Tasks from "./components/employee/Tasks";
 
 
 const icon = {
@@ -28,6 +30,7 @@ export const routes = [
     name: "task management",
     path: "tasks",
     icon: <MdOutlineTaskAlt {...icon} />,
+    element : <Tasks/>
   },
   {
     name: "baby database",
