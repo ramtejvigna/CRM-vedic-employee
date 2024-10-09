@@ -22,7 +22,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Divider,
-  Chip
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useStore } from "../../../store"; // Custom hook for dark mode
@@ -82,10 +82,13 @@ const Tasks = () => {
     try {
       const username = Cookies.get("username");
       const newComment = { text: comment, createdBy: username };
-  
+
       // API call to add the comment to the backend
-      await axios.post(`http://localhost:3000/api/tasks/${taskId}/comment`, newComment);
-  
+      await axios.post(
+        `http://localhost:3000/api/tasks/${taskId}/comment`,
+        newComment
+      );
+
       // Update the 'tasks' state with the new comment
       setTasks((tasks) =>
         tasks.map((task) =>
@@ -94,7 +97,7 @@ const Tasks = () => {
             : task
         )
       );
-  
+
       // If the modal is open and the task is selected, update the selectedTask as well
       if (selectedTask && selectedTask._id === taskId) {
         setSelectedTask((prevTask) => ({
@@ -102,14 +105,14 @@ const Tasks = () => {
           comments: [...prevTask.comments, newComment],
         }));
       }
-  
+
       // Clear the comment input field
       setComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
     }
   };
-  
+
   const handleOpenModal = (task) => {
     setSelectedTask(task);
     setModalOpen(true);
@@ -147,9 +150,19 @@ const Tasks = () => {
   };
 
   return (
-    <div className={`container mx-auto py-8 ${isDarkMode ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Box className="flex justify-between items-center mb-4">
-        <Typography variant="h4" fontWeight="bold">My Tasks</Typography>
+    <div
+      className={`container mx-auto py-8 ${
+        isDarkMode ? "bg-black text-white" : "bg-gray-50 text-gray-900"
+      }`}
+    >
+      <Box
+        className={`flex justify-between items-center ${
+          isDarkMode ? "bg-gray-900" : "bg-white"
+        } mb-4 rounded-md py-3 px-2`}
+      >
+        <Typography variant="h4" fontWeight="bold">
+          My Tasks
+        </Typography>
       </Box>
 
       {loading ? (
@@ -157,40 +170,120 @@ const Tasks = () => {
       ) : tasks.length === 0 ? (
         <Typography>No tasks assigned.</Typography>
       ) : (
-        <TableContainer component={Paper} className={isDarkMode ? "bg-black text-white" : "bg-white"}>
-          <Table aria-label="tasks table">
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ fontWeight: "bold", fontSize: "1.2em", color: "#1976d2" }}>Title</TableCell>
-                <TableCell style={{ fontWeight: "bold", fontSize: "1.2em", color: "#1976d2" }}>Description</TableCell>
-                <TableCell style={{ fontWeight: "bold", fontSize: "1.2em", color: "#1976d2" }}>Status</TableCell>
-                <TableCell style={{ fontWeight: "bold", fontSize: "1.2em", color: "#1976d2" }}>Due</TableCell>
-                <TableCell style={{ fontWeight: "bold", fontSize: "1.2em", color: "#1976d2" }}>Actions</TableCell>
+        <TableContainer
+        component={Paper}
+        sx={{
+          bgcolor: isDarkMode ? "black" : "white",
+          overflowX: "auto", // Prevent overflow issues on small screens
+        }}
+      >
+        <Table aria-label="tasks table">
+          <TableHead>
+            <TableRow>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: isDarkMode ? "#90caf9" : "#1976d2",
+                  bgcolor: isDarkMode ? "#333" : "#f5f5f5",
+                }}
+              >
+                Title
+              </TableCell>
+              <TableCell
+                sx={{
+                  display: { xs: "none", md: "table-cell" }, // Hide in mobile view
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: isDarkMode ? "#90caf9" : "#1976d2",
+                  bgcolor: isDarkMode ? "#333" : "#f5f5f5",
+                }}
+              >
+                Description
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: isDarkMode ? "#90caf9" : "#1976d2",
+                  bgcolor: isDarkMode ? "#333" : "#f5f5f5",
+                }}
+              >
+                Status
+              </TableCell>
+              <TableCell
+                sx={{
+                  display: { xs: "none", md: "table-cell" }, // Hide in mobile view
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: isDarkMode ? "#90caf9" : "#1976d2",
+                  bgcolor: isDarkMode ? "#333" : "#f5f5f5",
+                }}
+              >
+                Due
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: isDarkMode ? "#90caf9" : "#1976d2",
+                  bgcolor: isDarkMode ? "#333" : "#f5f5f5",
+                }}
+              >
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow
+                key={task._id}
+                sx={{
+                  bgcolor: isDarkMode ? "#121212" : "#ffffff",
+                }}
+              >
+                <TableCell
+                  sx={{
+                    color: isDarkMode ? "white" : "black",
+                  }}
+                >
+                  {task.title}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    display: { xs: "none", md: "table-cell" }, // Hide in mobile view
+                    color: isDarkMode ? "white" : "black",
+                  }}
+                >
+                  {task.description}
+                </TableCell>
+                <TableCell>
+                  <Chip label={task.status} color={getStatusColor(task.status)} />
+                </TableCell>
+                <TableCell
+                  sx={{
+                    display: { xs: "none", md: "table-cell" }, // Hide in mobile view
+                    color: isDarkMode ? "white" : "black",
+                  }}
+                >
+                  {new Date(task.endTime).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleOpenModal(task)}
+                  >
+                    View
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {tasks.map((task) => (
-                <TableRow key={task._id}>
-                  <TableCell>{task.title}</TableCell>
-                  <TableCell>{task.description}</TableCell>
-                  <TableCell>
-                    <Chip label={task.status} color={getStatusColor(task.status)} />
-                  </TableCell>
-                  <TableCell>{new Date(task.endTime).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleOpenModal(task)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      
       )}
 
       {/* Task Modal */}
@@ -203,7 +296,11 @@ const Tasks = () => {
         <Box sx={modalStyle}>
           {selectedTask && (
             <>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Typography id="modal-task-title" variant="h5" fontWeight="bold">
                   {selectedTask.title}
                 </Typography>
@@ -225,58 +322,76 @@ const Tasks = () => {
                   select
                   label="Status"
                   value={selectedTask.status}
-                  onChange={(e) => updateTaskStatus(selectedTask._id, e.target.value)}
+                  onChange={(e) =>
+                    updateTaskStatus(selectedTask._id, e.target.value)
+                  }
                   variant="outlined"
-                  fullWidth
+                  className="w-[150px]"
                   margin="normal"
+                  sx={{
+                    bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5",
+                    color: isDarkMode ? "#fff" : "#000",
+                  }}
                 >
-                  {statusOptions.map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {status}
+                  {statusOptions.map((option) => (
+                    <MenuItem   key={option} value={option}>
+                      {option}
                     </MenuItem>
                   ))}
                 </TextField>
               </Box>
 
-              {/* Comments Section */}
               <Box mt={4}>
-                <Typography variant="h6">Comments</Typography>
-                <List sx={{maxHeight:250,overflowY:'auto'}} dense>
+                <Typography variant="h6" fontWeight="bold">
+                  Comments
+                </Typography>
+                <List>
                   {selectedTask.comments.map((comment, index) => (
                     <React.Fragment key={index}>
                       <ListItem alignItems="flex-start">
                         <ListItemAvatar>
-                          <Avatar>{comment.createdBy.charAt(0)}</Avatar>
+                          <Avatar>{comment.createdBy[0]}</Avatar>
                         </ListItemAvatar>
                         <ListItemText
-                          primary={comment.text}
-                          secondary={comment.createdBy}
+                          primary={comment.createdBy}
+                          secondary={
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color={isDarkMode ? "#ffffffb3" : "text.primary"}
+                            >
+                              {comment.text}
+                            </Typography>
+                          }
                         />
                       </ListItem>
-                      <Divider component="li" />
+                      <Divider />
                     </React.Fragment>
                   ))}
                 </List>
+
                 <Box mt={2} display="flex" alignItems="center">
                   <TextField
-                    label="Add a comment"
-                    variant="outlined"
-                    fullWidth
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
+                    label="Add Comment"
+                    variant="outlined"
+                     fullWidth
+                   
+                    sx={{
+                      bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5",
+                      color: isDarkMode ? "#fff" : "#000",
+                      borderRadius : 3
+                     
+                    }}
                   />
                   <Button
                     onClick={() => handleAddComment(selectedTask._id)}
-                    color="primary"
                     variant="contained"
-                    disabled={addingComment || !comment}
+                    color="primary"
                     sx={{ ml: 2 }}
                   >
-                    {addingComment ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      "Add Comment"
-                    )}
+                    {addingComment ? <CircularProgress size={24} /> : "Add"}
                   </Button>
                 </Box>
               </Box>
