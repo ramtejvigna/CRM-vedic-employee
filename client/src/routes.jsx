@@ -27,7 +27,7 @@ export const routes = [
     icon: <FaUserMd {...icon} />, 
   },
   {
-    name: "task management",
+    name: "Todo",
     path: "tasks",
     icon: <MdOutlineTaskAlt {...icon} />,
     element : <Tasks/>
