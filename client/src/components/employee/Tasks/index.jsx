@@ -116,11 +116,10 @@ const {isDarkMode} = useStore()
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} transition-colors duration-300`}>
+    <div className={`min-h-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} transition-colors duration-300`}>
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Tasks</h1>
-         
         </div>
 
         {loading ? (
