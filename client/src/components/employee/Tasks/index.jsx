@@ -16,7 +16,7 @@ const Tasks = () => {
   const employeeId = "66fec75778f1878ad8dd4c9b";
   const token = Cookies.get("token");
   const { enqueueSnackbar } = useSnackbar();
-const {isDarkMode} = useStore()
+  const { isDarkMode } = useStore()
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -181,9 +181,8 @@ const TaskCard = ({ task, updateTaskStatus, setSelectedTask, isDarkMode }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-lg shadow-lg overflow-hidden ${
-        isDarkMode ? 'bg-gray-800' : 'bg-white'
-      }`}
+      className={`rounded-lg shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+        }`}
     >
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
@@ -255,18 +254,16 @@ const TaskModal = ({
         initial={{ scale: 0.9, y: 50 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 50 }}
-        className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl ${
-          isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-        }`}
+        className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+          }`}
       >
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">{task.title}</h2>
             <button
               onClick={onClose}
-              className={`p-1 rounded-full ${
-                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-              } transition-colors duration-200`}
+              className={`p-1 rounded-full ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+                } transition-colors duration-200`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -290,9 +287,8 @@ const TaskModal = ({
               id="status"
               value={task.status}
               onChange={(e) => updateTaskStatus(task._id, e.target.value)}
-              className={`w-full p-2 rounded-md ${
-                isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
-              } border-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full p-2 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
+                } border-none focus:ring-2 focus:ring-blue-500`}
             >
               {statusOptions.map((option) => (
                 <option key={option} value={option}>{option}</option>
@@ -315,16 +311,14 @@ const TaskModal = ({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add a comment..."
-                className={`flex-grow p-2 rounded-md ${
-                  isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
-                } border-none focus:ring-2 focus:ring-blue-500`}
+                className={`flex-grow p-2 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
+                  } border-none focus:ring-2 focus:ring-blue-500`}
               />
               <button
                 onClick={() => handleAddComment(task._id)}
                 disabled={addingComment}
-                className={`px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ${
-                  addingComment ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ${addingComment ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 {addingComment ? 'Adding...' : 'Add'}
               </button>
