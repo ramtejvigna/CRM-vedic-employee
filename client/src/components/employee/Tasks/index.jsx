@@ -152,17 +152,15 @@ const Tasks = () => {
   return (
     <div
       className={`container mx-auto py-8 ${
-        isDarkMode ? "bg-black text-white" : "bg-gray-50 text-gray-900"
+        isDarkMode ? "bg-black text-white" : " text-gray-900"
       }`}
     >
       <Box
         className={`flex justify-between items-center ${
-          isDarkMode ? "bg-gray-900" : "bg-white"
+          isDarkMode ? "bg-gray-900" : ""
         } mb-4 rounded-md py-3 px-2`}
       >
-        <Typography variant="h4" fontWeight="bold">
-          My Tasks
-        </Typography>
+        <h2 className="text-3xl font-semibold tracking-wide">My Tasks</h2>
       </Box>
 
       {loading ? (

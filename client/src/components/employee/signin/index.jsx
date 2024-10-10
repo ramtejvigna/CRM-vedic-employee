@@ -20,24 +20,11 @@ export function SignIn() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-<<<<<<< HEAD
-      const response = await axios.post('http://localhost:3000/api/login', { username, phone });
-      Cookies.set('token', response.data.token, { expires: 1 });
-      const token = response.data.token
-      // Decode the token to get user details
-      const decodedToken = jwtDecode(token);
-      const isAdmin = decodedToken.isAdmin;
-      const usernameFromToken = decodedToken.username; // If username is encoded in the token
-      console.log(decodedToken)
-      // Store username in cookies (you can also store email or any other user details)
-      Cookies.set('username', usernameFromToken, { expires: 1 });
-=======
       const response = await axios.post('http://localhost:3000/login', { username, phone });
       
       // Extract token and user details from the response
       const token = response.data.token;
       const employeeId = response.data.userId;
->>>>>>> d42d69b7b71477d9a4438438b6ff8ac4f498433c
       
       // Set token and employeeId as cookies
       Cookies.set('token', token, { expires: 1 });
