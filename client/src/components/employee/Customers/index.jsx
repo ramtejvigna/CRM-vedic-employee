@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { TextField, Button, MenuItem } from "@mui/material";
+import CheckBoxListPage from './CheckBoxList';
+
 
 export const Customers = () => {
     const [customerData, setCustomerData] = useState({});
@@ -17,6 +19,7 @@ export const Customers = () => {
     const [paymentTime, setPaymentTime] = useState();
     const [amountPaid, setAmountPaid] = useState();
     const [transactionId, setTransactionId] = useState()
+    const [showCheckBoxList, setShowCheckBoxList] = useState(false);
 
     // Get employeeId from cookies
     const employeeId = Cookies.get('employeeId');
@@ -37,6 +40,25 @@ export const Customers = () => {
             return;
         }
     }, [employeeId]);
+
+    const overlayStyle = {
+        position: 'absolute', // Or 'fixed' depending on your needs
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 999, // High value to ensure it appears above other elements
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: for dimming the background
+      };
+
+      const handleGeneratePdfClick = (customer) => {
+        setSelectedCustomer(customer); // Set the selected customer data
+        setShowCheckBoxList(true); // Show the modal
+      };
+    const handleClose = () => {
+            setShowCheckBoxList(false); // Hide the modal when close button is clicked
+        };
+      
 
     // Move customer from one section to another (trigger backend call)
     const moveCustomer = (customer, fromSection, toSection, details) => {
@@ -168,6 +190,29 @@ export const Customers = () => {
                                     </td>
                                 </>
                             )}
+                            
+
+                            {activeTab === 'inProgress' && (
+                            <td className="text-center border">
+                                <button
+                                    className="p-2 px-4 bg-blue-500 text-white rounded-lg"
+                                    onClick={() => { 
+                                        setSelectedCustomer(customer); // Set selected customer correctly
+                                        setShowCheckBoxList(true);    
+                                    }}
+                                >
+                                    Generate PDF
+                                </button>
+                            </td>
+                            )}
+                            {showCheckBoxList && (
+                                <div style={overlayStyle}>
+                                    <CheckBoxListPage 
+                                    selectedCustomer={selectedCustomer} 
+                                    handleClose={handleClose} 
+                                    />
+                                </div>
+                            )}
                         </tr>
                     ))}
                 </tbody>
@@ -203,6 +248,7 @@ export const Customers = () => {
     const newRequestsCount = Array.isArray(customerData['newRequests'])
         ? customerData['newRequests'].length
         : 0;
+        
 
     return (
         <div className="flex flex-col items-center p-10 gap-10">
