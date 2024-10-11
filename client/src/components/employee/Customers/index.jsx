@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { TextField, Button, MenuItem } from "@mui/material";
+import CheckBoxListPage from './CheckBoxList';
+import { select } from '@material-tailwind/react';
+
 
 export const Customers = () => {
     const [customerData, setCustomerData] = useState({});
@@ -17,6 +20,7 @@ export const Customers = () => {
     const [paymentTime, setPaymentTime] = useState();
     const [amountPaid, setAmountPaid] = useState();
     const [transactionId, setTransactionId] = useState()
+    const [showCheckBoxList, setShowCheckBoxList] = useState(false);
 
     // Get employeeId from cookies
     const employeeId = Cookies.get('employeeId');
@@ -37,6 +41,25 @@ export const Customers = () => {
             return;
         }
     }, [employeeId]);
+
+    const overlayStyle = {
+        position: 'absolute', // Or 'fixed' depending on your needs
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 999, // High value to ensure it appears above other elements
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: for dimming the background
+    };
+
+    const handleGeneratePdfClick = (customer) => {
+        setSelectedCustomer(customer); // Set the selected customer data
+        setShowCheckBoxList(true); // Show the modal
+    };
+    const handleClose = () => {
+        setShowCheckBoxList(false); // Hide the modal when close button is clicked
+    };
+
 
     // Move customer from one section to another (trigger backend call)
     const moveCustomer = (customer, fromSection, toSection, details) => {
@@ -117,7 +140,7 @@ export const Customers = () => {
                         <th className="py-2 px-4 border">Mother Name</th>
                         <th className="py-2 px-4 border">W/A number</th>
                         <th className="py-2 px-4 border">Baby Gender</th>
-                        <th className="py-2 px-4 border">Accept/Reject</th>
+                        <th className="py-2 px-4 border">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,25 +151,35 @@ export const Customers = () => {
                             <td className="text-center border">{customer.whatsappNumber}</td>
                             <td className="text-center border">{customer.babyGender}</td>
                             <td className="text-center border flex flex-row justify-around p-3">
-                                <button
-                                    className={`p-2 px-4 bg-green-500 bg-opacity-80 rounded-lg
-                                ${fromSection === 'completed' && 'hidden'}`}
-                                    onClick={() => {
-                                        setSelectedCustomer(customer); // Set customer for modal
-                                        setNextSection(nextSection); // Set target section
-                                        setShowModal(true); // Show modal
-                                        if (fromSection === 'newRequests') {
-                                            setPaymentStatus(false); // Reset payment status
-                                        }
-                                        if (fromSection === 'inProgress') {
-                                            setFeedback(''); // Reset feedback
-                                            setGeneratePdf(false); // Reset PDF generation
-                                        }
-                                    }}
-                                >
-                                    Accept
-                                </button>
-                                {fromSection !== 'rejected' && (
+                                {(fromSection === 'newRequests' || fromSection === 'rejected') && (
+                                    <button
+                                        className={`p-2 px-4 bg-green-500 bg-opacity-80 rounded-lg
+                                        ${fromSection === 'completed' && 'hidden'}`}
+                                        onClick={() => {
+                                            setSelectedCustomer(customer); // Set customer for modal
+                                            setNextSection(nextSection); // Set target section
+                                            setShowModal(true); // Show modal
+                                            if (fromSection === 'newRequests') {
+                                                setPaymentStatus(false); // Reset payment status
+                                            }
+                                        }}
+                                    >
+                                        Accept
+                                    </button>
+                                )}
+                                {(fromSection !== 'newRequests' && fromSection !== 'rejected') && (
+                                    <button
+                                        className={`p-2 bg-black px-4 text-white rounded-lg`}
+                                        onClick={() => {
+                                            setSelectedCustomer(customer); // Set customer for modal
+                                            setNextSection(nextSection); // Set target section
+                                            setShowModal(true);
+                                        }}
+                                    >
+                                        View
+                                    </button>
+                                )}
+                                {fromSection === 'newRequests' && (
                                     <button
                                         className='p-2 px-4 bg-red-500 bg-opacity-80 rounded-lg'
                                         onClick={() => moveCustomer(customer, fromSection, 'rejected')}
@@ -167,6 +200,15 @@ export const Customers = () => {
                                         </button>
                                     </td>
                                 </>
+                            )}
+
+                            {showCheckBoxList && (
+                                <div style={overlayStyle}>
+                                    <CheckBoxListPage
+                                        selectedCustomer={selectedCustomer}
+                                        handleClose={handleClose}
+                                    />
+                                </div>
                             )}
                         </tr>
                     ))}
@@ -204,6 +246,7 @@ export const Customers = () => {
         ? customerData['newRequests'].length
         : 0;
 
+
     return (
         <div className="flex flex-col items-center p-10 gap-10">
             {/* Tab Buttons */}
@@ -239,12 +282,12 @@ export const Customers = () => {
                     <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
                         <div className='flex flex-row justify-between'>
                             {selectedCustomer.fatherName && (
-                                <h2 className="text-lg font-semibold mb-4">
+                                <h2 className="text-lg font-semibold">
                                     Father Name : {selectedCustomer?.fatherName}
                                 </h2>
                             )}
                             {selectedCustomer.motherName && (
-                                <h2 className='text-lg font-semibold mb-4'>
+                                <h2 className='text-lg font-semibold'>
                                     Mother Name : {selectedCustomer?.motherName}
                                 </h2>
                             )}
@@ -299,36 +342,51 @@ export const Customers = () => {
                                 </div>
                             </div>
                         )}
-                        {activeTab === 'completed' && (
+                        {activeTab === 'inProgress' && (
                             <>
-                                <label className="block mb-2">Feedback</label>
-                                <textarea
-                                    onChange={(e) => setFeedback(e.target.value)}
-                                    className="border border-gray-300 rounded p-2 mb-4 w-full"
-                                />
-                                <label className="flex items-center mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={generatePdf}
-                                        onChange={(e) => setGeneratePdf(e.target.checked)}
-                                        className="mr-2"
+                                <div>
+                                    <p>{selectedCustomer.email}</p>
+                                    <p>
+                                        Payment Date & Time: {new Date(selectedCustomer.paymentDate).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })} - {selectedCustomer.paymentTime}
+                                    </p>
+                                    <p>Preferred God : {selectedCustomer.preferredGod}</p>
+                                    <p>PDF's Generated - {selectedCustomer.pdfGenerated}</p>
+                                    <label className="block my-2 mt-4">Feedback</label>
+                                    <textarea
+                                        onChange={(e) => setFeedback(e.target.value)}
+                                        className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none"
                                     />
-                                    Generate PDF
-                                </label>
+                                    <button
+                                        className="p-2 px-4 bg-blue-500 text-white rounded-lg"
+                                        onClick={() => {
+                                            setSelectedCustomer(selectedCustomer); // Set selected customer correctly
+                                            setShowCheckBoxList(true);
+                                        }}
+                                    >
+                                        Generate PDF
+                                    </button>
+                                </div>
                             </>
                         )}
-                        <button
-                            onClick={handleAccept}
-                            className="bg-blue-500 text-white px-4 py-2 rounded"
-                        >
-                            Confirm
-                        </button>
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
-                        >
-                            Cancel
-                        </button>
+
+                        <div className='mt-10'>
+                            <button
+                                onClick={handleAccept}
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Confirm
+                            </button>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
