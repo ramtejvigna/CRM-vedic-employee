@@ -9,7 +9,6 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
   const [uniqueId, setUniqueId] = useState('');
   const [email, setEmail] = useState(selectedCustomer.email || '');
   const [phoneNumber, setPhoneNumber] = useState(selectedCustomer.whatsappNumber || '');
-  const [selectedLetters, setSelectedLetters] = useState([]); // Store selected letters as tags
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
@@ -18,43 +17,21 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
     axios.get('http://localhost:3000/api/names')
       .then((response) => {
         setNames(response.data);
-        filterNames(response.data); // Initial filter based on babyGender
+        filterNames(response.data); // Initial filter based on babyGender and preferredStartingLetter
       })
       .catch((error) => console.error('Error fetching names:', error));
-  }, [selectedCustomer.babyGender]);
+  }, [selectedCustomer.babyGender, selectedCustomer.preferredStartingLetter]);
 
-  const filterNames = (allNames, letters = selectedLetters) => {
-    let filtered = allNames.filter(item => item.gender === selectedCustomer.babyGender);
-
-    // Filter by selected letters (tags)
-    if (letters.length > 0) {
-      filtered = filtered.filter(item => letters.some(letter => item.name.startsWith(letter)));
-    }
-
+  const filterNames = (allNames) => {
+    // Filter by babyGender and preferredStartingLetter
+    const filtered = allNames.filter(
+      item =>
+        item.gender === selectedCustomer.babyGender &&
+        item.name.startsWith(selectedCustomer.preferredStartingLetter)
+    );
+    
     setFilteredNames(filtered);
-    setCurrentPage(1);
-  };
-
-  const handleLetterClick = (letter) => {
-    if (letter === 'A-Z') {
-      // Reset filter to all names
-      setSelectedLetters([]);
-      filterNames(names, []);
-    } else {
-      // Add letter to selected tags if not already present
-      if (!selectedLetters.includes(letter)) {
-        const updatedLetters = [...selectedLetters, letter];
-        setSelectedLetters(updatedLetters);
-        filterNames(names, updatedLetters); // Apply filter with new letter
-      }
-    }
-  };
-
-  const handleTagRemove = (letter) => {
-    // Remove the selected letter (tag)
-    const updatedLetters = selectedLetters.filter(tag => tag !== letter);
-    setSelectedLetters(updatedLetters);
-    filterNames(names, updatedLetters);
+    setCurrentPage(1); // Reset to page 1 after filtering
   };
 
   const handleItemSelection = (item) => {
@@ -142,60 +119,6 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
     <div className="bg-white text-black p-6 rounded-lg shadow-lg">
       <h2 className="text-xl font-semibold mb-4">Select Names for PDF</h2>
       <h1>{selectedCustomer.fatherName}</h1>
-
-      {/* Letter buttons */}
-      <div className="mb-4 flex flex-col items-center">
-  {/* First line of buttons */}
-  <div className="flex flex-wrap justify-center space-x-2 mb-2">
-    {'ABCDEFGHIJKLMNOPQRS'.split('').map((letter) => (
-      <button
-        key={letter}
-        onClick={() => handleLetterClick(letter)}
-        className={`w-12 h-12 flex justify-center items-center bg-blue-500 text-white rounded-full ${selectedLetters.includes(letter) ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        {letter}
-      </button>
-    ))}
-  </div>
-
-  {/* Second line of buttons */}
-  <div className="flex flex-wrap justify-center space-x-2">
-    {'TUVWXYZ'.split('').map((letter) => (
-      <button
-        key={letter}
-        onClick={() => handleLetterClick(letter)}
-        className={`w-12 h-12 flex justify-center items-center bg-blue-500 text-white rounded-full ${selectedLetters.includes(letter) ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        {letter}
-      </button>
-    ))}
-
-    {/* "All" button */}
-    <button onClick={() => handleLetterClick('A-Z')} className="bg-gray-500 text-white px-4 py-2 rounded ml-2">
-      All
-    </button>
-  </div>
-</div>
-
-
-      {/* Selected tags */}
-      <div className="mb-4 flex justify-center">
-  {selectedLetters.map((letter) => (
-    <span
-      key={letter}
-      className="inline-flex items-center bg-blue-300 text-black px-3 py-1 rounded mr-2 relative"
-    >
-      {letter}
-      <button
-        onClick={() => handleTagRemove(letter)}
-        className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 text-red-500 font-bold w-4 h-4 flex items-center justify-center bg-white rounded-full"
-      >
-        &times;
-      </button>
-    </span>
-  ))}
-</div>
-
 
       {/* Table of filtered names with checkboxes */}
       <div className="overflow-y-auto max-h-96 mb-4">
