@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import {
-    Card,
-    CardContent,
-    Typography,
-    Button,
-    Box,
-    Divider,
-    CircularProgress,
-} from '@mui/material';
+import { motion, AnimatePresence } from "framer-motion";
 import { Edit, Delete, FileText } from 'lucide-react';
+import { useStore } from "../../../store"; // Assuming you have a store for dark mode
 
 const Customer = () => {
     const { fatherName } = useParams();
@@ -18,12 +11,17 @@ const Customer = () => {
     const [pdfs, setPdfs] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { isDarkMode } = useStore();
 
     useEffect(() => {
         const getCustomerDetails = async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/customers/getCustomerDetails/${fatherName}`);
+                console.log(response.data)
                 setCustomerDetails(response.data);
+
                 setLoading(false);
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'Error fetching customer details');
@@ -46,10 +44,12 @@ const Customer = () => {
 
     const handleDelete = () => {
         console.log("Delete customer");
+        setShowDeleteModal(false);
     };
 
     const handleEdit = () => {
         console.log("Edit customer");
+        setShowEditModal(false);
     };
 
     const viewPdf = (base64Pdf) => {
@@ -61,160 +61,199 @@ const Customer = () => {
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                <CircularProgress />
-            </Box>
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
         );
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div className="text-red-500 text-center mt-10">Error: {error}</div>;
     }
 
     if (!customerDetails) {
-        return <div>No customer details found.</div>;
+        return <div className="text-center mt-10">No customer details found.</div>;
     }
 
     return (
-        <Box display="flex" flexDirection="column" padding={2} bgcolor="#f4f6f8">
-            {/* Profile Card */}
-            <Box display="flex" justifyContent="space-between" marginBottom={2}>
-                <Box sx={{ width: '55%' }}>
-                    <Card variant="outlined" sx={{ height: '300px', boxShadow: 3, borderRadius: 2 }}>
-                        <CardContent sx={{ padding: 2 }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                                <Typography variant="h5" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                    Profile
-                                </Typography>
-                                <Box>
-                                    <Button onClick={handleEdit} sx={{ color: 'blue', fontWeight: 'bold', marginRight: 2 }}>
-                                        <Edit size={16} style={{ marginRight: 4 }} /> Edit
-                                    </Button>
-                                    <Button onClick={handleDelete} sx={{ color: 'red', fontWeight: 'bold' }}>
-                                        <Delete size={16} style={{ marginRight: 4 }} /> Delete
-                                    </Button>
-                                </Box>
-                            </Box>
-                            <Divider sx={{ margin: '20px 0' }} />
-                            <Typography variant="body2" sx={{ marginTop: 2, lineHeight: 1.6, color: '#555' }}>
-                                <Box sx={{ marginBottom: 2 }}>
-                                    <Typography variant="h5" component="span" sx={{ color: '#333' }}>
-                                        {customerDetails.fatherName || 'N/A'}
-                                    </Typography>
-                                </Box>
-                                <strong>Father's Name:</strong> <span style={{ color: '#333' }}>{customerDetails.fatherName || 'N/A'}</span><br />
-                                <strong>Mother's Name:</strong> <span style={{ color: '#333' }}>{customerDetails.motherName || 'N/A'}</span><br />
-                                <strong>Email:</strong> <span style={{ color: '#333' }}>{customerDetails.email || 'N/A'}</span><br />
-                                <strong>WhatsApp Number:</strong> <span style={{ color: '#333' }}>{customerDetails.whatsappNumber || 'N/A'}</span><br />
-                                <strong>Baby's Gender:</strong> <span style={{ color: '#333' }}>{customerDetails.babyGender || 'N/A'}</span><br />
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Box>
+        <div className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+            <div className="max-w-7xl mx-auto">
+                <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Details</h1>
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    {/* Profile Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile</h2>
+                            <div className="flex space-x-2">
+                                <button onClick={() => setShowEditModal(true)} className="text-blue-500 hover:text-blue-700">
+                                    <Edit size={20} />
+                                </button>
+                                <button onClick={() => setShowDeleteModal(true)} className="text-red-500 hover:text-red-700">
+                                    <Delete size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Father's Name:</strong> {customerDetails.fatherName || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Mother's Name:</strong> {customerDetails.motherName || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.email || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>WhatsApp Number:</strong> {customerDetails.whatsappNumber || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Baby's Gender:</strong> {customerDetails.babyGender || 'N/A'}</p>
+                        </div>
+                    </div>
 
-                {/* Employee Assigned Card */}
-                <Box sx={{ width: '45%', marginLeft: 2 }}>
-                    <Card variant="outlined" sx={{ height: '350px', boxShadow: 3, borderRadius: 2 }}>
-                        <CardContent>
-                            <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                    Generated PDFs
-                                </Typography>
-                            </Box>
-                            <Divider sx={{ margin: '7px 0' }} />
-
+                    {/* Generated PDFs Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Generated PDFs</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                             {pdfs.map((pdf, index) => (
-                                <Box key={index} display="flex" justifyContent="space-between" alignItems="center" sx={{ margin: '10px 0' }}>
-                                    <Box sx={{ flex: 1 }}>
-                                        <Typography variant="body2" sx={{ color: "rgb(52, 71, 103)", fontWeight: 'bold' }}>
-                                            {new Date(pdf.createdAt).toLocaleDateString()}<br />
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ color: 'black' }}>
-                                            #{pdf.uniqueId}
-                                        </Typography>
-                                    </Box>
-                                    <Button
-                                        onClick={() => viewPdf(pdf.base64Pdf)}
-                                        sx={{ color: "rgb(52, 71, 103)", display: 'flex', fontWeight: 'bold', alignItems: 'center' }}
-                                    >
-                                        <FileText size={16} style={{ marginRight: 4 }} /> PDF
-                                    </Button>
-                                </Box>
+                                <div key={index} className="flex justify-between items-center mb-4">
+                                    <div>
+                                        <p className="text-gray-600 dark:text-gray-300"><strong>{new Date(pdf.createdAt).toLocaleDateString()}</strong></p>
+                                        <p className="text-gray-600 dark:text-gray-300">#{pdf.uniqueId}</p>
+                                    </div>
+                                    <button onClick={() => viewPdf(pdf.base64Pdf)} className="text-blue-500 hover:text-blue-700">
+                                        <FileText size={20} />
+                                    </button>
+                                </div>
                             ))}
-                        </CardContent>
-                    </Card>
-                </Box>
-            </Box>
+                        </div>
+                    </div>
+                </div>
 
-            {/* Astrological Details Card */}
-            <Box display="flex" justifyContent="flex-end" padding={3}>
-                <Box sx={{ width: "46%", marginRight: -3, marginTop: -3 }}>
-                    <Card variant="outlined" sx={{ height: '300px', boxShadow: 3, borderRadius: 2 }}>
-                        <CardContent sx={{ padding: 2 }}>
-                            <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                Assigned Employee
-                            </Typography>
-                            <Divider sx={{ margin: '10px 0' }} />
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+                    {/* Assigned Employee Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Assigned Employee</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                             {customerDetails.assignedEmployee ? (
-                                <Typography variant="body2" sx={{ color: '#555' }}>
-                                    <Box sx={{ marginBottom: 2 }}>
-                                        <Typography variant="h5" component="span" sx={{ color: '#333' }}>
-                                            <strong>{customerDetails.assignedEmployee.name}</strong><br />
-                                        </Typography>
-                                    </Box>
-                                    <strong>Email:</strong> {customerDetails.assignedEmployee.email}<br />
-                                    <strong>Contact:</strong> {customerDetails.assignedEmployee.phone}<br />
-                                    <strong>Created At:</strong> {new Date(customerDetails.createdDateTime).toLocaleString()}<br />
-                                </Typography>
+                                <div>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Name:</strong> {customerDetails.assignedEmployee.name}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.assignedEmployee.email}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Contact:</strong> {customerDetails.assignedEmployee.phone}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Created At:</strong> {new Date(customerDetails.createdDateTime).toLocaleString()}</p>
+                                </div>
                             ) : (
-                                <Typography variant="body2" sx={{ color: '#555' }}>
-                                    No employee assigned.
-                                </Typography>
+                                <p className="text-gray-600 dark:text-gray-300">No employee assigned.</p>
                             )}
-                        </CardContent>
-                    </Card>
-                </Box>
-            </Box>
+                        </div>
+                    </div>
 
-            {/* Assigned Employee Card */}
-            <Box display="flex" padding={1}>
-                <Box sx={{ width: "55%", marginLeft: -1, marginTop: -48 }}>
-                    <Card variant="outlined" sx={{ boxShadow: 3, height: '350px', borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                Astrological Details
-                            </Typography>
-                            <Divider sx={{ margin: '10px 0' }} />
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Zodiac Sign:</strong> Leo<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Nakshatra:</strong> Ashwini<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Destiny Number:</strong> 5<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Gemstone:</strong> Ruby<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Lucky Metal:</strong> Gold<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Numerology:</strong> 3<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                <strong>Preferred Starting Letter:</strong> A<br />
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#555' }}>
-                                <strong>Suggested Baby Names:</strong> Aryan, Aadhya
-                            </Typography>
-                        </CardContent>
-                    </Card>
+                    {/* Astrological Details Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Astrological Details</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Zodiac Sign:</strong> Leo</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Nakshatra:</strong> Ashwini</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Destiny Number:</strong> 5</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Gemstone:</strong> Ruby</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Lucky Metal:</strong> Gold</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Numerology:</strong> 3</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> A</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Suggested Baby Names:</strong> Aryan, Aadhya</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                </Box>
-            </Box>
-        </Box>
+            {/* Edit Modal */}
+            <AnimatePresence>
+                {showEditModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                        >
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Edit Customer</h2>
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    placeholder="Father's Name"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Mother's Name"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Email"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="WhatsApp Number"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Baby's Gender"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            <div className="mt-10 flex justify-end space-x-2">
+                                <button
+                                    onClick={handleEdit}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={() => setShowEditModal(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Modal */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                        >
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Delete Customer</h2>
+                            <p className="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete this customer?</p>
+                            <div className="flex justify-end space-x-2">
+                                <button
+                                    onClick={handleDelete}
+                                    className="bg-red-500 text-white px-4 py-2 rounded"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 

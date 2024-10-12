@@ -7,6 +7,7 @@ import { useStore } from "../../store";
 import { Customers } from "./Customers";
 import { Leave } from "./Leave";
 import Tasks from "./Tasks";
+import Customer from "./Customers/Customer";
 const EmployeeManagement = () => {
   const { isDarkMode } = useStore()
   return (
@@ -25,6 +26,7 @@ const EmployeeManagement = () => {
           <Route path="/customers" element={<Customers />} />
           <Route path="/leave" element={<Leave />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/customer" element={<Customer />} />
 
         </Routes>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from "framer-motion";
 
 const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
   const [names, setNames] = useState([]);
@@ -29,7 +30,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
         item.gender === selectedCustomer.babyGender &&
         item.name.startsWith(selectedCustomer.preferredStartingLetter)
     );
-    
+
     setFilteredNames(filtered);
     setCurrentPage(1); // Reset to page 1 after filtering
   };
@@ -61,10 +62,6 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
 
       setPdfContent(response.data.base64Pdf);
       setUniqueId(response.data.uniqueId);
-
-      const pdfBlob = new Blob([new Uint8Array(atob(response.data.base64Pdf).split("").map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      window.open(pdfUrl);
 
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -116,43 +113,43 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
   const totalPages = Math.ceil(filteredNames.length / itemsPerPage);
 
   return (
-    <div className="bg-white text-black p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-10">Select Names for PDF</h2>
+    <div className="bg-white w-full dark:bg-gray-800 text-black dark:text-white p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-10">Select Names for PDF</h2>
 
       {/* Table of filtered names with checkboxes */}
       <div className="overflow-y-auto max-h-96 mb-4">
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
+        <table className="min-w-full table-auto border-collapse border border-gray-300 dark:border-gray-700">
           <thead>
-            <tr className="bg-black">
-              <th className="border border-gray-300 px-4 py-2 text-white">Select</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Book Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Gender</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Shlok No</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Page No</th>
+            <tr className="bg-black dark:bg-gray-900">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Select</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Book Name</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Gender</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Name</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Meaning</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Name In Hindi</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Meaning In Hindi</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Shlok No</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Page No</th>
             </tr>
           </thead>
           <tbody>
             {paginatedNames.map((item) => (
               <tr key={item._id}>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item)}
                     onChange={() => handleItemSelection(item)}
                   />
                 </td>
-                <td className="border border-gray-300 px-4 py-2">{item.bookName}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.gender}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaning}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.nameInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaningInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.shlokNo}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.pageNo}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.bookName}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.gender}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.name}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.meaning}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.nameInHindi}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.meaningInHindi}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.shlokNo}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.pageNo}</td>
               </tr>
             ))}
           </tbody>
@@ -168,7 +165,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
         >
           Previous
         </button>
-        <span className="text-black mx-4">
+        <span className="text-black dark:text-white mx-4">
           Page {currentPage} of {totalPages}
         </span>
         <button
