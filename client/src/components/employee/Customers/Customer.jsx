@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Grid } from '@mui/material';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import {
-    Card,
-    CardContent,
-    Typography,
-    Button,
-    Box,
-    Divider,
-    CircularProgress,
-} from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit, Delete, FileText } from 'lucide-react';
 import { useStore } from "../../../store"; // Assuming you have a store for dark mode
@@ -26,13 +15,13 @@ const Customer = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { isDarkMode } = useStore();
 
     useEffect(() => {
         const getCustomerDetails = async () => {
             setCustomerDetails(customerData);
             setLoading(false);
         };
-
 
         getCustomerDetails();
     }, [customerData]);
@@ -55,9 +44,15 @@ const Customer = () => {
     }
 
     return (
-        <div className={`min-h-screen p-4 sm:p-8`}>
+        <div className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Details</h1>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="mb-4 text-blue-500 hover:text-blue-700"
+                >
+                    Back to Customers
+                </button>
                 <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                     {/* Profile Card */}
                     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -115,6 +110,7 @@ const Customer = () => {
                     </div>
                 </div>
             </div>
+
 
             {/* Edit Modal */}
             <AnimatePresence>
