@@ -26,7 +26,6 @@ export const Customers = () => {
     const [showCheckBoxList, setShowCheckBoxList] = useState(false);
     const navigate = useNavigate();
 
-
     const employeeId = Cookies.get('employeeId');
 
     useEffect(() => {
@@ -205,7 +204,7 @@ export const Customers = () => {
     const newRequestsCount = Array.isArray(customerData['newRequests']) ? customerData['newRequests'].length : 0;
 
     return (
-        <div className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+        <div className={`min-h-screen p-4 sm:p-8`}>
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Management</h1>
                 <div className="flex p-2 mb-6 text-center justify-center space-x-2 overflow-x-auto">
