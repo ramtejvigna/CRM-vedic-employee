@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, Eye, MessageSquare, Calendar, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, Calendar, Clock } from "lucide-react";
 import Cookies from "js-cookie";
 import { useSnackbar } from "notistack";
 import { useStore } from "../../../store";
@@ -16,7 +16,8 @@ const Tasks = () => {
   const employeeId = "66fec75778f1878ad8dd4c9b";
   const token = Cookies.get("token");
   const { enqueueSnackbar } = useSnackbar();
-  const { isDarkMode } = useStore()
+  const { isDarkMode } = useStore();
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -111,10 +112,6 @@ const Tasks = () => {
     }
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
     <div className={`min-h-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} transition-colors duration-300`}>
       <div className="container mx-auto py-8 px-4">
@@ -162,6 +159,7 @@ const Tasks = () => {
 
 const TaskCard = ({ task, updateTaskStatus, setSelectedTask, isDarkMode }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Pending":
@@ -174,6 +172,11 @@ const TaskCard = ({ task, updateTaskStatus, setSelectedTask, isDarkMode }) => {
         return "bg-gray-200 text-gray-800";
     }
   };
+
+  const toggleCard = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
   return (
     <motion.div
       layout
@@ -188,7 +191,7 @@ const TaskCard = ({ task, updateTaskStatus, setSelectedTask, isDarkMode }) => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">{task.title}</h2>
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggleCard}
             className="text-blue-500 hover:text-blue-700 transition-colors duration-200"
           >
             {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}

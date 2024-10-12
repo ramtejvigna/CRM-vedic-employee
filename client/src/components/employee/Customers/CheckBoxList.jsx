@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from 'react-router-dom';
+import { FaDownload, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 
-import { Download, Email, WhatsApp } from '@mui/icons-material';
-import { Button } from '@mui/material';
+const CheckBoxListPage = () => {
+  const location = useLocation();
+  const { customerData } = location.state || {};
+  const [email, setEmail] = useState(customerData?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || '');
 
-const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
+
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [pdfContent, setPdfContent] = useState('');
   const [uniqueId, setUniqueId] = useState('');
-  const [email, setEmail] = useState(selectedCustomer.email || '');
-  const [phoneNumber, setPhoneNumber] = useState(selectedCustomer.whatsappNumber || '');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
@@ -23,19 +27,28 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
         filterNames(response.data); // Initial filter based on babyGender and preferredStartingLetter
       })
       .catch((error) => console.error('Error fetching names:', error));
-  }, [selectedCustomer.babyGender, selectedCustomer.preferredStartingLetter]);
+  }, [customerData.babyGender, customerData.preferredStartingLetter]);
 
   const filterNames = (allNames) => {
-    // Filter by babyGender and preferredStartingLetter
+    if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
+      setFilteredNames([]);
+      return;
+    }
     const filtered = allNames.filter(
       item =>
-        item.gender === selectedCustomer.babyGender &&
-        item.name.startsWith(selectedCustomer.preferredStartingLetter)
+        item.gender === customerData.babyGender &&
+        item.name.startsWith(customerData.preferredStartingLetter)
     );
-    
     setFilteredNames(filtered);
-    setCurrentPage(1); // Reset to page 1 after filtering
+    setCurrentPage(1);
   };
+  
+
+  const handleClose = () => {
+    // You can use history or navigate depending on the version of React Router you're using
+    window.history.back(); // Go back to the previous page
+  };
+
 
   const handleItemSelection = (item) => {
     setSelectedItems((prevSelected) => {
@@ -59,13 +72,19 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
           name: item.name,
           meaning: item.meaning
         })),
-        customerId: selectedCustomer._id,
+        customerId: customerData._id,
       });
 
       setPdfContent(response.data.base64Pdf);
       setUniqueId(response.data.uniqueId);
 
-      const pdfBlob = new Blob([new Uint8Array(atob(response.data.base64Pdf).split("").map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+      const binaryString = window.atob(response.data.base64Pdf);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const pdfBlob = new Blob([bytes], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       window.open(pdfUrl);
 
@@ -74,6 +93,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
       alert('Failed to generate PDF.');
     }
   };
+
 
   const handleDownload = () => {
     if (!pdfContent) return;
@@ -115,93 +135,110 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
 
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNames = filteredNames.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil(filteredNames.length / itemsPerPage);
+  const paginatedNames = filteredNames.slice(startIndex, startIndex + itemsPerPage) || [];
+  const totalPages = Math.ceil(filteredNames.length / itemsPerPage) || 1;
 
   return (
-    <div className="bg-white text-black p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-4">Select Names for PDF</h2>
-      <h1>{selectedCustomer.fatherName}</h1>
+    <div className="max-w-7xl mx-auto mt-8">
+      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg mb-8 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Customer Details</h1>
+          <div className="flex items-center space-x-4">
+          </div>
+        </div>
 
-      {/* Table of filtered names with checkboxes */}
-      <div className="overflow-y-auto max-h-96 mb-4">
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-black">
-              <th className="border border-gray-300 px-4 py-2 text-white">Select</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Book Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Gender</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Shlok No</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Page No</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedNames.map((item) => (
-              <tr key={item._id}>
-                <td className="border border-gray-300 px-4 py-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item)}
-                    onChange={() => handleItemSelection(item)}
-                  />
-                </td>
-                <td className="border border-gray-300 px-4 py-2">{item.bookName}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.gender}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaning}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.nameInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaningInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.shlokNo}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.pageNo}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <div className="overflow-x-auto max-h-96 mb-4 rounded-lg shadow-lg">
+  <table className="min-w-full table-auto border-collapse bg-white rounded-lg">
+    <thead className="bg-gray-100">
+      <tr>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Book Name</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name In Hindi</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning In Hindi</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Shlok No</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Page No</th>
+      </tr>
+    </thead>
+    <tbody>
+      {paginatedNames.map((item) => (
+        <tr key={item._id} className="bg-white hover:bg-gray-100 border-b">
+          <td className="px-4 py-4">
+            <input
+              type="checkbox"
+              checked={selectedItems.includes(item)}
+              onChange={() => handleItemSelection(item)}
+              className="rounded"
+            />
+          </td>
+          <td className="px-4 py-2">{item.bookName}</td>
+          <td className="px-4 py-2">{item.gender}</td>
+          <td className="px-4 py-2">{item.name}</td>
+          <td className="px-4 py-2">{item.meaning}</td>
+          <td className="px-4 py-2">{item.nameInHindi}</td>
+          <td className="px-4 py-2">{item.meaningInHindi}</td>
+          <td className="px-4 py-2">{item.shlokNo}</td>
+          <td className="px-4 py-2">{item.pageNo}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
+
 
       {/* Pagination controls */}
-      <div className="flex justify-center items-center mb-4">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Previous
-        </button>
-        <span className="text-black mx-4">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Next
-        </button>
-      </div>
+      <div className="flex justify-between items-center mb-4">
+  <button
+    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+    disabled={currentPage === 1}
+    className={`px-4 py-2 rounded flex items-center gap-2 ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-500 hover:bg-gray-100'}`}
+  >
+    <span>&lt;</span> Previous
+  </button>
 
-      <div className="flex justify-between mt-4">
-        <button onClick={handleGeneratePdf} className="bg-blue-500 text-white px-4 py-2 rounded">Generate PDF</button>
+  <span className="text-sm text-gray-600 mx-4">
+    Page {currentPage} of {totalPages}
+  </span>
 
-        {pdfContent && (
-          <>
-            <Button onClick={handleDownload} className="bg-green-500 text-white px-4 py-2 rounded">
-              <Download style={{ marginRight: '8px' }} /> {/* Icon for Download */}
-            </Button>
-            <Button onClick={handleSendMail} className="bg-red-500 text-white px-4 py-2 rounded">
-              <Email style={{ marginRight: '8px' }} /> {/* Icon for Email */}
-            </Button>
-            <Button onClick={handleSendWhatsApp} className="bg-yellow-500 text-white px-4 py-2 rounded">
-              <WhatsApp style={{ marginRight: '8px' }} /> {/* Icon for WhatsApp */}
-            </Button>
-          </>
-        )}
-        <button onClick={handleClose} className="bg-gray-500 text-white px-4 py-2 rounded">Close</button>
-      </div>
+  <button
+    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+    disabled={currentPage === totalPages}
+    className={`px-4 py-2 rounded flex items-center gap-2 ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-500 hover:bg-gray-100'}`}
+  >
+    Next <span>&gt;</span>
+  </button>
+</div>
+
+
+
+
+<div className="flex justify-between items-center my-10">
+  {/* Left-end button */}
+  <button onClick={handleGeneratePdf} className="bg-blue-500 text-white px-4 py-2 rounded">Generate PDF</button>
+
+  {/* Center container for the icon buttons */}
+  <div className="flex justify-center items-center flex-grow space-x-2">
+    {pdfContent && (
+      <>
+        <button onClick={handleDownload} className="bg-white-500 text-white px-4 py-2 rounded flex items-center">
+          <FaDownload className="text-gray-600" size={20} /> {/* Gray color */}
+        </button>
+        <button onClick={handleSendMail} className="bg-white-500 text-white px-4 py-2 rounded flex items-center">
+          <FaEnvelope className="text-gray-600" size={20} /> {/* Gray color */}
+        </button>
+        <button onClick={handleSendWhatsApp} className="bg-white-500 text-white px-4 py-2 rounded flex items-center">
+          <FaWhatsapp className="text-gray-600" size={20} /> {/* Gray color */}
+        </button>
+      </>
+    )}
+  </div>
+
+  {/* Right-end button */}
+  <button onClick={handleClose} className="bg-gray-500 text-white px-4 py-2 rounded">Close</button>
+</div>
     </div>
   );
 };

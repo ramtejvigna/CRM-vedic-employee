@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { TextField, Button, MenuItem } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Edit, Trash2, Eye, Check, X } from "lucide-react";
+import { useStore } from "../../../store"; // Assuming you have a store for dark mode
 import CheckBoxListPage from './CheckBoxList';
 import { select } from '@material-tailwind/react';
+import { useNavigate } from 'react-router-dom';
 
 
 export const Customers = () => {
@@ -13,70 +16,50 @@ export const Customers = () => {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [nextSection, setNextSection] = useState('');
     const [details, setDetails] = useState('');
-    const [paymentStatus, setPaymentStatus] = useState(false); // For new requests
-    const [feedback, setFeedback] = useState(''); // For inProgress
-    const [generatePdf, setGeneratePdf] = useState(false); // For PDF generation
-    const [paymentDate, setPaymentDate] = useState();
-    const [paymentTime, setPaymentTime] = useState();
-    const [amountPaid, setAmountPaid] = useState();
-    const [transactionId, setTransactionId] = useState()
+    const [paymentStatus, setPaymentStatus] = useState(false);
+    const [feedback, setFeedback] = useState('');
+    const [generatePdf, setGeneratePdf] = useState(false);
+    const [paymentDate, setPaymentDate] = useState('');
+    const [paymentTime, setPaymentTime] = useState('');
+    const [amountPaid, setAmountPaid] = useState('');
+    const [transactionId, setTransactionId] = useState('');
     const [showCheckBoxList, setShowCheckBoxList] = useState(false);
+    const navigate = useNavigate();
 
-    // Get employeeId from cookies
     const employeeId = Cookies.get('employeeId');
 
-    // Fetch customer data from backend
     useEffect(() => {
         if (employeeId) {
-            axios
-                .get(`http://localhost:3000/customers/employees/${employeeId}/customers`)
-                .then((response) => {
-                    setCustomerData(response.data);
-                })
-                .catch((error) => {
-                    console.error('Error fetching customer data:', error);
-                });
+            axios.get(`http://localhost:3000/customers/employees/${employeeId}/customers`)
+                .then((response) => setCustomerData(response.data))
+                .catch((error) => console.error('Error fetching customer data:', error));
         } else {
             console.error('Employee ID not found in cookies');
-            return;
         }
     }, [employeeId]);
 
-    const overlayStyle = {
-        position: 'absolute', // Or 'fixed' depending on your needs
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 999, // High value to ensure it appears above other elements
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: for dimming the background
-    };
-
     const handleGeneratePdfClick = (customer) => {
-        setSelectedCustomer(customer); // Set the selected customer data
-        setShowCheckBoxList(true); // Show the modal
+        setSelectedCustomer(customer);
+        setShowCheckBoxList(true);
     };
+
     const handleClose = () => {
-        setShowCheckBoxList(false); // Hide the modal when close button is clicked
+        setShowCheckBoxList(false);
     };
 
-
-    // Move customer from one section to another (trigger backend call)
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
 
-        // Handle different section moves
         if (toSection === 'inProgress') {
-            updatedCustomer.paymentStatus = paymentStatus; // Payment status for new requests
+            updatedCustomer.paymentStatus = paymentStatus;
             updatedCustomer.customerStatus = 'inProgress';
             updatedCustomer.paymentDate = paymentDate;
             updatedCustomer.paymentTime = paymentTime;
             updatedCustomer.amountPaid = amountPaid;
             updatedCustomer.transactionId = transactionId;
-            console.log('Updated customer data:', updatedCustomer);
         } else if (toSection === 'completed') {
-            updatedCustomer.feedback = feedback; // Adding feedback for completed
-            updatedCustomer.pdfGenerated = generatePdf ? customer.pdfGenerated + 1 : customer.pdfGenerated; // Increment PDF count if generated
+            updatedCustomer.feedback = feedback;
+            updatedCustomer.pdfGenerated = generatePdf ? customer.pdfGenerated + 1 : customer.pdfGenerated;
             updatedCustomer.customerStatus = 'completed';
         } else if (toSection === 'newRequests') {
             updatedCustomer.feedback = '';
@@ -84,63 +67,43 @@ export const Customers = () => {
             updatedCustomer.paymentStatus = paymentStatus;
             updatedCustomer.customerStatus = 'newRequests';
         } else if (toSection === 'rejected') {
-            updatedCustomer.customerStatus = 'rejected'; // Set the status to rejected
+            updatedCustomer.customerStatus = 'rejected';
         }
 
-        // Update customer data based on the section
-        setCustomerData((prevData) => {
-            // Remove customer from fromSection
-            const updatedFromSection = prevData[fromSection].filter(
-                (c) => c._id !== customer._id
-            );
+        setCustomerData((prevData) => ({
+            ...prevData,
+            [fromSection]: prevData[fromSection].filter((c) => c._id !== customer._id),
+            [toSection]: [...prevData[toSection], updatedCustomer],
+        }));
 
-            // Add customer to toSection
-            return {
-                ...prevData,
-                [fromSection]: updatedFromSection,
-                [toSection]: [...prevData[toSection], updatedCustomer],
-            };
-        });
-
-
-        // Make the API call to update the customer in the backend
-        axios
-            .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
-            .catch((error) => {
-                console.error('Error moving customer:', error);
-            });
+        axios.put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+            .catch((error) => console.error('Error moving customer:', error));
     };
 
     const handleAccept = useCallback(() => {
         if (selectedCustomer) {
-            if (paymentDate && paymentTime) {
-                setPaymentStatus(true);
-            } else {
-                setPaymentStatus(false);
-            }
-
-            moveCustomer(
-                selectedCustomer,
-                activeTab, // From section
-                nextSection, // To section
-                details
-            );
-            setShowModal(false); // Close modal
+            setPaymentStatus(paymentDate && paymentTime);
+            moveCustomer(selectedCustomer, activeTab, nextSection, details);
+            setShowModal(false);
         }
     }, [selectedCustomer, paymentDate, paymentTime, nextSection, details, activeTab, amountPaid, transactionId, paymentStatus]);
 
-
-    // Render table content based on customerStatus
     const renderTable = (customers, fromSection, nextSection) => (
-        <>
-            <table className="min-w-full bg-white">
-                <thead>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-x-auto"
+        >
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                        <th className="py-2 px-4 border">Father Name</th>
-                        <th className="py-2 px-4 border">Mother Name</th>
-                        <th className="py-2 px-4 border">W/A number</th>
-                        <th className="py-2 px-4 border">Baby Gender</th>
-                        <th className="py-2 px-4 border">Actions</th>
+                        {['Father Name', 'Mother Name', 'W/A number', 'Baby Gender', 'Actions'].map((header) => (
+                            <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                {header}
+                            </th>
+                        ))}
                     </tr>
                 </thead>
                 <tbody>
@@ -173,7 +136,16 @@ export const Customers = () => {
                                         onClick={() => {
                                             setSelectedCustomer(customer); // Set customer for modal
                                             setNextSection(nextSection); // Set target section
-                                            setShowModal(true);
+                                            (fromSection !== 'inProgress' ? (
+                                                setShowModal(true)
+                                            ) : (
+                                                navigate('viewDetailsIn', {
+                                                    state: {
+                                                        customerData: customer, // Pass customer data
+                                                        section: nextSection    // Pass section info
+                                                    }
+                                                })
+                                            ))
                                         }}
                                     >
                                         View
@@ -189,19 +161,6 @@ export const Customers = () => {
                                 )}
                             </td>
 
-                            {fromSection === 'completed' && (
-                                <>
-                                    <td className="text-center border">
-                                        <button
-                                            className="p-2 px-4 bg-yellow-500 bg-opacity-80 rounded-lg"
-                                            onClick={() => moveCustomer(customer, 'completed', 'inProgress')}
-                                        >
-                                            Move to In Progress
-                                        </button>
-                                    </td>
-                                </>
-                            )}
-
                             {showCheckBoxList && (
                                 <div style={overlayStyle}>
                                     <CheckBoxListPage
@@ -214,26 +173,27 @@ export const Customers = () => {
                     ))}
                 </tbody>
             </table>
-            {customers.length == 0 && (
-                <div className='text-center p-4 py-8'>
-                    <h1 className='text-xl'>No customers available in this section</h1>
-                </div>
+            {customers.length === 0 && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
+                >
+                    <p className="text-xl">No customers available in this section</p>
+                </motion.div>
             )}
-        </>
+        </motion.div>
     );
 
-    // Render content based on activeTab and customerStatus
     const renderContent = () => {
-        const filteredCustomers = Array.isArray(customerData[activeTab])
-            ? customerData[activeTab]
-            : [];
+        const filteredCustomers = Array.isArray(customerData[activeTab]) ? customerData[activeTab] : [];
         switch (activeTab) {
             case 'newRequests':
                 return renderTable(filteredCustomers, 'newRequests', 'inProgress');
             case 'inProgress':
                 return renderTable(filteredCustomers, 'inProgress', 'completed');
             case 'completed':
-                return renderTable(filteredCustomers, 'completed', 'inProgress'); // Allow moving back to 'In Progress'
+                return renderTable(filteredCustomers, 'completed', 'inProgress');
             case 'rejected':
                 return renderTable(filteredCustomers, 'rejected', 'newRequests');
             default:
@@ -241,153 +201,172 @@ export const Customers = () => {
         }
     };
 
-    // Calculate new requests count
-    const newRequestsCount = Array.isArray(customerData['newRequests'])
-        ? customerData['newRequests'].length
-        : 0;
-
+    const newRequestsCount = Array.isArray(customerData['newRequests']) ? customerData['newRequests'].length : 0;
 
     return (
-        <div className="flex flex-col items-center p-10 gap-10">
-            {/* Tab Buttons */}
-            <div className="flex mb-4 gap-5">
-                {['newRequests', 'inProgress', 'completed', 'rejected'].map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`relative px-4 py-2 text-sm rounded-lg ${activeTab === tab
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-700 hover:bg-opacity-60 hover:text-white transition-colors'
+        <div className={`min-h-screen p-4 sm:p-8`}>
+            <div className="max-w-7xl mx-auto">
+                <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Management</h1>
+                <div className="flex p-2 mb-6 text-center justify-center space-x-2 overflow-x-auto">
+                    {['newRequests', 'inProgress', 'completed', 'rejected'].map((tab) => (
+                        <motion.button
+                            key={tab}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setActiveTab(tab)}
+                            className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${
+                                activeTab === tab
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                             }`}
+                        >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1')}
+                            {tab === 'newRequests' && newRequestsCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
+                                    {newRequestsCount}
+                                </span>
+                            )}
+                        </motion.button>
+                    ))}
+                </div>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden"
+                >
+                    {renderContent()}
+                </motion.div>
+            </div>
+
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
                     >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1')}
-                        {tab === 'newRequests' && newRequestsCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
-                                {newRequestsCount}
-                            </span>
-                        )}
-                    </button>
-
-                ))}
-            </div>
-
-            {/* Tab Content - Customer Tables */}
-            <div className="bg-white shadow-md w-full py-10 rounded-xl">
-                {renderContent()}
-            </div>
-
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
-                        <div className='flex flex-row justify-between'>
-                            {selectedCustomer.fatherName && (
-                                <h2 className="text-lg font-semibold">
-                                    Father Name : {selectedCustomer?.fatherName}
-                                </h2>
-                            )}
-                            {selectedCustomer.motherName && (
-                                <h2 className='text-lg font-semibold'>
-                                    Mother Name : {selectedCustomer?.motherName}
-                                </h2>
-                            )}
-                        </div>
-                        {activeTab === 'newRequests' && (
-                            <div>
-                                <div>
-                                    <TextField
-                                        label="Payment Date"
-                                        name="paymentDate"
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                        >
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                                {selectedCustomer?.fatherName}'s Details
+                            </h2>
+                            {activeTab === 'newRequests' && (
+                                <div className="space-y-4">
+                                    <input
+                                        type="date"
                                         value={paymentDate}
                                         onChange={(e) => setPaymentDate(e.target.value)}
-                                        type="date"
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                                     />
-                                    <TextField
-                                        label="Payment Time"
-                                        name="paymentTime"
+                                    <input
+                                        type="time"
                                         value={paymentTime}
                                         onChange={(e) => setPaymentTime(e.target.value)}
-                                        type="time"
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                                     />
-                                    <TextField
-                                        label="Amount Paid"
-                                        name="amountPaid"
+                                    <input
+                                        type="text"
                                         value={amountPaid}
                                         onChange={(e) => setAmountPaid(e.target.value)}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
+                                        placeholder="Amount Paid"
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                                     />
-                                    <TextField
-                                        label="Transaction ID"
-                                        name="transactionId"
+                                    <input
+                                        type="text"
                                         value={transactionId}
                                         onChange={(e) => setTransactionId(e.target.value)}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
+                                        placeholder="Transaction ID"
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
-                            </div>
-                        )}
-                        {activeTab === 'inProgress' && (
-                            <>
-                                <div>
-                                    <p>{selectedCustomer.email}</p>
-                                    <p>
-                                        Payment Date & Time: {new Date(selectedCustomer.paymentDate).toLocaleDateString('en-US', {
+                            )}
+                            {activeTab === 'inProgress' && (
+                                <div className="space-y-4">
+                                    <p className="text-gray-600 dark:text-gray-300">{selectedCustomer?.email}</p>
+                                    <p className="text-gray-600 dark:text-gray-300">
+                                        Payment Date & Time: {new Date(selectedCustomer?.paymentDate).toLocaleDateString('en-US', {
                                             year: 'numeric',
                                             month: 'long',
                                             day: 'numeric'
-                                        })} - {selectedCustomer.paymentTime}
+                                        })} - {selectedCustomer?.paymentTime}
                                     </p>
-                                    <p>Preferred God : {selectedCustomer.preferredGod}</p>
-                                    <p>PDF's Generated - {selectedCustomer.pdfGenerated}</p>
-                                    <label className="block my-2 mt-4">Feedback</label>
+                                    <p className="text-gray-600 dark:text-gray-300">Preferred God : {selectedCustomer?.preferredGod}</p>
+                                    <p className="text-gray-600 dark:text-gray-300">PDF's Generated - {selectedCustomer?.pdfGenerated}</p>
+                                    <label className="block my-2 mt-4 text-gray-600 dark:text-gray-300">Feedback</label>
                                     <textarea
                                         onChange={(e) => setFeedback(e.target.value)}
-                                        className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none"
+                                        className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none dark:bg-gray-700 dark:text-white"
                                     />
                                     <button
                                         className="p-2 px-4 bg-blue-500 text-white rounded-lg"
                                         onClick={() => {
-                                            setSelectedCustomer(selectedCustomer); // Set selected customer correctly
+                                            setSelectedCustomer(selectedCustomer);
                                             setShowCheckBoxList(true);
                                         }}
                                     >
                                         Generate PDF
                                     </button>
                                 </div>
-                            </>
-                        )}
+                            )}
+                            {activeTab === 'completed' && (
+                                <div className="space-y-4">
+                                    <p className="text-gray-600 dark:text-gray-300">{selectedCustomer?.email}</p>
+                                    <p className="text-gray-600 dark:text-gray-300">
+                                        Payment Date & Time: {new Date(selectedCustomer?.paymentDate).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })} - {selectedCustomer?.paymentTime}
+                                    </p>
+                                    <p className="text-gray-600 dark:text-gray-300">Preferred God : {selectedCustomer?.preferredGod}</p>
+                                    <p className="text-gray-600 dark:text-gray-300">Given Feedback : {selectedCustomer?.feedback}</p>
+                                    <button
+                                        className="p-2 px-4 bg-yellow-500 bg-opacity-80 rounded-lg my-10"
+                                        onClick={() => moveCustomer(selectedCustomer, 'completed', 'inProgress')}
+                                    >
+                                        Move to In Progress
+                                    </button>
+                                </div>
+                            )}
 
-                        <div className='mt-10'>
-                            <button
-                                onClick={handleAccept}
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                            >
-                                Confirm
-                            </button>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
+                            <div className='mt-10'>
+                                <button
+                                    onClick={handleAccept}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                                >
+                                    Confirm
+                                </button>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {showCheckBoxList && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                    >
+                        <CheckBoxListPage
+                            selectedCustomer={selectedCustomer}
+                            handleClose={handleClose}
+                        />
+                    </motion.div>
                 </div>
             )}
         </div>
