@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
 import { FaHome, FaCog, FaChevronDown, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUserCircle } from 'react-icons/fa'; // Import dark/light mode icons
 import { useStore } from '../../../store';
 import NotificationButton from './NotificationButton';
-
+import { toast } from 'react-toastify';
+import Cookies from 'js-cookie'
 const Navbar = () => {
+  const navigate = useNavigate();
   const { setOpenSidenav } = useStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // State to control user dropdown
   const { activeRoute, isDarkMode, toggleDarkMode } = useStore(); // Access theme state and toggle function
+  const token = Cookies.get('token')
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-  const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = "/signin"; // Redirect to sign-in page after logout
+      if (response.ok) {
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        navigate('/signin'); // Redirect to sign-in page after logout
+      } else {
+        toast.error('Logout failed');
+      }
+    } catch (error) {
+      toast.error('Logout failed');
+    }
   };
 
   return (

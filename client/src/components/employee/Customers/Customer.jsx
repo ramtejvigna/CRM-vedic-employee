@@ -11,7 +11,10 @@ import {
     Divider,
     CircularProgress,
 } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from "framer-motion";
 import { Edit, Delete, FileText } from 'lucide-react';
+import { useStore } from "../../../store"; // Assuming you have a store for dark mode
 
 const Customer = () => {
     const location = useLocation();
@@ -28,6 +31,22 @@ const Customer = () => {
             setCustomerDetails(customerData);
             console.log(customerData)
             setLoading(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { isDarkMode } = useStore();
+
+    useEffect(() => {
+        const getCustomerDetails = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/customers/getCustomerDetails/${fatherName}`);
+                console.log(response.data)
+                setCustomerDetails(response.data);
+
+                setLoading(false);
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'Error fetching customer details');
+                setLoading(false);
+            }
         };
 
 
@@ -36,108 +55,195 @@ const Customer = () => {
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                <CircularProgress />
-            </Box>
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
         );
     }
 
     if (!customerDetails) {
-        return <div>No customer details found.</div>;
+        return <div className="text-center mt-10">No customer details found.</div>;
     }
 
     return (
-        <Box display="flex" flexDirection="column" padding={2} className="gap-5">
-            {/* Profile Card */}
-            <Box>
-                <Box>
-                    <Card variant="outlined" sx={{ height: '300px', boxShadow: 3, borderRadius: 2 }}>
-                        <CardContent sx={{ padding: 2 }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                                <Typography variant="h5" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                    Profile
-                                </Typography>
-                            </Box>
-                            <Divider sx={{ margin: '20px 0' }} />
-                            <Typography variant="body2" sx={{ marginTop: 2, lineHeight: 1.6, color: '#555' }}>
-                                <strong>Father's Name:</strong> <span style={{ color: '#333' }}>{customerDetails.fatherName || 'N/A'}</span><br />
-                                <strong>Mother's Name:</strong> <span style={{ color: '#333' }}>{customerDetails.motherName || 'N/A'}</span><br />
-                                <strong>Email:</strong> <span style={{ color: '#333' }}>{customerDetails.email || 'N/A'}</span><br />
-                                <strong>WhatsApp Number:</strong> <span style={{ color: '#333' }}>{customerDetails.whatsappNumber || 'N/A'}</span><br />
-                                <strong>Baby's Gender:</strong> <span style={{ color: '#333' }}>{customerDetails.babyGender || 'N/A'}</span><br />
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Box>
-            </Box>
+        <div className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+            <div className="max-w-7xl mx-auto">
+                <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Details</h1>
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    {/* Profile Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile</h2>
+                            <div className="flex space-x-2">
+                                <button onClick={() => setShowEditModal(true)} className="text-blue-500 hover:text-blue-700">
+                                    <Edit size={20} />
+                                </button>
+                                <button onClick={() => setShowDeleteModal(true)} className="text-red-500 hover:text-red-700">
+                                    <Delete size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Father's Name:</strong> {customerDetails.fatherName || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Mother's Name:</strong> {customerDetails.motherName || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.email || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>WhatsApp Number:</strong> {customerDetails.whatsappNumber || 'N/A'}</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Baby's Gender:</strong> {customerDetails.babyGender || 'N/A'}</p>
+                        </div>
+                    </div>
 
-            {/* Assigned Employee Card */}
-            <Box display="flex" className="flex flex-row justify-between gap-5">
-                <Box className="w-1/2">
-                    <Card variant="outlined" sx={{ boxShadow: 3, height: '350px', borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', color: "rgb(52, 71, 103)" }}>
-                                Astrological Details
-                            </Typography>
-                            <Divider sx={{ margin: '10px 0' }} />
-
-                            {/* Grid for two-column layout */}
-                            <Grid container spacing={2} className="p-10">
-                                {/* First column */}
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Zodiac Sign:</strong> Leo<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Destiny Number:</strong> 5<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Gemstone:</strong> Ruby<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Numerology:</strong> 3<br />
-                                    </Typography>
-                                </Grid>
-
-                                {/* Second column */}
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Nakshatra:</strong> Ashwini<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Lucky Metal:</strong> Gold<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Preferred Starting Letter:</strong> A<br />
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#555', mb: 1 }}>
-                                        <strong>Suggested Baby Names:</strong> Aryan, Aadhya
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-                </Box>
-                <div className='w-1/2'>
-                    <textarea
-                        onChange={(e) => setFeedback(e.target.value)}
-                        className="rounded-xl p-2 mb-4 h-1/2 w-full resize-none bg-slate-200 border-none"
-                    />
-                    <button
-                        className="p-2 px-4 bg-blue-500 text-white rounded-lg"
-                        onClick={() => {
-                            navigate('generate-pdf', {
-                                state: {
-                                    customerData: customerData
-                                },
-                            })
-                        }}
-                    >
-                        Generate PDF
-                    </button>
+                    {/* Generated PDFs Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Generated PDFs</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            {pdfs.map((pdf, index) => (
+                                <div key={index} className="flex justify-between items-center mb-4">
+                                    <div>
+                                        <p className="text-gray-600 dark:text-gray-300"><strong>{new Date(pdf.createdAt).toLocaleDateString()}</strong></p>
+                                        <p className="text-gray-600 dark:text-gray-300">#{pdf.uniqueId}</p>
+                                    </div>
+                                    <button onClick={() => viewPdf(pdf.base64Pdf)} className="text-blue-500 hover:text-blue-700">
+                                        <FileText size={20} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-            </Box>
-        </Box>
+
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+                    {/* Assigned Employee Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Assigned Employee</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            {customerDetails.assignedEmployee ? (
+                                <div>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Name:</strong> {customerDetails.assignedEmployee.name}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.assignedEmployee.email}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Contact:</strong> {customerDetails.assignedEmployee.phone}</p>
+                                    <p className="text-gray-600 dark:text-gray-300"><strong>Created At:</strong> {new Date(customerDetails.createdDateTime).toLocaleString()}</p>
+                                </div>
+                            ) : (
+                                <p className="text-gray-600 dark:text-gray-300">No employee assigned.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Astrological Details Card */}
+                    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Astrological Details</h2>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Zodiac Sign:</strong> Leo</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Nakshatra:</strong> Ashwini</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Destiny Number:</strong> 5</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Gemstone:</strong> Ruby</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Lucky Metal:</strong> Gold</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Numerology:</strong> 3</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> A</p>
+                            <p className="text-gray-600 dark:text-gray-300"><strong>Suggested Baby Names:</strong> Aryan, Aadhya</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Edit Modal */}
+            <AnimatePresence>
+                {showEditModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                        >
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Edit Customer</h2>
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    placeholder="Father's Name"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Mother's Name"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Email"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="WhatsApp Number"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Baby's Gender"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            <div className="mt-10 flex justify-end space-x-2">
+                                <button
+                                    onClick={handleEdit}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={() => setShowEditModal(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Modal */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
+                        >
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Delete Customer</h2>
+                            <p className="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete this customer?</p>
+                            <div className="flex justify-end space-x-2">
+                                <button
+                                    onClick={handleDelete}
+                                    className="bg-red-500 text-white px-4 py-2 rounded"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 

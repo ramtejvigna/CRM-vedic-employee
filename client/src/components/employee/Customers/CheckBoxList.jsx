@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from 'react-router-dom';
 
 const CheckBoxListPage = () => {
@@ -7,6 +8,7 @@ const CheckBoxListPage = () => {
   const { customerData } = location.state || {};
   const [email, setEmail] = useState(customerData?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || '');
+
 
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
@@ -136,43 +138,43 @@ const CheckBoxListPage = () => {
   const totalPages = Math.ceil(filteredNames.length / itemsPerPage) || 1;
 
   return (
-    <div className="bg-white text-black p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-10">Select Names for PDF</h2>
+    <div className="bg-white w-full dark:bg-gray-800 text-black dark:text-white p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-10">Select Names for PDF</h2>
 
       {/* Table of filtered names with checkboxes */}
       <div className="overflow-y-auto max-h-96 mb-4">
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
+        <table className="min-w-full table-auto border-collapse border border-gray-300 dark:border-gray-700">
           <thead>
-            <tr className="bg-black">
-              <th className="border border-gray-300 px-4 py-2 text-white">Select</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Book Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Gender</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Name In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Meaning In Hindi</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Shlok No</th>
-              <th className="border border-gray-300 px-4 py-2 text-white">Page No</th>
+            <tr className="bg-black dark:bg-gray-900">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Select</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Book Name</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Gender</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Name</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Meaning</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Name In Hindi</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Meaning In Hindi</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Shlok No</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-white">Page No</th>
             </tr>
           </thead>
           <tbody>
             {paginatedNames.map((item) => (
-              <tr key={item._id}> {/* Make sure _id is unique */}
-                <td className="border border-gray-300 px-4 py-2">
+              <tr key={item._id}>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item)}
                     onChange={() => handleItemSelection(item)}
                   />
                 </td>
-                <td className="border border-gray-300 px-4 py-2">{item.bookName}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.gender}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaning}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.nameInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.meaningInHindi}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.shlokNo}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.pageNo}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.bookName}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.gender}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.name}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.meaning}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.nameInHindi}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.meaningInHindi}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.shlokNo}</td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{item.pageNo}</td>
               </tr>
             ))}
 
@@ -189,7 +191,7 @@ const CheckBoxListPage = () => {
         >
           Previous
         </button>
-        <span className="text-black mx-4">
+        <span className="text-black dark:text-white mx-4">
           Page {currentPage} of {totalPages}
         </span>
         <button
