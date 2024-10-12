@@ -7,6 +7,8 @@ import { useStore } from "../../store";
 import { Customers } from "./Customers";
 import { Leave } from "./Leave";
 import Tasks from "./Tasks";
+import Customer from "./Customers/Customer";
+import CheckBoxListPage from "./Customers/CheckBoxList";
 const EmployeeManagement = () => {
   const { isDarkMode } = useStore()
   return (
@@ -25,7 +27,8 @@ const EmployeeManagement = () => {
           <Route path="/customers" element={<Customers />} />
           <Route path="/leave" element={<Leave />} />
           <Route path="/tasks" element={<Tasks />} />
-
+          <Route path="/customers/viewDetailsIn" element={<Customer />} />
+          <Route path="/customers/viewDetailsIn/generate-pdf" element={<CheckBoxListPage />} />
         </Routes>
       </div>
     </div>

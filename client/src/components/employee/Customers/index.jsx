@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import { TextField, Button, MenuItem } from "@mui/material";
 import CheckBoxListPage from './CheckBoxList';
 import { select } from '@material-tailwind/react';
+import { useNavigate } from 'react-router-dom';
 
 
 export const Customers = () => {
@@ -21,6 +22,8 @@ export const Customers = () => {
     const [amountPaid, setAmountPaid] = useState();
     const [transactionId, setTransactionId] = useState()
     const [showCheckBoxList, setShowCheckBoxList] = useState(false);
+    const navigate = useNavigate();
+
 
     // Get employeeId from cookies
     const employeeId = Cookies.get('employeeId');
@@ -173,7 +176,16 @@ export const Customers = () => {
                                         onClick={() => {
                                             setSelectedCustomer(customer); // Set customer for modal
                                             setNextSection(nextSection); // Set target section
-                                            setShowModal(true);
+                                            (fromSection !== 'inProgress' ? (
+                                                setShowModal(true)
+                                            ) : (
+                                                navigate('viewDetailsIn', {
+                                                    state: {
+                                                        customerData: customer, // Pass customer data
+                                                        section: nextSection    // Pass section info
+                                                    }
+                                                })
+                                            ))
                                         }}
                                     >
                                         View

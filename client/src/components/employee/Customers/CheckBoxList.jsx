@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
-const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
+const CheckBoxListPage = () => {
+  const location = useLocation();
+  const { customerData } = location.state || {};
+  const [email, setEmail] = useState(customerData?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || '');
+
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [pdfContent, setPdfContent] = useState('');
   const [uniqueId, setUniqueId] = useState('');
-  const [email, setEmail] = useState(selectedCustomer.email || '');
-  const [phoneNumber, setPhoneNumber] = useState(selectedCustomer.whatsappNumber || '');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
@@ -20,19 +24,28 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
         filterNames(response.data); // Initial filter based on babyGender and preferredStartingLetter
       })
       .catch((error) => console.error('Error fetching names:', error));
-  }, [selectedCustomer.babyGender, selectedCustomer.preferredStartingLetter]);
+  }, [customerData.babyGender, customerData.preferredStartingLetter]);
 
   const filterNames = (allNames) => {
-    // Filter by babyGender and preferredStartingLetter
+    if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
+      setFilteredNames([]);
+      return;
+    }
     const filtered = allNames.filter(
       item =>
-        item.gender === selectedCustomer.babyGender &&
-        item.name.startsWith(selectedCustomer.preferredStartingLetter)
+        item.gender === customerData.babyGender &&
+        item.name.startsWith(customerData.preferredStartingLetter)
     );
-    
     setFilteredNames(filtered);
-    setCurrentPage(1); // Reset to page 1 after filtering
+    setCurrentPage(1);
   };
+  
+
+  const handleClose = () => {
+    // You can use history or navigate depending on the version of React Router you're using
+    window.history.back(); // Go back to the previous page
+  };
+
 
   const handleItemSelection = (item) => {
     setSelectedItems((prevSelected) => {
@@ -56,13 +69,19 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
           name: item.name,
           meaning: item.meaning
         })),
-        customerId: selectedCustomer._id,
+        customerId: customerData._id,
       });
 
       setPdfContent(response.data.base64Pdf);
       setUniqueId(response.data.uniqueId);
 
-      const pdfBlob = new Blob([new Uint8Array(atob(response.data.base64Pdf).split("").map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+      const binaryString = window.atob(response.data.base64Pdf);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const pdfBlob = new Blob([bytes], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       window.open(pdfUrl);
 
@@ -71,6 +90,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
       alert('Failed to generate PDF.');
     }
   };
+
 
   const handleDownload = () => {
     if (!pdfContent) return;
@@ -112,8 +132,8 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
 
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNames = filteredNames.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil(filteredNames.length / itemsPerPage);
+  const paginatedNames = filteredNames.slice(startIndex, startIndex + itemsPerPage) || [];
+  const totalPages = Math.ceil(filteredNames.length / itemsPerPage) || 1;
 
   return (
     <div className="bg-white text-black p-6 rounded-lg shadow-lg">
@@ -137,7 +157,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
           </thead>
           <tbody>
             {paginatedNames.map((item) => (
-              <tr key={item._id}>
+              <tr key={item._id}> {/* Make sure _id is unique */}
                 <td className="border border-gray-300 px-4 py-2">
                   <input
                     type="checkbox"
@@ -155,6 +175,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
                 <td className="border border-gray-300 px-4 py-2">{item.pageNo}</td>
               </tr>
             ))}
+
           </tbody>
         </table>
       </div>
