@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+import { Download, Email, WhatsApp } from '@mui/icons-material';
+import { Button } from '@mui/material';
+
 const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
@@ -186,9 +189,15 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
 
         {pdfContent && (
           <>
-            <button onClick={handleDownload} className="bg-green-500 text-white px-4 py-2 rounded">Download PDF</button>
-            <button onClick={handleSendMail} className="bg-red-500 text-white px-4 py-2 rounded">Send PDF via Email</button>
-            <button onClick={handleSendWhatsApp} className="bg-yellow-500 text-white px-4 py-2 rounded">Send PDF via WhatsApp</button>
+            <Button onClick={handleDownload} className="bg-green-500 text-white px-4 py-2 rounded">
+              <Download style={{ marginRight: '8px' }} /> {/* Icon for Download */}
+            </Button>
+            <Button onClick={handleSendMail} className="bg-red-500 text-white px-4 py-2 rounded">
+              <Email style={{ marginRight: '8px' }} /> {/* Icon for Email */}
+            </Button>
+            <Button onClick={handleSendWhatsApp} className="bg-yellow-500 text-white px-4 py-2 rounded">
+              <WhatsApp style={{ marginRight: '8px' }} /> {/* Icon for WhatsApp */}
+            </Button>
           </>
         )}
         <button onClick={handleClose} className="bg-gray-500 text-white px-4 py-2 rounded">Close</button>
