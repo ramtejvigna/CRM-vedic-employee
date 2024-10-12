@@ -117,8 +117,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
 
   return (
     <div className="bg-white text-black p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-4">Select Names for PDF</h2>
-      <h1>{selectedCustomer.fatherName}</h1>
+      <h2 className="text-xl font-semibold mb-10">Select Names for PDF</h2>
 
       {/* Table of filtered names with checkboxes */}
       <div className="overflow-y-auto max-h-96 mb-4">
@@ -181,7 +180,7 @@ const CheckBoxListPage = ({ selectedCustomer, handleClose }) => {
         </button>
       </div>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between my-10">
         <button onClick={handleGeneratePdf} className="bg-blue-500 text-white px-4 py-2 rounded">Generate PDF</button>
 
         {pdfContent && (

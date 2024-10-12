@@ -189,19 +189,6 @@ export const Customers = () => {
                                 )}
                             </td>
 
-                            {fromSection === 'completed' && (
-                                <>
-                                    <td className="text-center border">
-                                        <button
-                                            className="p-2 px-4 bg-yellow-500 bg-opacity-80 rounded-lg"
-                                            onClick={() => moveCustomer(customer, 'completed', 'inProgress')}
-                                        >
-                                            Move to In Progress
-                                        </button>
-                                    </td>
-                                </>
-                            )}
-
                             {showCheckBoxList && (
                                 <div style={overlayStyle}>
                                     <CheckBoxListPage
@@ -370,6 +357,26 @@ export const Customers = () => {
                                         Generate PDF
                                     </button>
                                 </div>
+                            </>
+                        )}
+                        {activeTab === 'completed' && (
+                            <>
+                                <p>{selectedCustomer.email}</p>
+                                <p>
+                                    Payment Date & Time: {new Date(selectedCustomer.paymentDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })} - {selectedCustomer.paymentTime}
+                                </p>
+                                <p>Preferred God : {selectedCustomer.preferredGod}</p>
+                                <p>Given Feedback : {selectedCustomer.feedback}</p>
+                                <button
+                                    className="p-2 px-4 bg-yellow-500 bg-opacity-80 rounded-lg my-10"
+                                    onClick={() => moveCustomer(selectedCustomer, 'completed', 'inProgress')}
+                                >
+                                    Move to In Progress
+                                </button>
                             </>
                         )}
 
