@@ -142,6 +142,7 @@ export const Customers = () => {
                                                 navigate('viewDetailsIn', {
                                                     state: {
                                                         customerData: customer, // Pass customer data
+                                                        fromSection: fromSection, // Pass current section
                                                         section: nextSection    // Pass section info
                                                     }
                                                 })

@@ -18,7 +18,7 @@ import { useStore } from "../../../store"; // Assuming you have a store for dark
 
 const Customer = () => {
     const location = useLocation();
-    const { customerData, section } = location.state || {};
+    const { customerData, section, fromSection } = location.state || {};
     const [customerDetails, setCustomerDetails] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
@@ -49,6 +49,18 @@ const Customer = () => {
         console.log("Edit customer");
         setShowEditModal(false);
     };
+
+    const handleAccept = useCallback(() => {
+        if (customerData) {
+            moveCustomer(
+                customerData,
+                fromSection, // From section
+                section, // To section
+                details
+            );
+            setShowModal(false); // Close modal
+        }
+    }, []);
 
     if (!customerDetails) {
         return <div className="text-center mt-10">No customer details found.</div>;
@@ -96,9 +108,10 @@ const Customer = () => {
                         </div>
                     </div>
                     <div className='w-1/2'>
+                        <h1 className='mb-5 text-lg font-medium'>Enter Customer Feedback : </h1>
                         <textarea
                             onChange={(e) => setFeedback(e.target.value)}
-                            className="rounded-xl p-2 mb-4 h-1/2 w-full resize-none bg-slate-200 border-none"
+                            className="rounded-xl p-2 mb-4 h-1/2 w-full resize-none bg-slate-200 border-none text-lg"
                         />
                         <button
                             className="p-2 px-4 bg-blue-500 text-white rounded-lg"
@@ -112,6 +125,19 @@ const Customer = () => {
                         >
                             Generate PDF
                         </button>
+                        <div className='mt-10'>
+                            <button
+                                onClick={handleAccept}
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Confirm
+                            </button>
+                            <button
+                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
