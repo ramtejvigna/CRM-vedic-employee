@@ -3,8 +3,8 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
-
-const CheckBoxListPage = ({customerData}) => {
+import {toast} from "react-toastify"
+const CheckBoxListPage = ({customerData , pdfContent , setPdfContent}) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   //const { customerData } = location.state || {};
@@ -16,11 +16,10 @@ const CheckBoxListPage = ({customerData}) => {
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [pdfContent, setPdfContent] = useState("");
   const [uniqueId, setUniqueId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-
+    const [isloading, setIsloading] = useState(false)
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/names")
@@ -77,6 +76,7 @@ const CheckBoxListPage = ({customerData}) => {
     }
 
     try {
+      setIsloading(true)
       const response = await axios.post("http://localhost:3000/api/create-pdf", {
         names: selectedItems.map((item) => ({
           name: item.name,
@@ -87,9 +87,11 @@ const CheckBoxListPage = ({customerData}) => {
 
       setPdfContent(response.data.base64Pdf);
       setUniqueId(response.data.uniqueId);
+      toast.success("pdf generated")
+      setIsloading(false);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF.");
+      toast.error("pdf generation failed");
     }
   };
 
@@ -99,7 +101,7 @@ const CheckBoxListPage = ({customerData}) => {
     link.href = `data:application/pdf;base64,${pdfContent}`;
     link.download = `${uniqueId}.pdf`;
     link.click();
-  };
+  };  
 
   const handleSendMail = async () => {
     if (!email || !pdfContent) {
@@ -265,8 +267,13 @@ const CheckBoxListPage = ({customerData}) => {
     </div>
   )}
 </div>
-
-{pdfBlobUrl && (
+  
+  {isloading && (
+    <div className="w-full flex items-center justify-center h-[500px]">
+      <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
+    </div>
+  )}
+{pdfBlobUrl  && !isloading &&  (
         <div className="mt-4">
           <iframe
             src={pdfBlobUrl}
