@@ -91,9 +91,11 @@ const Customer = () => {
                         </div>
                     </div>
                     <div className='w-1/2'>
+                    <h1 className='text-xl font-bold py-2 m-2'>Feedback</h1>
                         <textarea
                             onChange={(e) => setFeedback(e.target.value)}
-                            className="rounded-xl p-2 mb-4 h-1/2 w-full resize-none bg-slate-200 border-none"
+                            placeholder='Enter feedback'
+                            className="rounded-xl p-2 mb-4 h-[80px] w-full resize-none bg-slate-200 border-none"
                         />
                         <button
                             className="p-2 px-4 bg-blue-500 text-white rounded-lg"

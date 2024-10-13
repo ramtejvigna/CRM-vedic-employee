@@ -33,6 +33,7 @@ export const Customers = () => {
   const [showCheckBoxList, setShowCheckBoxList] = useState(false);
   const { isDarkMode } = useStore();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   const employeeId = Cookies.get("employeeId");
 
@@ -43,6 +44,7 @@ export const Customers = () => {
           `http://localhost:3000/customers/employees/${employeeId}/customers`
         )
         .then((response) => setCustomerData(response.data))
+        .then(()=>setIsLoading(false))
         .catch((error) =>
           console.error("Error fetching customer data:", error)
         );
@@ -299,6 +301,12 @@ export const Customers = () => {
             </motion.button>
           ))}
         </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -307,7 +315,11 @@ export const Customers = () => {
         >
           {renderContent()}
         </motion.div>
+        </>
+        )
+      }
       </div>
+      
 
       <AnimatePresence>
         {showModal && (
