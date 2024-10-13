@@ -40,14 +40,6 @@ const Customer = () => {
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
 
-        // Dummy values for payment-related info (replace them with real data)
-        const paymentStatus = 'Paid';
-        const paymentDate = new Date().toLocaleDateString();
-        const paymentTime = new Date().toLocaleTimeString();
-        const amountPaid = 100;
-        const transactionId = 'XYZ123';
-        const generatePdf = true;
-
         if (toSection === 'inProgress') {
             updatedCustomer.paymentStatus = paymentStatus;
             updatedCustomer.customerStatus = 'inProgress';
