@@ -187,7 +187,9 @@ const Customer = () => {
 </div>
 
                 <div className="mt-8">
-            <CheckBoxListPage customerData={customerDetails} />
+            {fromSection === 'inProgress' && (
+                <CheckBoxListPage customerData={customerDetails} />
+            )}
             </div>
                 {fromSection === 'inProgress' ? (
                     <div className="w-1/2 mt-10">
