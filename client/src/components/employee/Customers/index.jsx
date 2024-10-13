@@ -170,22 +170,22 @@ export const Customers = () => {
                   <div className="flex space-x-2">
                     {(fromSection === "newRequests" ||
                       fromSection === "rejected") && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
-                        onClick={() => {
-                          setSelectedCustomer(customer);
-                          setNextSection(nextSection);
-                          setShowModal(true);
-                          if (fromSection === "newRequests") {
-                            setPaymentStatus(false);
-                          }
-                        }}
-                      >
-                        <Check size={20} />
-                      </motion.button>
-                    )}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                          onClick={() => {
+                            setSelectedCustomer(customer);
+                            setNextSection(nextSection);
+                            setShowModal(true);
+                            if (fromSection === "newRequests") {
+                              setPaymentStatus(false);
+                            }
+                          }}
+                        >
+                          <Check size={20} />
+                        </motion.button>
+                      )}
                     {fromSection !== "newRequests" &&
                       fromSection !== "rejected" && (
                         <motion.button
@@ -195,7 +195,17 @@ export const Customers = () => {
                           onClick={() => {
                             setSelectedCustomer(customer);
                             setNextSection(nextSection);
-                            setShowModal(true);
+                            (fromSection === 'newRequests' ? (
+                              setShowModal(true)
+                            ) : (
+                              navigate('viewDetailsIn', {
+                                state: {
+                                  customerData: customer, // Pass customer data
+                                  fromSection: fromSection, // Pass current section
+                                  section: nextSection    // Pass section info
+                                }
+                              })
+                            ))
                           }}
                         >
                           <Eye size={20} />
@@ -213,18 +223,6 @@ export const Customers = () => {
                         <X size={20} />
                       </motion.button>
                     )}
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-200"
-                      onClick={() =>
-                        navigate(`/employee/customers/viewDetailsIn`, {
-                          state: { customerData: customer },
-                        })
-                      }
-                    >
-                      <ReceiptText size={18} />
-                    </motion.button>
                   </div>
                 </td>
               </motion.tr>
@@ -268,9 +266,8 @@ export const Customers = () => {
 
   return (
     <div
-      className={`min-h-screen p-4 sm:p-8 ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-100"
-      }`}
+      className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"
+        }`}
     >
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
@@ -283,11 +280,10 @@ export const Customers = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab)}
-              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${
-                activeTab === tab
+              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${activeTab === tab
                   ? "bg-blue-500 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-              }`}
+                }`}
             >
               {tab.charAt(0).toUpperCase() +
                 tab.slice(1).replace(/([A-Z])/g, " $1")}
