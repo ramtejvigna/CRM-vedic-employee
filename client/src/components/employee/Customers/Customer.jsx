@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Edit } from 'lucide-react';
 import axios from 'axios';
 import CheckBoxListPage from './CheckBoxList';
+import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+
 
 const Customer = () => {
     const location = useLocation();
@@ -19,7 +21,12 @@ const Customer = () => {
         whatsappNumber: '',
         babyGender: ''
     });
+    const [pdfs, setPdfs] = useState([]);
+    const customerId = customerData?._id;
+
+
     const navigate = useNavigate();
+    
 
     useEffect(() => {
         const getCustomerDetails = async () => {
@@ -37,6 +44,24 @@ const Customer = () => {
         };
         getCustomerDetails();
     }, [customerData]);
+    
+    useEffect(() => {
+        const fetchPdfs = async () => {
+          try {
+            const response = await axios.get(`http://localhost:3000/api/generatedpdf?customerId=${customerId}`);
+            setPdfs(response.data);
+          } catch (error) {
+            console.error('Error fetching PDFs:', error);
+          }
+        };
+    
+        if (customerId) {
+          fetchPdfs();
+        }
+      }, [customerId]);
+
+
+      
 
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
@@ -96,40 +121,71 @@ const Customer = () => {
     return (
         <div className="min-h-screen p-4 sm:p-8">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Customer Details</h1>
                 <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile</h2>
-                            <button onClick={() => setShowEditModal(true)} className="text-blue-500 hover:text-blue-700">
-                                <Edit size={20} />
-                            </button>
-                        </div>
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Father's Name:</strong> {customerDetails.fatherName || 'N/A'}</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Mother's Name:</strong> {customerDetails.motherName || 'N/A'}</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.email || 'N/A'}</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>WhatsApp Number:</strong> {customerDetails.whatsappNumber || 'N/A'}</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Baby's Gender:</strong> {customerDetails.babyGender || 'N/A'}</p>
-                        </div>
-                    </div>
-                </div>
+    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"> {/* Updated here */}
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile</h2>
+            <button onClick={() => setShowEditModal(true)} className="text-blue-500 hover:text-blue-700">
+                <Edit size={20} />
+            </button>
+        </div>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <p className="text-gray-600 dark:text-gray-300"><strong>Father's Name:</strong> {customerDetails.fatherName || 'N/A'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Mother's Name:</strong> {customerDetails.motherName || 'N/A'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {customerDetails.email || 'N/A'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>WhatsApp Number:</strong> {customerDetails.whatsappNumber || 'N/A'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Baby's Gender:</strong> {customerDetails.babyGender || 'N/A'}</p>
+        </div>
+    </div>
+</div>
 
-                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+<div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
                     <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Astrological Details</h2>
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Generated PDFs</h2>
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Zodiac Sign:</strong> Leo</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Nakshatra:</strong> Ashwini</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Destiny Number:</strong> 5</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Gemstone:</strong> Ruby</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Lucky Metal:</strong> Gold</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Numerology:</strong> 3</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> A</p>
-                            <p className="text-gray-600 dark:text-gray-300"><strong>Suggested Baby Names:</strong> Aryan, Aadhya</p>
+                            {pdfs.length > 0 ? (
+                                pdfs.map((pdf) => (
+                                    <div key={pdf.uniqueId} className="flex justify-between items-center mb-4">
+                                        <span className="text-gray-600 dark:text-gray-300">
+                                            {new Date(pdf.createdAt).toLocaleString()}
+                                        </span>
+                                        <div className="flex space-x-2">
+                                            <button className="flex items-center text-blue-500 hover:text-blue-700">
+                                                <FaDownload className="mr-1" /> Download
+                                            </button>
+                                            <button className="flex items-center text-green-500 hover:text-green-700">
+                                                <FaWhatsapp className="mr-1" /> WhatsApp
+                                            </button>
+                                            <button className="flex items-center text-yellow-500 hover:text-yellow-700">
+                                                <FaEnvelope className="mr-1" /> Email
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-600 dark:text-gray-300">No PDFs generated yet.</p>
+                            )}
                         </div>
                     </div>
                 </div>
+    
+
+<div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+    <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Astrological Details</h2>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <p className="text-gray-600 dark:text-gray-300"><strong>Zodiac Sign:</strong> Leo</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Nakshatra:</strong> Ashwini</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Destiny Number:</strong> 5</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Gemstone:</strong> Ruby</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Lucky Metal:</strong> Gold</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Numerology:</strong> 3</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> A</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Suggested Baby Names:</strong> Aryan, Aadhya</p>
+        </div>
+    </div>
+</div>
+
                 <div className="mt-8">
             <CheckBoxListPage customerData={customerDetails} />
             </div>
