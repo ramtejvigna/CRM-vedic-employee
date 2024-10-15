@@ -1,20 +1,20 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
-import {toast} from "react-toastify"
+import { toast } from "react-toastify";
 
-export const handleDownload = (pdfContent,uniqueId) => {
-  if (!pdfContent) return;
+export const handleDownload = (pdfUrl, uniqueId) => {
+  if (!pdfUrl) return;
   const link = document.createElement("a");
-  link.href = `data:application/pdf;base64,${pdfContent}`;
+  link.href = pdfUrl;
   link.download = `${uniqueId}.pdf`;
   link.click();
-};  
+};
 
- export const handleSendMail = async (pdfContent, uniqueId,email) => {
-  if (!email || !pdfContent) {
+export const handleSendMail = async (pdfUrl, uniqueId, email) => {
+  if (!email || !pdfUrl) {
     alert("Provide a valid email and ensure the PDF is generated.");
     return;
   }
@@ -22,7 +22,7 @@ export const handleDownload = (pdfContent,uniqueId) => {
   try {
     await axios.post("http://localhost:3000/api/send-pdf-email", {
       email,
-      base64Pdf: pdfContent,
+      pdfUrl,
       uniqueId,
     });
     alert("PDF sent to email");
@@ -32,8 +32,8 @@ export const handleDownload = (pdfContent,uniqueId) => {
   }
 };
 
-export const handleSendWhatsApp = async (pdfContent, uniqueId,phoneNumber) => {
-  if (!phoneNumber || !pdfContent || !uniqueId) {
+export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
+  if (!phoneNumber || !pdfUrl || !uniqueId) {
     alert("Provide a valid phone number and ensure the PDF is generated.");
     return;
   }
@@ -41,7 +41,7 @@ export const handleSendWhatsApp = async (pdfContent, uniqueId,phoneNumber) => {
   try {
     await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
       phoneNumber,
-      base64Pdf: pdfContent,
+      pdfUrl,
       uniqueId,
     });
     alert("PDF sent to WhatsApp");
@@ -51,23 +51,19 @@ export const handleSendWhatsApp = async (pdfContent, uniqueId,phoneNumber) => {
   }
 };
 
-
-const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}) => {
+const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
-  //const { customerData } = location.state || {};
   const [email, setEmail] = useState(customerData?.email || "");
-  const [phoneNumber, setPhoneNumber] = useState(
-    customerData?.whatsappNumber || ""
-  );
-
+  const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || "");
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [uniqueId, setUniqueId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-  const [isloading, setIsloading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/names")
@@ -82,22 +78,14 @@ const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}
     if (pdfContent) {
       let blobUrl;
       try {
-        // Convert base64 to binary data
-        const byteCharacters = atob(pdfContent);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-  
         // Create Blob URL
+        const blob = new Blob([pdfContent], { type: 'application/pdf' });
         blobUrl = URL.createObjectURL(blob);
         setPdfBlobUrl(blobUrl);
       } catch (error) {
         console.error("Error processing PDF content:", error);
       }
-  
+
       // Cleanup function to revoke Blob URL
       return () => {
         if (blobUrl) {
@@ -106,13 +94,6 @@ const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}
       };
     }
   }, [pdfContent]);
-  
-  
-  
-
-  
-  
-  
 
   const filterNames = (allNames) => {
     if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
@@ -138,32 +119,27 @@ const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}
 
   const handleGeneratePdf = async () => {
     if (selectedItems.length === 0) {
-      alert("No items selected!");
-      return;
+        alert("No items selected!");
+        return;
     }
-  
-    try {
-      setIsloading(true);
-      const response = await axios.post("http://localhost:3000/api/create-pdf", {
-        names: selectedItems.map((item) => ({
-          name: item.name,
-          meaning: item.meaning,
-        })),
-        customerId: customerData._id,
-      });
-      setPdfContent(response.data.base64Pdf); // Only set this if response is successful
-      setUniqueId(response.data.uniqueId);
-      toast.success("PDF generated");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("PDF generation failed");
-    } finally {
-      setIsloading(false); // Ensure loading state is set to false in any case
-    }
-  };
-  
 
-   
+    try {
+        setIsLoading(true);
+        const response = await axios.post("http://localhost:3000/api/create-pdf", {
+            names: selectedItems.map((item) => item.name),
+            customerId: customerData._id,
+        });
+        // setPdfContent(response.data.pdfUrl);
+        // setUniqueId(response.data.uniqueId);
+        toast.success("PDF generated");
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        toast.error("PDF generation failed");
+    } finally {
+        setIsLoading(false); // Ensure loading state is set to false in any case
+    }
+};
+
 
   const handleClose = () => {
     window.history.back();
@@ -253,51 +229,52 @@ const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}
       </div>
 
       <div className="flex justify-between items-center my-10">
-  <button
-    onClick={handleGeneratePdf}
-    className="bg-blue-500 text-white px-4 py-2 rounded"
-  >
-    Generate PDF
-  </button>
+        <button
+          onClick={handleGeneratePdf}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Generate PDF
+        </button>
 
-  {pdfContent && (
-    <div className="flex items-center space-x-4">
-      <motion.button
-        onClick={() => handleDownload(pdfContent, uniqueId)}
-        whileTap={{ scale: 0.9 }}
-        className="flex items-center space-x-2 text-green-600 hover:underline"
-      >
-        <FaDownload />
-        <span>Download PDF</span>
-      </motion.button>
+        {pdfContent && (
+          <div className="flex items-center space-x-4">
+            <motion.button
+              onClick={() => handleDownload(pdfContent, uniqueId)}
+              whileTap={{ scale: 0.9 }}
+              className="flex items-center space-x-2 text-green-600 hover:underline"
+            >
+              <FaDownload />
+              <span>Download PDF</span>
+            </motion.button>
 
-      <motion.button
-        onClick={()=>handleSendMail(pdfContent,uniqueId,email)}
-        whileTap={{ scale: 0.9 }}
-        className="flex items-center space-x-2 text-blue-500 hover:underline"
-      >
-        <FaEnvelope />
-        <span>Send via Email</span>
-      </motion.button>
+            <motion.button
+              onClick={() => handleSendMail(pdfContent, uniqueId, email)}
+              whileTap={{ scale: 0.9 }}
+              className="flex items-center space-x-2 text-blue-500 hover:underline"
+            >
+              <FaEnvelope />
+              <span>Send via Email</span>
+            </motion.button>
 
-      <motion.button
-        onClick={()=>handleSendWhatsApp(pdfContent,uniqueId,phoneNumber)}
-        whileTap={{ scale: 0.9 }}
-        className="flex items-center space-x-2 text-green-500 hover:underline"
-      >
-        <FaWhatsapp />
-        <span>Send via WhatsApp</span>
-      </motion.button>
-    </div>
-  )}
-</div>
-  
-  {isloading && (
-    <div className="w-full flex items-center justify-center h-[500px]">
-      <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
-    </div>
-  )}
-{pdfBlobUrl  && !isloading &&  (
+            <motion.button
+              onClick={() => handleSendWhatsApp(pdfContent, uniqueId, phoneNumber)}
+              whileTap={{ scale: 0.9 }}
+              className="flex items-center space-x-2 text-green-500 hover:underline"
+            >
+              <FaWhatsapp />
+              <span>Send via WhatsApp</span>
+            </motion.button>
+          </div>
+        )}
+      </div>
+
+      {isLoading && (
+        <div className="w-full flex items-center justify-center h-[500px]">
+          <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
+        </div>
+      )}
+
+      {pdfBlobUrl && !isLoading && (
         <div className="mt-4">
           <iframe
             ref={iframeRef}
@@ -309,7 +286,6 @@ const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}
           />
         </div>
       )}
-
     </div>
   );
 };
