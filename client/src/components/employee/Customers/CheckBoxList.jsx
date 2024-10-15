@@ -93,7 +93,7 @@ const CheckBoxListPage = ({customerData}) => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = (pdfContent,uniqueId) => {
     if (!pdfContent) return;
     const link = document.createElement("a");
     link.href = `data:application/pdf;base64,${pdfContent}`;
@@ -237,7 +237,7 @@ const CheckBoxListPage = ({customerData}) => {
   {pdfContent && (
     <div className="flex items-center space-x-4">
       <motion.button
-        onClick={handleDownload}
+        onClick={() => handleDownload(pdfContent, uniqueId)}
         whileTap={{ scale: 0.9 }}
         className="flex items-center space-x-2 text-green-600 hover:underline"
       >
