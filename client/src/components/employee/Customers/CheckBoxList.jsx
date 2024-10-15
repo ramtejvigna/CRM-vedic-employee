@@ -1,10 +1,58 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import {toast} from "react-toastify"
 
-const CheckBoxListPage = ({customerData}) => {
+export const handleDownload = (pdfContent,uniqueId) => {
+  if (!pdfContent) return;
+  const link = document.createElement("a");
+  link.href = `data:application/pdf;base64,${pdfContent}`;
+  link.download = `${uniqueId}.pdf`;
+  link.click();
+};  
+
+ export const handleSendMail = async (pdfContent, uniqueId,email) => {
+  if (!email || !pdfContent) {
+    alert("Provide a valid email and ensure the PDF is generated.");
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:3000/api/send-pdf-email", {
+      email,
+      base64Pdf: pdfContent,
+      uniqueId,
+    });
+    alert("PDF sent to email");
+  } catch (error) {
+    console.error("Error sending PDF to email", error);
+    alert("Error sending email");
+  }
+};
+
+export const handleSendWhatsApp = async (pdfContent, uniqueId,phoneNumber) => {
+  if (!phoneNumber || !pdfContent || !uniqueId) {
+    alert("Provide a valid phone number and ensure the PDF is generated.");
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
+      phoneNumber,
+      base64Pdf: pdfContent,
+      uniqueId,
+    });
+    alert("PDF sent to WhatsApp");
+  } catch (error) {
+    console.error("Error sending PDF via WhatsApp", error);
+    alert("Error sending WhatsApp message");
+  }
+};
+
+
+const CheckBoxListPage = ({customerData , pdfContent , setPdfContent, iframeRef}) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   //const { customerData } = location.state || {};
@@ -16,11 +64,10 @@ const CheckBoxListPage = ({customerData}) => {
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [pdfContent, setPdfContent] = useState("");
   const [uniqueId, setUniqueId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-
+  const [isloading, setIsloading] = useState(false)
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/names")
@@ -33,20 +80,39 @@ const CheckBoxListPage = ({customerData}) => {
 
   useEffect(() => {
     if (pdfContent) {
-      // Convert base64 string to Blob
-      const byteCharacters = atob(pdfContent);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      let blobUrl;
+      try {
+        // Convert base64 to binary data
+        const byteCharacters = atob(pdfContent);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+  
+        // Create Blob URL
+        blobUrl = URL.createObjectURL(blob);
+        setPdfBlobUrl(blobUrl);
+      } catch (error) {
+        console.error("Error processing PDF content:", error);
       }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      
-      // Create URL for the Blob and set it in the state
-      const blobUrl = URL.createObjectURL(blob);
-      setPdfBlobUrl(blobUrl);
+  
+      // Cleanup function to revoke Blob URL
+      return () => {
+        if (blobUrl) {
+          URL.revokeObjectURL(blobUrl);
+        }
+      };
     }
   }, [pdfContent]);
+  
+  
+  
+
+  
+  
+  
 
   const filterNames = (allNames) => {
     if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
@@ -75,8 +141,9 @@ const CheckBoxListPage = ({customerData}) => {
       alert("No items selected!");
       return;
     }
-
+  
     try {
+      setIsloading(true);
       const response = await axios.post("http://localhost:3000/api/create-pdf", {
         names: selectedItems.map((item) => ({
           name: item.name,
@@ -84,60 +151,19 @@ const CheckBoxListPage = ({customerData}) => {
         })),
         customerId: customerData._id,
       });
-
-      setPdfContent(response.data.base64Pdf);
+      setPdfContent(response.data.base64Pdf); // Only set this if response is successful
       setUniqueId(response.data.uniqueId);
+      toast.success("PDF generated");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF.");
+      toast.error("PDF generation failed");
+    } finally {
+      setIsloading(false); // Ensure loading state is set to false in any case
     }
   };
+  
 
-  const handleDownload = (pdfContent,uniqueId) => {
-    if (!pdfContent) return;
-    const link = document.createElement("a");
-    link.href = `data:application/pdf;base64,${pdfContent}`;
-    link.download = `${uniqueId}.pdf`;
-    link.click();
-  };
-
-  const handleSendMail = async () => {
-    if (!email || !pdfContent) {
-      alert("Provide a valid email and ensure the PDF is generated.");
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:3000/api/send-pdf-email", {
-        email,
-        base64Pdf: pdfContent,
-        uniqueId,
-      });
-      alert("PDF sent to email");
-    } catch (error) {
-      console.error("Error sending PDF to email", error);
-      alert("Error sending email");
-    }
-  };
-
-  const handleSendWhatsApp = async () => {
-    if (!phoneNumber || !pdfContent || !uniqueId) {
-      alert("Provide a valid phone number and ensure the PDF is generated.");
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
-        phoneNumber,
-        base64Pdf: pdfContent,
-        uniqueId,
-      });
-      alert("PDF sent to WhatsApp");
-    } catch (error) {
-      console.error("Error sending PDF via WhatsApp", error);
-      alert("Error sending WhatsApp message");
-    }
-  };
+   
 
   const handleClose = () => {
     window.history.back();
@@ -246,7 +272,7 @@ const CheckBoxListPage = ({customerData}) => {
       </motion.button>
 
       <motion.button
-        onClick={handleSendMail}
+        onClick={()=>handleSendMail(pdfContent,uniqueId,email)}
         whileTap={{ scale: 0.9 }}
         className="flex items-center space-x-2 text-blue-500 hover:underline"
       >
@@ -255,7 +281,7 @@ const CheckBoxListPage = ({customerData}) => {
       </motion.button>
 
       <motion.button
-        onClick={handleSendWhatsApp}
+        onClick={()=>handleSendWhatsApp(pdfContent,uniqueId,phoneNumber)}
         whileTap={{ scale: 0.9 }}
         className="flex items-center space-x-2 text-green-500 hover:underline"
       >
@@ -265,10 +291,16 @@ const CheckBoxListPage = ({customerData}) => {
     </div>
   )}
 </div>
-
-{pdfBlobUrl && (
+  
+  {isloading && (
+    <div className="w-full flex items-center justify-center h-[500px]">
+      <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
+    </div>
+  )}
+{pdfBlobUrl  && !isloading &&  (
         <div className="mt-4">
           <iframe
+            ref={iframeRef}
             src={pdfBlobUrl}
             width="100%"
             height="500px"
