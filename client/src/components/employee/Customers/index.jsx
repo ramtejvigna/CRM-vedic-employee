@@ -266,7 +266,7 @@ export const Customers = () => {
 
   return (
     <div
-      className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"
+      className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? "bg-gray-900" : ""
         }`}
     >
       <div className="max-w-7xl mx-auto">
