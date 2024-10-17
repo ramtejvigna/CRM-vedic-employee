@@ -4,9 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { generatePdf } from './pdfDisplayComponent';
+
 
 export const handleDownload = (pdfUrl, uniqueId) => {
-  if (!pdfUrl) return;
+  if (!pdfUrl) {
+    alert('No PDF URL found. Please generate the PDF first.');
+    return;
+  }
   const link = document.createElement("a");
   link.href = pdfUrl;
   link.download = `${uniqueId}.pdf`;
@@ -51,7 +56,8 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
   }
 };
 
-const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }) => {
+
+const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, pdfUrl, setPdfUrl}) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [email, setEmail] = useState(customerData?.email || "");
@@ -63,6 +69,8 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [isLoading, setIsLoading] = useState(false);
+ 
+
 
   useEffect(() => {
     axios
@@ -117,6 +125,11 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
     );
   };
 
+  const handleShowPdf = async (babyNames) => {
+    const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
+    setPdfUrl(generatedPdfUrl); // Set the URL state
+  };
+  
   const handleGeneratePdf = async () => {
     if (selectedItems.length === 0) {
         alert("No items selected!");
@@ -129,8 +142,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
             names: selectedItems.map((item) => item.name),
             customerId: customerData._id,
         });
-        // setPdfContent(response.data.pdfUrl);
-        // setUniqueId(response.data.uniqueId);
+        handleShowPdf(selectedItems);
         toast.success("PDF generated");
     } catch (error) {
         console.error("Error generating PDF:", error);
@@ -236,10 +248,10 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
           Generate PDF
         </button>
 
-        {pdfContent && (
+        {pdfUrl && (
           <div className="flex items-center space-x-4">
             <motion.button
-              onClick={() => handleDownload(pdfContent, uniqueId)}
+              onClick={() => handleDownload(pdfUrl, uniqueId)}
               whileTap={{ scale: 0.9 }}
               className="flex items-center space-x-2 text-green-600 hover:underline"
             >
@@ -248,7 +260,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
             </motion.button>
 
             <motion.button
-              onClick={() => handleSendMail(pdfContent, uniqueId, email)}
+              onClick={() => handleSendMail(pdfUrl, uniqueId, email)}
               whileTap={{ scale: 0.9 }}
               className="flex items-center space-x-2 text-blue-500 hover:underline"
             >
@@ -257,7 +269,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
             </motion.button>
 
             <motion.button
-              onClick={() => handleSendWhatsApp(pdfContent, uniqueId, phoneNumber)}
+              onClick={() => handleSendWhatsApp(pdfUrl, uniqueId, phoneNumber)}
               whileTap={{ scale: 0.9 }}
               className="flex items-center space-x-2 text-green-500 hover:underline"
             >
@@ -267,25 +279,8 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef }
           </div>
         )}
       </div>
-
-      {isLoading && (
-        <div className="w-full flex items-center justify-center h-[500px]">
-          <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
-        </div>
-      )}
-
-      {pdfBlobUrl && !isLoading && (
-        <div className="mt-4">
-          <iframe
-            ref={iframeRef}
-            src={pdfBlobUrl}
-            width="100%"
-            height="500px"
-            className="border rounded-lg shadow-lg"
-            title="PDF Viewer"
-          />
-        </div>
-      )}
+      
+    
     </div>
   );
 };

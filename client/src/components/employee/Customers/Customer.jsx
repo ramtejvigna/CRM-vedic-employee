@@ -6,7 +6,7 @@ import axios from 'axios';
 import CheckBoxListPage from './CheckBoxList';
 import { FaDownload, FaEnvelope, FaStar, FaEye, FaWhatsapp } from "react-icons/fa";
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
-
+import { generatePdf } from './pdfDisplayComponent';
 const Customer = () => {
     const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
     const [pdfsLoading, setPdfsLoading] = useState(false);
@@ -27,9 +27,10 @@ const Customer = () => {
     const [pdfs, setPdfs] = useState([]);
     const customerId = customerData?._id;
     const iframeRef = useRef(null);
-
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
     const navigate = useNavigate();
-
+    
     useEffect(() => {
         const getCustomerDetails = async () => {
             if (customerData) {
@@ -64,17 +65,13 @@ const Customer = () => {
         }
     }, [customerId]);
 
-    const handleViewClick = (pdfUrl) => {
-        setPdfContent(pdfUrl); // Set the PDF content
+    const handleShowPdf = async (babyNames, _id) => {
+        const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
+        setPdfUrl(generatedPdfUrl); // Set the URL state
+        setEnabledRow(_id); // Enable buttons for the row that was clicked
 
-        // Delay scrolling slightly to ensure iframe has rendered
-        setTimeout(() => {
-            if (iframeRef.current) {
-                iframeRef.current.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 300); // 300ms delay to allow rendering
-    };
-
+      };
+    
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
 
@@ -118,20 +115,7 @@ const Customer = () => {
         }
     }, [customerDetails, fromSection, section, feedback]);
 
-    const handleGeneratePdf = async () => {
-        try {
-            const response = await axios.post("http://localhost:3000/api/create-pdf", {
-                names: selectedItems.map((item) => item.name),
-                customerId: customerData._id,
-            });
-            // Fetch the updated list of PDFs after a new PDF is generated
-            fetchPdfs();
-            toast.success("PDF generated");
-        } catch (error) {
-            console.error("Error generating PDF:", error);
-            toast.error("PDF generation failed");
-        }
-    };
+    
 
     if (loading) {
         return (
@@ -217,9 +201,9 @@ const Customer = () => {
                                         </thead>
                                         <tbody>
                                             {pdfs.map((pdf, index) => (
-                                                <tr key={pdf.uniqueId} className="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200">
+                                                <tr key={pdf._id} className="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200">
                                                     <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">{index + 1}</td>
-                                                    <td onClick={() => handleViewClick(pdf.pdfUrl)} className="border border-gray-200 dark:border-gray-700 p-2 cursor-pointer text-center">show</td>
+                                                    <td onClick={()=>{handleShowPdf(pdf.babyNames,pdf._id)}} className="border border-gray-200 dark:border-gray-700 p-2 cursor-pointer text-center">show</td>
                                                     <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">
                                                         <span>
                                                             {new Date(pdf.createdAt).toLocaleDateString('en-US', {
@@ -234,9 +218,24 @@ const Customer = () => {
                                                         </span>
                                                     </td>
                                                     <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">
-                                                        <button className=" text-blue-700 rounded-lg px-4 py-1 transition duration-200" onClick={() => handleDownload(pdf.pdfUrl, pdf.uniqueId)}> <FaDownload /> </button>
-                                                        <button className=" text-green-700 rounded-lg px-4 py-1 transition duration-200" onClick={() => handleSendWhatsApp(pdf.pdfUrl, pdf.uniqueId, customerData.whatsappNumber)}> <FaWhatsapp /> </button>
-                                                        <button className=" text-red-700 rounded-lg px-4 py-1 transition duration-200" onClick={() => handleSendMail(pdf.pdfUrl, pdf.uniqueId, customerData.email)}> <FaEnvelope /> </button>
+                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
+                                                            enabledRow !== pdf._id
+                                                            ? 'text-blue-100 cursor-not-allowed pointer-events-none'
+                                                            : 'text-blue-700 cursor-pointer'
+                                                        }`}
+                                                        onClick={() =>  handleDownload(pdfUrl, pdf._id)} 
+                                                        disabled={enabledRow !== pdf._id}> <FaDownload /> </button>
+                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
+                                                            enabledRow !== pdf._id
+                                                            ? 'text-green-100 cursor-not-allowed pointer-events-none'
+                                                            : 'text-green-700 cursor-pointer'
+                                                        }`}
+                                                        onClick={() =>{}} disabled={enabledRow !== pdf._id} > <FaWhatsapp /> </button>
+                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
+                                                            enabledRow !== pdf._id
+                                                            ? 'text-red-100 cursor-not-allowed pointer-events-none'
+                                                            : 'text-red-700 cursor-pointer'
+                                                        }`} onClick={() =>  handleSendMail(pdfUrl, pdf._id, customerData.email)} disabled={enabledRow !== pdf._id}> <FaEnvelope /> </button>
                                                     </td>
                                                     <td className="border justify-center flex gap-2 border-gray-200 dark:border-gray-700 p-2 text-center">
                                                         <button
@@ -267,7 +266,17 @@ const Customer = () => {
                 </div>
 
                 <div className="mt-8">
-                    <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} />
+                    <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} />
+                    {pdfUrl && (
+                        <iframe
+                        src={pdfUrl}
+                        width="100%"
+                        height="600px"
+                        className="border rounded-lg shadow-lg"
+                        title="PDF Viewer"
+                        />
+                    )}
+      
                 </div>
 
                 {fromSection === 'inProgress' ? (
