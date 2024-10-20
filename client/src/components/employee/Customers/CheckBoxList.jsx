@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { Edit, Trash, MessageCircle, Share2, Check, X } from "lucide-react";
-import { useStore } from "../../../store";
-
-const CheckBoxListPage = () => {
-  const { isDarkMode, toggleDarkMode } = useStore();
-
+import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import {toast} from "react-toastify"
+const CheckBoxListPage = ({customerData , pdfContent , setPdfContent}) => {
   const location = useLocation();
-  const { customerData } = location.state || {};
+  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  //const { customerData } = location.state || {};
   const [email, setEmail] = useState(customerData?.email || "");
   const [phoneNumber, setPhoneNumber] = useState(
     customerData?.whatsappNumber || ""
@@ -18,53 +16,60 @@ const CheckBoxListPage = () => {
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [pdfContent, setPdfContent] = useState("");
   const [uniqueId, setUniqueId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showPreview, setShowPreview] = useState(false);
-  const [showShareOptions, setShowShareOptions] = useState(false);
   const itemsPerPage = 20;
-  const [isLoading, setIsLoading] = useState(true);
-
+    const [isloading, setIsloading] = useState(false)
+    console.log(filteredNames)
   useEffect(() => {
-    // Fetch names from the database
     axios
       .get("http://localhost:3000/api/names")
       .then((response) => {
         setNames(response.data);
-        filterNames(response.data);
-        setIsLoading(false) // Initial filter based on babyGender and preferredStartingLetter
+        console.log(response.data)
+        // filterNames(response.data);
       })
       .catch((error) => console.error("Error fetching names:", error));
   }, [customerData?.babyGender, customerData?.preferredStartingLetter]);
 
+  useEffect(() => {
+    if (pdfContent) {
+      // Convert base64 string to Blob
+      const byteCharacters = atob(pdfContent);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      // Create URL for the Blob and set it in the state
+      const blobUrl = URL.createObjectURL(blob);
+      setPdfBlobUrl(blobUrl);
+    }
+  }, [pdfContent]);
+
   const filterNames = (allNames) => {
-    if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
+    if (!customerData?.gender ) {
       setFilteredNames([]);
+      // setFilteredNames(names)
       return;
     }
     const filtered = allNames.filter(
       (item) =>
-        item.gender === customerData.babyGender &&
-        item.name.startsWith(customerData.preferredStartingLetter)
+        item.gender === customerData.gender 
+        // item.name.startsWith(customerData.)
     );
-    setFilteredNames(filtered);
+    setFilteredNames(filtered)
     setCurrentPage(1);
   };
 
-  const handleClose = () => {
-    // You can use history or navigate depending on the version of React Router you're using
-    window.history.back(); // Go back to the previous page
-  };
-
   const handleItemSelection = (item) => {
-    setSelectedItems((prevSelected) => {
-      if (prevSelected.includes(item)) {
-        return prevSelected.filter((i) => i !== item);
-      } else {
-        return [...prevSelected, item];
-      }
-    });
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(item)
+        ? prevSelected.filter((i) => i !== item)
+        : [...prevSelected, item]
+    );
   };
 
   const handleGeneratePdf = async () => {
@@ -74,22 +79,22 @@ const CheckBoxListPage = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/create-pdf",
-        {
-          names: selectedItems.map((item) => ({
-            name: item.name,
-            meaning: item.meaning,
-          })),
-          customerId: customerData._id,
-        }
-      );
+      setIsloading(true)
+      const response = await axios.post("http://localhost:3000/api/create-pdf", {
+        names: selectedItems.map((item) => ({
+          name: item.name,
+          meaning: item.meaning,
+        })),
+        customerId: customerData._id,
+      });
 
       setPdfContent(response.data.base64Pdf);
       setUniqueId(response.data.uniqueId);
+      toast.success("pdf generated")
+      setIsloading(false);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF.");
+      toast.error("pdf generation failed");
     }
   };
 
@@ -99,7 +104,7 @@ const CheckBoxListPage = () => {
     link.href = `data:application/pdf;base64,${pdfContent}`;
     link.download = `${uniqueId}.pdf`;
     link.click();
-  };
+  };  
 
   const handleSendMail = async () => {
     if (!email || !pdfContent) {
@@ -139,264 +144,150 @@ const CheckBoxListPage = () => {
     }
   };
 
+  const handleClose = () => {
+    window.history.back();
+  };
+
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNames =
-    filteredNames.slice(startIndex, startIndex + itemsPerPage) || [];
-  const totalPages = Math.ceil(filteredNames.length / itemsPerPage) || 1;
+  const paginatedNames = filteredNames.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+  const totalPages = Math.ceil(filteredNames.length / itemsPerPage);
 
   return (
-    <div className={`bg-white w-full ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} text-black ${isDarkMode ? 'text-white' : 'text-black'} p-6 rounded-lg shadow-lg`}>
-      <h1 className="text-3xl font-bold mb-5">Select Names For PDF</h1>
-     
-      {/* Table of filtered names with checkboxes */}
-      <div className="overflow-y-auto max-h-96 mb-4">
-      {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-        <table className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gray-200 dark:bg-gray-700">
+    <div className="max-w-7xl mx-auto mt-8">
+      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg mb-8 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Baby Names</h1>
+      </div>
+
+      <div className="overflow-x-auto max-h-96 mb-4 rounded-lg shadow-lg">
+        <table className="min-w-full table-auto border-collapse bg-white rounded-lg">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Select
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Book Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Gender
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Meaning
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Name In Hindi
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Meaning In Hindi
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Shlok No
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Page No
-              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Book Name</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name In Hindi</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning In Hindi</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Shlok No</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Page No</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            <AnimatePresence>
-              {paginatedNames.map((item) => (
-                <motion.tr
-                  key={item._id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(item)}
-                      onChange={() => handleItemSelection(item)}
-                      className="text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.bookName}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.gender}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.meaning}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.nameInHindi}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.meaningInHindi}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.shlokNo}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-300">
-                      {item.pageNo}
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
+          <tbody>
+            {filteredNames.map((item) => (
+              <tr key={item._id} className="bg-white hover:bg-gray-100 border-b">
+                <td className="px-4 py-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item)}
+                    onChange={() => handleItemSelection(item)}
+                    className="rounded"
+                  />
+                </td>
+                <td className="px-4 py-2">{item.bookName}</td>
+                <td className="px-4 py-2">{item.gender}</td>
+                <td className="px-4 py-2">{item.name}</td>
+                <td className="px-4 py-2">{item.meaning}</td>
+                <td className="px-4 py-2">{item.nameInHindi}</td>
+                <td className="px-4 py-2">{item.meaningInHindi}</td>
+                <td className="px-4 py-2">{item.shlokNo}</td>
+                <td className="px-4 py-2">{item.pageNo}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
-          )
-        }
       </div>
-      
+
       {/* Pagination controls */}
-      <div className="flex justify-center items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          className={`px-4 py-2 rounded flex items-center gap-2 ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white text-blue-500 hover:bg-gray-100"
+          }`}
         >
-          Previous
+          &lt; Previous
         </button>
-        <span className="text-black dark:text-white mx-4">
+        <span className="text-sm text-gray-600 mx-4">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-            isDarkMode
-              ? "border-gray-700 bg-gray-800"
-              : "border-gray-300 bg-white"
-          } text-sm font-medium text-gray-500 hover:bg-gray-50`}
+          className={`px-4 py-2 rounded flex items-center gap-2 ${
+            currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white text-blue-500 hover:bg-gray-100"
+          }`}
         >
-          Next
+          Next &gt;
         </button>
       </div>
 
-      <div className="flex justify-between my-10">
-        <button
-          onClick={handleGeneratePdf}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Generate PDF
-        </button>
+      <div className="flex justify-between items-center my-10">
+  <button
+    onClick={handleGeneratePdf}
+    className="bg-blue-500 text-white px-4 py-2 rounded"
+  >
+    Generate PDF
+  </button>
 
-        {pdfContent && (
-          <>
-            <button
-              onClick={() => setShowPreview(true)}
-              className="bg-purple-500 text-white px-4 py-2 rounded"
-            >
-              Preview PDF
-            </button>
-            <button
-              onClick={() => setShowShareOptions(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Share
-            </button>
-          </>
-        )}
-        <button
-          onClick={handleClose}
-          className="bg-gray-500 text-white px-4 py-2 rounded"
-        >
-          Close
-        </button>
-      </div>
+  {pdfContent && (
+    <div className="flex items-center space-x-4">
+      <motion.button
+        onClick={handleDownload}
+        whileTap={{ scale: 0.9 }}
+        className="flex items-center space-x-2 text-green-600 hover:underline"
+      >
+        <FaDownload />
+        <span>Download PDF</span>
+      </motion.button>
 
-      {/* PDF Preview Modal */}
-      <AnimatePresence>
-        {showPreview && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-4xl"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                  PDF Preview
-                </h2>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <embed
-                src={`data:application/pdf;base64,${pdfContent}`}
-                type="application/pdf"
-                width="100%"
-                height="600px"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.button
+        onClick={handleSendMail}
+        whileTap={{ scale: 0.9 }}
+        className="flex items-center space-x-2 text-blue-500 hover:underline"
+      >
+        <FaEnvelope />
+        <span>Send via Email</span>
+      </motion.button>
 
-      {/* Share Options Modal */}
-      <AnimatePresence>
-        {showShareOptions && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-[400px]"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                  Share PDF
-                </h2>
-                <button
-                  onClick={() => setShowShareOptions(false)}
-                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <div className="flex justify-center mt-2 items-center flex-col space-y-5">
-                <button
-                  onClick={handleSendMail}
-                  className="flex items-center w-[200px] bg-red-500 text-white px-2 py-2 rounded"
-                >
-                  <MessageCircle size={20} className="mr-2" />
-                  Send via Email
-                </button>
-                <button
-                  onClick={handleSendWhatsApp}
-                  className="flex items-center  w-[200px] bg-green-500 text-white px-2 py-2 rounded"
-                >
-                  <Share2 size={20} className="mr-2" />
-                  Send via WhatsApp
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.button
+        onClick={handleSendWhatsApp}
+        whileTap={{ scale: 0.9 }}
+        className="flex items-center space-x-2 text-green-500 hover:underline"
+      >
+        <FaWhatsapp />
+        <span>Send via WhatsApp</span>
+      </motion.button>
+    </div>
+  )}
+</div>
+  
+  {isloading && (
+    <div className="w-full flex items-center justify-center h-[500px]">
+      <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
+    </div>
+  )}
+{pdfBlobUrl  && !isloading &&  (
+        <div className="mt-4">
+          <iframe
+            src={pdfBlobUrl}
+            width="100%"
+            height="500px"
+            className="border rounded-lg shadow-lg"
+            title="PDF Viewer"
+          />
+        </div>
+      )}
+
     </div>
   );
 };
