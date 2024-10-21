@@ -77,8 +77,8 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
       .get("http://localhost:3000/api/names")
       .then((response) => {
         setNames(response.data);
-        console.log(response.data)
-        // filterNames(response.data);
+        console.log(response.data);
+        filterNames(response.data);
       })
       .catch((error) => console.error("Error fetching names:", error));
   }, [customerData?.babyGender, customerData?.preferredStartingLetter]);
@@ -104,16 +104,16 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
     }
   }, [pdfContent]);
 
+  console.log(customerData)
+
   const filterNames = (allNames) => {
-    if (!customerData?.gender ) {
-      setFilteredNames([]);
-      // setFilteredNames(names)
+    if (!customerData?.babyGender ) {
+      // setFilteredNames([]);
+      setFilteredNames(names)
       return;
     }
     const filtered = allNames.filter(
-      (item) =>
-        item.gender === customerData.gender 
-        // item.name.startsWith(customerData.)
+      (item) => item.name.startsWith(customerData.preferredStartingLetter)
     );
     setFilteredNames(filtered)
     setCurrentPage(1);

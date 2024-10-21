@@ -52,7 +52,9 @@ const Customer = () => {
         try {
             setPdfsLoading(true);
             const response = await axios.get(`http://localhost:3000/api/generatedpdf?customerId=${customerId}`);
-            setPdfs(response.data);
+            if(response.data.length > 0) {
+                setPdfs(response.data);
+            }
             setPdfsLoading(false);
         } catch (error) {
             console.error('Error fetching PDFs:', error);
@@ -70,7 +72,7 @@ const Customer = () => {
         setPdfUrl(generatedPdfUrl); // Set the URL state
         setEnabledRow(_id); // Enable buttons for the row that was clicked
 
-      };
+    };
     
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
