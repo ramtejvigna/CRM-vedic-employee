@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, Eye, Calendar, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, Calendar, Clock, Send } from "lucide-react";
 import Cookies from "js-cookie";
 import { useSnackbar } from "notistack";
 import { useStore } from "../../../store";
@@ -48,9 +48,6 @@ const Tasks = () => {
           task._id === taskId ? { ...task, status: newStatus } : task
         )
       );
-      if (selectedTask && selectedTask._id === taskId) {
-        setSelectedTask({ ...selectedTask, status: newStatus });
-      }
       enqueueSnackbar("Task status updated successfully", { variant: "success" });
     } catch (error) {
       console.error("Error updating status:", error);
@@ -58,38 +55,19 @@ const Tasks = () => {
     }
   };
 
-  const handleAddComment = async (taskId) => {
-    if (!comment.trim()) {
-      enqueueSnackbar("Please enter a comment", { variant: "warning" });
-      return;
-    }
+  const handleAddComment = async (taskId, newComment) => {
     try {
       setAddingComment(true);
-      const username = Cookies.get("username");
-      const newComment = { text: comment, createdBy: username };
-
       await axios.post(
-        `http://localhost:3000/api/tasks/${taskId}/comment`,
-        newComment,
+        `http://localhost:3000/api/employee/tasks/${taskId}/comments`,
+        { newComment }, // Send the newComment object correctly
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setTasks((tasks) =>
         tasks.map((task) =>
-          task._id === taskId
-            ? { ...task, comments: [...task.comments, newComment] }
-            : task
+          task._id === taskId ? { ...task, comments: [...task.comments, newComment] } : task
         )
       );
-
-      if (selectedTask && selectedTask._id === taskId) {
-        setSelectedTask((prevTask) => ({
-          ...prevTask,
-          comments: [...prevTask.comments, newComment],
-        }));
-      }
-
-      setComment("");
       enqueueSnackbar("Comment added successfully", { variant: "success" });
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -98,6 +76,7 @@ const Tasks = () => {
       setAddingComment(false);
     }
   };
+  
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -234,6 +213,14 @@ const TaskModal = ({
   addingComment,
   isDarkMode,
 }) => {
+  const [localTask, setLocalTask] = useState(task);
+  const [localComment, setLocalComment] = useState("");
+
+  useEffect(() => {
+    setLocalTask(task);
+    setLocalComment(comment);
+  }, [task, comment]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Pending":
@@ -246,6 +233,24 @@ const TaskModal = ({
         return "bg-gray-200 text-gray-800";
     }
   };
+
+  const handleSave = async () => {
+    // Update task status
+    if (localTask.status !== task.status) {
+      await updateTaskStatus(localTask._id, localTask.status);
+    }
+
+    // Add new comments
+    if (localComment.trim()) {
+      const username = Cookies.get("username");
+      const newComment = { text: localComment, createdBy: username };
+      await handleAddComment(localTask._id, newComment);
+    }
+
+    // Close the modal
+    onClose();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -262,7 +267,7 @@ const TaskModal = ({
       >
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">{task.title}</h2>
+            <h2 className="text-2xl font-bold">{localTask.title}</h2>
             <button
               onClick={onClose}
               className={`p-1 rounded-full ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
@@ -273,23 +278,23 @@ const TaskModal = ({
               </svg>
             </button>
           </div>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{task.description}</p>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{localTask.description}</p>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Calendar size={20} className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-              <span>{new Date(task.endTime).toLocaleDateString()}</span>
+              <span>{new Date(localTask.endTime).toLocaleDateString()}</span>
             </div>
             <div className="flex items-center space-x-2">
               <Clock size={20} className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-              <span>{new Date(task.endTime).toLocaleTimeString()}</span>
+              <span>{new Date(localTask.endTime).toLocaleTimeString()}</span>
             </div>
           </div>
           <div className="w-[210px]">
             <label htmlFor="status" className="block text-sm font-medium mb-2">Status</label>
             <select
               id="status"
-              value={task.status}
-              onChange={(e) => updateTaskStatus(task._id, e.target.value)}
+              value={localTask.status}
+              onChange={(e) => setLocalTask({ ...localTask, status: e.target.value })}
               className={`w-full p-2 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
                 } border-none focus:ring-2 focus:ring-blue-500`}
             >
@@ -300,7 +305,7 @@ const TaskModal = ({
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-4">Comments</h3>
-            <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+            <div className="space-y-4 mb-4 max-h-40 overflow-y-auto">
               {task.comments.map((comment, index) => (
                 <div key={index} className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <p className="font-medium">{comment.createdBy}</p>
@@ -311,21 +316,50 @@ const TaskModal = ({
             <div className="flex space-x-2">
               <input
                 type="text"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                value={localComment}
+                onChange={(e) => setLocalComment(e.target.value)}
                 placeholder="Add a comment..."
                 className={`flex-grow p-2 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
                   } border-none focus:ring-2 focus:ring-blue-500`}
               />
-              <button
-                onClick={() => handleAddComment(task._id)}
+              {/* <button
+                onClick={async () => {
+                  if (localComment.trim()) {
+                    const username = Cookies.get("username");
+                    const newComment = { text: localComment, createdBy: username };
+                    await handleAddComment(localTask._id, newComment);
+                    setLocalComment("");
+                  }
+                }}
                 disabled={addingComment}
                 className={`px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ${addingComment ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
               >
                 {addingComment ? 'Adding...' : 'Add'}
+              </button> */}
+              <button
+                onClick={async () => {
+                  if (localComment.trim()) {
+                    const newComment = { text: localComment};
+                    await handleAddComment(localTask._id, newComment);
+                    setLocalComment("");
+                  }
+                }}
+                disabled={addingComment}
+                className={`px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ${addingComment ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+              >
+                <Send size={20} />
               </button>
             </div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={handleSave}
+              className={`px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition-colors duration-200`}
+            >
+              Save
+            </button>
           </div>
         </div>
       </motion.div>

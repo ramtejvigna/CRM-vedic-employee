@@ -77,7 +77,8 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
       .get("http://localhost:3000/api/names")
       .then((response) => {
         setNames(response.data);
-        filterNames(response.data);
+        console.log(response.data)
+        // filterNames(response.data);
       })
       .catch((error) => console.error("Error fetching names:", error));
   }, [customerData?.babyGender, customerData?.preferredStartingLetter]);
@@ -104,16 +105,17 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
   }, [pdfContent]);
 
   const filterNames = (allNames) => {
-    if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
+    if (!customerData?.gender ) {
       setFilteredNames([]);
+      // setFilteredNames(names)
       return;
     }
     const filtered = allNames.filter(
       (item) =>
-        item.gender === customerData.babyGender &&
-        item.name.startsWith(customerData.preferredStartingLetter)
+        item.gender === customerData.gender 
+        // item.name.startsWith(customerData.)
     );
-    setFilteredNames(filtered);
+    setFilteredNames(filtered)
     setCurrentPage(1);
   };
 
@@ -145,13 +147,56 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
         handleShowPdf(selectedItems);
         toast.success("PDF generated");
     } catch (error) {
-        console.error("Error generating PDF:", error);
-        toast.error("PDF generation failed");
-    } finally {
-        setIsLoading(false); // Ensure loading state is set to false in any case
+      console.error("Error generating PDF:", error);
+      toast.error("pdf generation failed");
     }
-};
+  };
 
+  const handleDownload = () => {
+    if (!pdfContent) return;
+    const link = document.createElement("a");
+    link.href = `data:application/pdf;base64,${pdfContent}`;
+    link.download = `${uniqueId}.pdf`;
+    link.click();
+  };  
+
+  const handleSendMail = async () => {
+    if (!email || !pdfContent) {
+      alert("Provide a valid email and ensure the PDF is generated.");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:3000/api/send-pdf-email", {
+        email,
+        base64Pdf: pdfContent,
+        uniqueId,
+      });
+      alert("PDF sent to email");
+    } catch (error) {
+      console.error("Error sending PDF to email", error);
+      alert("Error sending email");
+    }
+  };
+
+  const handleSendWhatsApp = async () => {
+    if (!phoneNumber || !pdfContent || !uniqueId) {
+      alert("Provide a valid phone number and ensure the PDF is generated.");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
+        phoneNumber,
+        base64Pdf: pdfContent,
+        uniqueId,
+      });
+      alert("PDF sent to WhatsApp");
+    } catch (error) {
+      console.error("Error sending PDF via WhatsApp", error);
+      alert("Error sending WhatsApp message");
+    }
+  };
 
   const handleClose = () => {
     window.history.back();
@@ -187,7 +232,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
             </tr>
           </thead>
           <tbody>
-            {paginatedNames.map((item) => (
+            {filteredNames.map((item) => (
               <tr key={item._id} className="bg-white hover:bg-gray-100 border-b">
                 <td className="px-4 py-4">
                   <input
