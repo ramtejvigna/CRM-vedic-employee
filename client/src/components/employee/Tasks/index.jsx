@@ -59,19 +59,15 @@ const Tasks = () => {
     try {
       setAddingComment(true);
       await axios.post(
-        `http://localhost:3000/api/tasks/${taskId}/comment`,
-        newComment,
+        `http://localhost:3000/api/employee/tasks/${taskId}/comments`,
+        { newComment }, // Send the newComment object correctly
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setTasks((tasks) =>
         tasks.map((task) =>
-          task._id === taskId
-            ? { ...task, comments: [...task.comments, newComment] }
-            : task
+          task._id === taskId ? { ...task, comments: [...task.comments, newComment] } : task
         )
       );
-
       enqueueSnackbar("Comment added successfully", { variant: "success" });
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -80,6 +76,7 @@ const Tasks = () => {
       setAddingComment(false);
     }
   };
+  
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -308,8 +305,8 @@ const TaskModal = ({
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-4">Comments</h3>
-            <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-              {localTask.comments.map((comment, index) => (
+            <div className="space-y-4 mb-4 max-h-40 overflow-y-auto">
+              {task.comments.map((comment, index) => (
                 <div key={index} className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <p className="font-medium">{comment.createdBy}</p>
                   <p className={`mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{comment.text}</p>
@@ -325,12 +322,26 @@ const TaskModal = ({
                 className={`flex-grow p-2 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
                   } border-none focus:ring-2 focus:ring-blue-500`}
               />
-              <button
-                onClick={() => {
+              {/* <button
+                onClick={async () => {
                   if (localComment.trim()) {
                     const username = Cookies.get("username");
                     const newComment = { text: localComment, createdBy: username };
-                    setLocalTask({ ...localTask, comments: [...localTask.comments, newComment] });
+                    await handleAddComment(localTask._id, newComment);
+                    setLocalComment("");
+                  }
+                }}
+                disabled={addingComment}
+                className={`px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ${addingComment ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+              >
+                {addingComment ? 'Adding...' : 'Add'}
+              </button> */}
+              <button
+                onClick={async () => {
+                  if (localComment.trim()) {
+                    const newComment = { text: localComment};
+                    await handleAddComment(localTask._id, newComment);
                     setLocalComment("");
                   }
                 }}

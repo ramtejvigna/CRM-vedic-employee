@@ -13,14 +13,14 @@ import { motion } from 'framer-motion';
 import Cookies from 'js-cookie';
 
 export function SignIn() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/login', { username, phone });
+      const response = await axios.post('http://localhost:3000/login', { email, phone });
       
       // Extract token and user details from the response
       const token = response.data.token;
@@ -50,20 +50,20 @@ export function SignIn() {
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4 text-gray-900 dark:text-white">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal text-gray-600 dark:text-gray-400">
-            Enter your email or username and phone to Sign In.
+            Enter your email and phone to Sign In.
           </Typography>
         </div>
         <form className="mt-8 mb-2" onSubmit={handleLogin}>
           <div className="mb-4">
             <Typography variant="small" color="blue-gray" className="mb-2 font-medium text-gray-600 dark:text-gray-400">
-              Your email or username
+              Your email
             </Typography>
             <Input
               size="lg"
-              placeholder="name@mail.com or username"
+              placeholder="name@mail.com "
               className="border-t-blue-gray-200 focus:border-t-gray-900 dark:bg-gray-700 dark:text-white"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
