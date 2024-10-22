@@ -30,7 +30,6 @@ const NotificationButton = () => {
       const response = await axios.get(`http://localhost:3000/api/notifications/get`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(response.data)
       setNotifications(response.data);
       setUnreadCount(response.data.filter(n => !n.isRead).length);
     } catch (error) {

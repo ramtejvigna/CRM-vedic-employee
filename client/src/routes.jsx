@@ -5,9 +5,9 @@ import { BiSolidBabyCarriage } from "react-icons/bi";
 import { GiThreeLeaves } from "react-icons/gi";
 
 import Home from "./components/employee/Dashboard";
-import { Leave } from "./components/employee/Leave";
 import { element } from "prop-types";
 import Tasks from "./components/employee/Tasks";
+import LeaveManagement from "./components/employee/LeaveApply";
 
 
 const icon = {
@@ -42,7 +42,7 @@ export const routes = [
     name: "leave apply",
     path: "leave",
     icon: <GiThreeLeaves {...icon} />,
-    element: <Leave />,
+    element: <LeaveManagement />,
   },
   {
     name: "reports",
