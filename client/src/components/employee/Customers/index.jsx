@@ -72,13 +72,9 @@ export const Customers = () => {
       updatedCustomer.transactionId = transactionId;
     } else if (toSection === "completed") {
       updatedCustomer.feedback = feedback;
-      updatedCustomer.pdfGenerated = generatePdf
-        ? customer.pdfGenerated + 1
-        : customer.pdfGenerated;
       updatedCustomer.customerStatus = "completed";
     } else if (toSection === "newRequests") {
       updatedCustomer.feedback = "";
-      updatedCustomer.pdfGenerated = 0;
       updatedCustomer.paymentStatus = paymentStatus;
       updatedCustomer.customerStatus = "newRequests";
     } else if (toSection === "rejected") {
