@@ -3,6 +3,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { FaDownload, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import { Filter } from "lucide-react";
 import { toast } from "react-toastify";
 import { generatePdf } from './pdfDisplayComponent';
 
@@ -69,6 +70,9 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [isLoading, setIsLoading] = useState(false);
+  const [bookFilter, setBookFilter] = useState('');
+  const [meaningFilter, setMeaningFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
  
 
 
@@ -77,7 +81,6 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
       .get("http://localhost:3000/api/names")
       .then((response) => {
         setNames(response.data);
-        console.log(response.data);
         filterNames(response.data);
       })
       .catch((error) => console.error("Error fetching names:", error));
@@ -107,17 +110,38 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
   console.log(customerData)
 
   const filterNames = (allNames) => {
-    if (!customerData?.babyGender ) {
-      // setFilteredNames([]);
-      setFilteredNames(names)
+    console.log("Filtering with:", customerData?.babyGender, customerData?.preferredStartingLetter); // Check values
+    if (!customerData?.babyGender || !customerData?.preferredStartingLetter) {
+      console.log("Missing gender or preferred starting letter");
+      setFilteredNames([]); // No filtering if data is missing
       return;
     }
-    const filtered = allNames.filter(
-      (item) => item.name.startsWith(customerData.preferredStartingLetter)
+  
+    let filtered = allNames.filter(
+      (item) =>
+        item.gender === customerData.babyGender &&
+        item.name.startsWith(customerData.preferredStartingLetter)
     );
-    setFilteredNames(filtered)
+
+
+    
+
+    if (bookFilter) {
+      filtered = filtered.filter((item) =>
+        item.bookName?.toLowerCase().includes(bookFilter.toLowerCase())
+      );
+    }
+
+    if (meaningFilter) {
+      filtered = filtered.filter((item) =>
+        item.meaning?.toLowerCase().includes(meaningFilter.toLowerCase())
+      );
+    }
+  
+    setFilteredNames(filtered);
     setCurrentPage(1);
   };
+  
 
   const handleItemSelection = (item) => {
     setSelectedItems((prevSelected) =>
@@ -147,56 +171,13 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
         handleShowPdf(selectedItems);
         toast.success("PDF generated");
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("pdf generation failed");
+        console.error("Error generating PDF:", error);
+        toast.error("PDF generation failed");
+    } finally {
+        setIsLoading(false); // Ensure loading state is set to false in any case
     }
-  };
+};
 
-  const handleDownload = () => {
-    if (!pdfContent) return;
-    const link = document.createElement("a");
-    link.href = `data:application/pdf;base64,${pdfContent}`;
-    link.download = `${uniqueId}.pdf`;
-    link.click();
-  };  
-
-  const handleSendMail = async () => {
-    if (!email || !pdfContent) {
-      alert("Provide a valid email and ensure the PDF is generated.");
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:3000/api/send-pdf-email", {
-        email,
-        base64Pdf: pdfContent,
-        uniqueId,
-      });
-      alert("PDF sent to email");
-    } catch (error) {
-      console.error("Error sending PDF to email", error);
-      alert("Error sending email");
-    }
-  };
-
-  const handleSendWhatsApp = async () => {
-    if (!phoneNumber || !pdfContent || !uniqueId) {
-      alert("Provide a valid phone number and ensure the PDF is generated.");
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
-        phoneNumber,
-        base64Pdf: pdfContent,
-        uniqueId,
-      });
-      alert("PDF sent to WhatsApp");
-    } catch (error) {
-      console.error("Error sending PDF via WhatsApp", error);
-      alert("Error sending WhatsApp message");
-    }
-  };
 
   const handleClose = () => {
     window.history.back();
@@ -214,7 +195,50 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
     <div className="max-w-7xl mx-auto mt-8">
       <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg mb-8 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Baby Names</h1>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setShowFilters((prev) => !prev)}
+            className="flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+          >
+            <Filter size={20} />
+            <span>Filter</span>
+          </button>
+        </div>
       </div>
+
+      {showFilters && (
+        <div className="bg-white p-4 rounded-lg mb-6 shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Filters</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Book</label>
+              <input
+                type="text"
+                value={bookFilter}
+                onChange={(e) => setBookFilter(e.target.value)}
+                className="mt-1 p-2 block w-full border rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Meaning</label>
+              <input
+                type="text"
+                value={meaningFilter}
+                onChange={(e) => setMeaningFilter(e.target.value)}
+                className="mt-1 p-2 block w-full border rounded-md"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => filterNames(names)}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto max-h-96 mb-4 rounded-lg shadow-lg">
         <table className="min-w-full table-auto border-collapse bg-white rounded-lg">
@@ -232,7 +256,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
             </tr>
           </thead>
           <tbody>
-            {filteredNames.map((item) => (
+            {paginatedNames.map((item) => (
               <tr key={item._id} className="bg-white hover:bg-gray-100 border-b">
                 <td className="px-4 py-4">
                   <input
