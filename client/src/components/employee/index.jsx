@@ -9,6 +9,7 @@ import Tasks from "./Tasks";
 import Customer from "./Customers/Customer";
 import CheckBoxListPage from "./Customers/CheckBoxList";
 import LeaveManagement from "./LeaveApply";
+import BabyDatabase from "./BabyDatabase";
 const EmployeeManagement = () => {
   const { isDarkMode } = useStore()
   return (
@@ -27,6 +28,7 @@ const EmployeeManagement = () => {
           <Route path="/customers" element={<Customers />} />
           <Route path="/leave" element={<LeaveManagement />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/babyDatabase" element={<BabyDatabase />} />
           <Route path="/customers/viewDetailsIn" element={<Customer />} />
           <Route path="/customers/viewDetailsIn/generate-pdf" element={<CheckBoxListPage />} />
         </Routes>

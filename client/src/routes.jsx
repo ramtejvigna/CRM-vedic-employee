@@ -8,6 +8,7 @@ import Home from "./components/employee/Dashboard";
 import { element } from "prop-types";
 import Tasks from "./components/employee/Tasks";
 import LeaveManagement from "./components/employee/LeaveApply";
+import BabyDatabase from "./components/employee/BabyDatabase";
 
 
 const icon = {
@@ -34,9 +35,9 @@ export const routes = [
   },
   {
     name: "baby database",
-    path: "baby",
+    path: "babyDatabase",
     icon: <BiSolidBabyCarriage {...icon} />,
-    element: <Home />,
+    element: <BabyDatabase />,
   },
   {
     name: "leave apply",
