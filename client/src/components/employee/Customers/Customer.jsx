@@ -7,6 +7,8 @@ import CheckBoxListPage from './CheckBoxList';
 import { FaDownload, FaEnvelope, FaStar, FaEye, FaWhatsapp } from "react-icons/fa";
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
+import PDFViewer from './PDFviewer';
+
 const Customer = () => {
     const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
     const [pdfsLoading, setPdfsLoading] = useState(false);
@@ -29,6 +31,8 @@ const Customer = () => {
     const iframeRef = useRef(null);
     const [pdfUrl, setPdfUrl] = useState(null);
     const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
+    const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
+
     const navigate = useNavigate();
     
     useEffect(() => {
@@ -52,7 +56,9 @@ const Customer = () => {
         try {
             setPdfsLoading(true);
             const response = await axios.get(`http://localhost:3000/api/generatedpdf?customerId=${customerId}`);
-            setPdfs(response.data);
+            if(response.data.length > 0) {
+                setPdfs(response.data);
+            }
             setPdfsLoading(false);
         } catch (error) {
             console.error('Error fetching PDFs:', error);
@@ -69,7 +75,13 @@ const Customer = () => {
         const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
         setEnabledRow(_id); // Enable buttons for the row that was clicked
+        setShowViewer(true);
+    };
 
+    const handleClose = () => {
+        setShowViewer(false); // Hide the PDF viewer
+        setPdfUrl(''); // Reset PDF URL
+        setEnabledRow(null); // Reset enabled row
       };
     
     const moveCustomer = (customer, fromSection, toSection, details) => {
@@ -195,7 +207,6 @@ const Customer = () => {
                                                 <th className="border  border-gray-200 dark:border-gray-700 p-2 text-center">S.No</th>
                                                 <th className="border  border-gray-200 dark:border-gray-700 p-2 text-center">pdf</th>
                                                 <th className="border border-gray-200 dark:border-gray-700 p-2 text-center">Generated Time/Date</th>
-                                                <th className="border border-gray-200 dark:border-gray-700 p-2 text-center">Actions</th>
                                                 <th className="border border-gray-200 dark:border-gray-700 p-2 text-center">Rating</th>
                                             </tr>
                                         </thead>
@@ -217,26 +228,7 @@ const Customer = () => {
                                                             })}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">
-                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
-                                                            enabledRow !== pdf._id
-                                                            ? 'text-blue-100 cursor-not-allowed pointer-events-none'
-                                                            : 'text-blue-700 cursor-pointer'
-                                                        }`}
-                                                        onClick={() =>  handleDownload(pdfUrl, pdf._id)} 
-                                                        disabled={enabledRow !== pdf._id}> <FaDownload /> </button>
-                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
-                                                            enabledRow !== pdf._id
-                                                            ? 'text-green-100 cursor-not-allowed pointer-events-none'
-                                                            : 'text-green-700 cursor-pointer'
-                                                        }`}
-                                                        onClick={() =>{}} disabled={enabledRow !== pdf._id} > <FaWhatsapp /> </button>
-                                                        <button className={`rounded-lg px-4 py-1 transition duration-200 ${
-                                                            enabledRow !== pdf._id
-                                                            ? 'text-red-100 cursor-not-allowed pointer-events-none'
-                                                            : 'text-red-700 cursor-pointer'
-                                                        }`} onClick={() =>  handleSendMail(pdfUrl, pdf._id, customerData.email)} disabled={enabledRow !== pdf._id}> <FaEnvelope /> </button>
-                                                    </td>
+                                                    
                                                     <td className="border justify-center flex gap-2 border-gray-200 dark:border-gray-700 p-2 text-center">
                                                         <button
                                                             className="flex items-center text-gray-700 rounded-lg px-4 py-1 bg-gray-200 hover:bg-gray-300 transition duration-200"
@@ -266,14 +258,16 @@ const Customer = () => {
                 </div>
 
                 <div className="mt-8">
-                    <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} />
-                    {pdfUrl && (
-                        <iframe
-                        src={pdfUrl}
-                        width="100%"
-                        height="600px"
-                        className="border rounded-lg shadow-lg"
-                        title="PDF Viewer"
+                    <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} />
+                    {showViewer && (
+                        <PDFViewer
+                        pdfUrl={pdfUrl}
+                        handleDownload={handleDownload}
+                        handleSendMail={handleSendMail}
+                        email={customerData.email} 
+                        enabledRow={enabledRow}
+                        pdfId={enabledRow} 
+                        onClose={handleClose} // Pass the close handler
                         />
                     )}
       
