@@ -58,7 +58,7 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
 };
 
 
-const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, pdfUrl, setPdfUrl}) => {
+const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, pdfUrl, setPdfUrl, setShowViewer }) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [email, setEmail] = useState(customerData?.email || "");
@@ -154,6 +154,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
   const handleShowPdf = async (babyNames) => {
     const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
     setPdfUrl(generatedPdfUrl); // Set the URL state
+    setShowViewer(true);
   };
   
   const handleGeneratePdf = async () => {
@@ -170,6 +171,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
         });
         handleShowPdf(selectedItems);
         toast.success("PDF generated");
+        selectedItems([]);
     } catch (error) {
         console.error("Error generating PDF:", error);
         toast.error("PDF generation failed");
@@ -310,43 +312,15 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
       </div>
 
       <div className="flex justify-between items-center my-10">
-        <button
+      <button
           onClick={handleGeneratePdf}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className={`bg-blue-500 text-white px-4 py-2 rounded ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isLoading}
         >
-          Generate PDF
+          {isLoading ? "Generating..." : "Generate PDF"}
         </button>
 
-        {pdfUrl && (
-          <div className="flex items-center space-x-4">
-            <motion.button
-              onClick={() => handleDownload(pdfUrl, uniqueId)}
-              whileTap={{ scale: 0.9 }}
-              className="flex items-center space-x-2 text-green-600 hover:underline"
-            >
-              <FaDownload />
-              <span>Download PDF</span>
-            </motion.button>
-
-            <motion.button
-              onClick={() => handleSendMail(pdfUrl, uniqueId, email)}
-              whileTap={{ scale: 0.9 }}
-              className="flex items-center space-x-2 text-blue-500 hover:underline"
-            >
-              <FaEnvelope />
-              <span>Send via Email</span>
-            </motion.button>
-
-            <motion.button
-              onClick={() => handleSendWhatsApp(pdfUrl, uniqueId, phoneNumber)}
-              whileTap={{ scale: 0.9 }}
-              className="flex items-center space-x-2 text-green-500 hover:underline"
-            >
-              <FaWhatsapp />
-              <span>Send via WhatsApp</span>
-            </motion.button>
-          </div>
-        )}
+        
       </div>
       
     
