@@ -434,9 +434,9 @@ const LeaveManagement = () => {
             >
             {activeTab === 'apply' && (
         <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
-            <h2 className="text-2xl font-bold text-white">Leave Application</h2>
-            <p className="text-blue-100 mt-1">Submit your leave request</p>
+          <div className="bg-gradient-to-r p-6">
+            <h2 className="text-2xl font-bold ">Leave Application</h2>
+            <p className="mt-1">Submit your leave request</p>
           </div>
 
           <form onSubmit={handleApplyLeave} className="p-6 space-y-6">
