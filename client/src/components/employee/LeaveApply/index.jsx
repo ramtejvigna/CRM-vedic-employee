@@ -29,6 +29,8 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { Calendar, Clock, FileText, AlertCircle, CheckCircle, ChevronDown } from 'lucide-react';
+
 import {
   Info as InfoIcon,
   Close as CloseIcon,
@@ -136,6 +138,8 @@ const LeaveManagement = () => {
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pendingLeaves, setPendingLeaves] = useState([]);
+  const [errors, setErrors] = useState({});
+  console.log(leaveDuration)
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -158,12 +162,13 @@ const LeaveManagement = () => {
   useEffect(() => {
     if (leaveData.startDate && leaveData.endDate) {
       const duration =
-        differenceInDays(leaveData.endDate, leaveData.startDate) + 1;
+        differenceInDays(new Date(leaveData.endDate), new Date(leaveData.startDate)) + 1;
       setLeaveDuration(duration > 0 ? duration : 0);
     } else {
       setLeaveDuration(0);
     }
   }, [leaveData.startDate, leaveData.endDate]);
+  
 
   useEffect(() => {
     fetchLeaveBalance();
@@ -190,7 +195,25 @@ const LeaveManagement = () => {
       });
     }
   };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!leaveData.startDate) newErrors.startDate = 'Start date is required';
+    if (!leaveData.endDate) newErrors.endDate = 'End date is required';
+    if (!leaveData.leaveType) newErrors.leaveType = 'Leave type is required';
+    if (!leaveData.reason) newErrors.reason = 'Reason is required';
+    if (leaveData.reason && leaveData.reason.length < 10) {
+      newErrors.reason = 'Reason must be at least 10 characters';
+    }
+    if (leaveData.startDate && leaveData.endDate) {
+      const start = new Date(leaveData.startDate);
+      const end = new Date(leaveData.endDate);
+      if (end < start) newErrors.endDate = 'End date cannot be before start date';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const fetchLeaveHistory = async () => {
     try {
       const token = Cookies.get("token");
@@ -202,7 +225,7 @@ const LeaveManagement = () => {
           },
         }
       );
-      console.log(response.data)
+      console.log(response.data);
       setLeaveHistory(
         response.data.filter((leave) => leave.status !== "Pending")
       );
@@ -303,7 +326,9 @@ const LeaveManagement = () => {
           },
         }
       );
-      setPendingLeaves(pendingLeaves.filter((leave) => leave._id !== leaveToDelete._id));
+      setPendingLeaves(
+        pendingLeaves.filter((leave) => leave._id !== leaveToDelete._id)
+      );
       setSnackbar({
         open: true,
         message: "Leave request deleted successfully!",
@@ -343,9 +368,9 @@ const LeaveManagement = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "Approved":
-        return "text-[#10B981]";
+        return "#10B981";
       case "Rejected":
-        return "text-[#EF4444]";
+        return "#EF4444";
       default:
         return "#F59E0B";
     }
@@ -360,7 +385,9 @@ const LeaveManagement = () => {
     setPage(0);
   };
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, leaveHistory.length - page * rowsPerPage);
+  const emptyRows =
+    rowsPerPage -
+    Math.min(rowsPerPage, leaveHistory.length - page * rowsPerPage);
 
   return (
     <ThemeProvider theme={theme}>
@@ -405,110 +432,149 @@ const LeaveManagement = () => {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
             >
-              {activeTab === "apply" && (
-                <Card className="max-w-2xl mx-auto">
-                  <CardContent className="p-6">
-                    <form onSubmit={handleApplyLeave} className="space-y-6">
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                          <DatePicker
-                            label="Start Date"
-                            value={leaveData.startDate}
-                            onChange={(date) =>
-                              setLeaveData({ ...leaveData, startDate: date })
-                            }
-                            renderInput={(params) => (
-                              <TextField {...params} fullWidth />
-                            )}
-                          />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <DatePicker
-                            label="End Date"
-                            value={leaveData.endDate}
-                            onChange={(date) =>
-                              setLeaveData({ ...leaveData, endDate: date })
-                            }
-                            renderInput={(params) => (
-                              <TextField {...params} fullWidth />
-                            )}
-                          />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <FormControl fullWidth>
-                            <InputLabel>Leave Type</InputLabel>
-                            <Select
-                              value={leaveData.leaveType}
-                              onChange={(e) =>
-                                setLeaveData({
-                                  ...leaveData,
-                                  leaveType: e.target.value,
-                                })
-                              }
-                            >
-                              <MenuItem value="Loss of pay">Loss of Pay</MenuItem>
-                              <MenuItem value="Sick">Sick</MenuItem>
-                              <MenuItem value="Privileged">Privileged</MenuItem>
-                              <MenuItem value="Other">Other</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <TextField
-                            fullWidth
-                            label="Total Days"
-                            value={leaveDuration}
-                            InputProps={{
-                              readOnly: true,
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            multiline
-                            rows={3}
-                            label="Reason"
-                            value={leaveData.reason}
-                            onChange={(e) =>
-                              setLeaveData({
-                                ...leaveData,
-                                reason: e.target.value,
-                              })
-                            }
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Box className="flex items-center justify-between mb-2">
-                            <Typography variant="body2">
-                              Leave Balance
-                            </Typography>
-                            <Typography variant="body2">
-                              {leaveBalance} / 15 days
-                            </Typography>
-                          </Box>
-                          <LinearProgress
-                            variant="determinate"
-                            value={(leaveBalance / 15) * 100}
-                            color="primary"
-                          />
-                        </Grid>
-                      </Grid>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        fullWidth
-                        className="mt-4"
-                      >
-                        Submit Leave Application
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
+            {activeTab === 'apply' && (
+        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+            <h2 className="text-2xl font-bold text-white">Leave Application</h2>
+            <p className="text-blue-100 mt-1">Submit your leave request</p>
+          </div>
 
+          <form onSubmit={handleApplyLeave} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Start Date */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+    <div className="relative">
+      <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+      <input
+        type="date"
+        value={leaveData.startDate}
+        onChange={(e) => setLeaveData(prev => ({ ...prev, startDate: e.target.value }))}
+        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+      {errors.startDate && (
+        <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>
+      )}
+    </div>
+  </div>
+
+  {/* End Date */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+    <div className="relative">
+      <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+      <input
+        type="date"
+        value={leaveData.endDate}
+        onChange={(e) => setLeaveData(prev => ({ ...prev, endDate: e.target.value }))}
+        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+      {errors.endDate && (
+        <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>
+      )}
+    </div>
+  </div>
+</div>
+
+
+            {/* Leave Type and Duration */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Leave Type</label>
+                <div className="relative">
+                  <select
+                    value={leaveData.leaveType}
+                    onChange={(e) => setLeaveData(prev => ({ ...prev, leaveType: e.target.value }))}
+                    className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                  >
+                    <option value="">Select Leave Type</option>
+                    <option value="Sick">Sick</option>
+                    <option value="Loss of pay">Loss of pay</option>
+                    <option value="Privileged">Privileged</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                  {errors.leaveType && (
+                    <p className="mt-1 text-sm text-red-600">{errors.leaveType}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={leaveDuration}
+                    readOnly
+                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Reason */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Leave</label>
+              <div className="relative">
+                <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <textarea
+                  value={leaveData.reason}
+                  onChange={(e) => setLeaveData(prev => ({ ...prev, reason: e.target.value }))}
+                  rows={1}
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Please provide detailed reason for your leave request..."
+                />
+                {errors.reason && (
+                  <p className="mt-1 text-sm text-red-600">{errors.reason}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Leave Balance */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">Leave Balance</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {leaveBalance} / 15 days
+                </span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                  style={{ width: `${(leaveBalance / 15) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full py-4 rounded-lg text-white font-medium transition-all ${
+                isSubmitting
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Submit Leave Application
+                  </>
+                )}
+              </div>
+            </button>
+          </form>
+        </div>
+      )}
               {activeTab === "pending" && (
                 <Grid container spacing={4}>
                   {pendingLeaves.length > 0 ? (
@@ -521,8 +587,8 @@ const LeaveManagement = () => {
                           transition={{ delay: index * 0.1 }}
                         >
                           <Card className="h-full">
-                            <CardContent className="p-6">
-                              <Box className="flex items-center mb-4">
+                            <CardContent className="p-2">
+                              {/* <Box className="flex items-center mb-4">
                                 <Avatar
                                   className="mr-4"
                                   src={leave.employee.avatar}
@@ -535,16 +601,18 @@ const LeaveManagement = () => {
                                     {leave.employee.lastName}
                                   </Typography>
                                 </Box>
-                              </Box>
+                              </Box> */}
                               <Box className="flex items-center mb-3">
                                 <CalendarIcon
                                   className="mr-2"
                                   color="primary"
                                 />
                                 <Typography variant="body2">
-                                  {new Date(leave.startDate).toLocaleDateString()}{" "}
+                                  {new Date(
+                                    leave.startDate
+                                  ).toLocaleDateString()}{" "}
                                   -{" "}
-                                  {new Date(leave.endDate).toLocaleDateString() }
+                                  {new Date(leave.endDate).toLocaleDateString()}
                                 </Typography>
                               </Box>
                               <Box className="flex items-center mb-3">
@@ -578,22 +646,20 @@ const LeaveManagement = () => {
                               </Typography>
                               <Box className="flex justify-end mt-4">
                                 <Button
-                                  variant="outlined"
-                                  color="primary"
+                                
                                   onClick={() => handleLeaveDetails(leave)}
                                   startIcon={<InfoIcon />}
                                 >
                                   View Details
                                 </Button>
                                 <Button
-                                  variant="outlined"
-                                  color="error"
+                                  color="warning"
                                   onClick={() => handleDeleteLeave(leave)}
                                   startIcon={<DeleteIcon />}
                                   className="ml-4"
-                                  sx={{ml:2}}
+                                  sx={{ ml: 2 }}
                                 >
-                                  Delete
+                                  Withdraw
                                 </Button>
                               </Box>
                             </CardContent>
@@ -602,7 +668,7 @@ const LeaveManagement = () => {
                       </Grid>
                     ))
                   ) : (
-                    <EmptyState/>
+                    <EmptyState />
                   )}
                 </Grid>
               )}
@@ -631,7 +697,7 @@ const LeaveManagement = () => {
                           Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                           Leave Applied Date
+                          Leave Applied Date
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                           Actions
@@ -641,7 +707,10 @@ const LeaveManagement = () => {
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       <AnimatePresence>
                         {leaveHistory
-                          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
                           .map((leave, index) => (
                             <motion.tr
                               key={leave._id}
@@ -663,7 +732,11 @@ const LeaveManagement = () => {
                                 {new Date(leave.endDate).toLocaleDateString()}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                {differenceInDays(new Date(leave.endDate), new Date(leave.startDate)) + 1} days
+                                {differenceInDays(
+                                  new Date(leave.endDate),
+                                  new Date(leave.startDate)
+                                ) + 1}{" "}
+                                days
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span
@@ -675,7 +748,11 @@ const LeaveManagement = () => {
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                {leave.createdAt ? new Date(leave.createdAt).toLocaleDateString() : 'N/A'}
+                                {leave.createdAt
+                                  ? new Date(
+                                      leave.createdAt
+                                    ).toLocaleDateString()
+                                  : "N/A"}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <button
@@ -692,7 +769,9 @@ const LeaveManagement = () => {
                   </table>
                   <div
                     className={`px-4 py-3 flex items-center justify-between border-t ${
-                      theme.palette.mode === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      theme.palette.mode === "dark"
+                        ? "bg-gray-800 border-gray-700"
+                        : "bg-white border-gray-200"
                     } sm:px-6`}
                   >
                     <div className="flex-1 flex justify-between sm:hidden">
@@ -707,9 +786,17 @@ const LeaveManagement = () => {
                       </button>
                       <button
                         onClick={() => {
-                          setPage((prev) => Math.min(prev + 1, Math.ceil(leaveHistory.length / rowsPerPage) - 1));
+                          setPage((prev) =>
+                            Math.min(
+                              prev + 1,
+                              Math.ceil(leaveHistory.length / rowsPerPage) - 1
+                            )
+                          );
                         }}
-                        disabled={page === Math.ceil(leaveHistory.length / rowsPerPage) - 1}
+                        disabled={
+                          page ===
+                          Math.ceil(leaveHistory.length / rowsPerPage) - 1
+                        }
                         className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                       >
                         Next
@@ -718,7 +805,12 @@ const LeaveManagement = () => {
                     <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm text-gray-700">
-                          Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, leaveHistory.length)} of {leaveHistory.length} results
+                          Showing {page * rowsPerPage + 1} to{" "}
+                          {Math.min(
+                            (page + 1) * rowsPerPage,
+                            leaveHistory.length
+                          )}{" "}
+                          of {leaveHistory.length} results
                         </p>
                       </div>
                       <div>
@@ -732,31 +824,55 @@ const LeaveManagement = () => {
                             }}
                             disabled={page === 0}
                             className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
-                              theme.palette.mode === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-300 bg-white"
+                              theme.palette.mode === "dark"
+                                ? "border-gray-700 bg-gray-800"
+                                : "border-gray-300 bg-white"
                             } text-sm font-medium text-gray-500 hover:bg-gray-50`}
                           >
                             Previous
                           </button>
-                          {Array.from({ length: Math.ceil(leaveHistory.length / rowsPerPage) }, (_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setPage(i)}
-                              className={`relative inline-flex items-center px-4 py-2 border ${
-                                theme.palette.mode === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-300 bg-white"
-                              } text-sm font-medium ${
-                                page === i ? "text-indigo-600" : "text-gray-500"
-                              }`}
-                            >
-                              {i + 1}
-                            </button>
-                          ))}
+                          {Array.from(
+                            {
+                              length: Math.ceil(
+                                leaveHistory.length / rowsPerPage
+                              ),
+                            },
+                            (_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setPage(i)}
+                                className={`relative inline-flex items-center px-4 py-2 border ${
+                                  theme.palette.mode === "dark"
+                                    ? "border-gray-700 bg-gray-800"
+                                    : "border-gray-300 bg-white"
+                                } text-sm font-medium ${
+                                  page === i
+                                    ? "text-indigo-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {i + 1}
+                              </button>
+                            )
+                          )}
                           <button
                             onClick={() => {
-                              setPage((prev) => Math.min(prev + 1, Math.ceil(leaveHistory.length / rowsPerPage) - 1));
+                              setPage((prev) =>
+                                Math.min(
+                                  prev + 1,
+                                  Math.ceil(leaveHistory.length / rowsPerPage) -
+                                    1
+                                )
+                              );
                             }}
-                            disabled={page === Math.ceil(leaveHistory.length / rowsPerPage) - 1}
+                            disabled={
+                              page ===
+                              Math.ceil(leaveHistory.length / rowsPerPage) - 1
+                            }
                             className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-                              theme.palette.mode === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-300 bg-white"
+                              theme.palette.mode === "dark"
+                                ? "border-gray-700 bg-gray-800"
+                                : "border-gray-300 bg-white"
                             } text-sm font-medium text-gray-500 hover:bg-gray-50`}
                           >
                             Next
@@ -799,7 +915,7 @@ const LeaveManagement = () => {
             </DialogTitle>
             <DialogContent>
               {selectedLeave && (
-                <Box className="space-y-4">
+                <Box className="space-y-4 p-0 h-[150px]">
                   <Box className="flex items-center justify-between">
                     <Typography variant="h6">
                       {selectedLeave.leaveType} Leave
@@ -816,8 +932,7 @@ const LeaveManagement = () => {
                     <CalendarIcon className="mr-2" color="primary" />
                     <Typography>
                       <strong>Date Range:</strong>{" "}
-                      {new Date(selectedLeave.startDate).toLocaleDateString()}{" "}
-                      -{" "}
+                      {new Date(selectedLeave.startDate).toLocaleDateString()} -{" "}
                       {new Date(selectedLeave.endDate).toLocaleDateString()}
                     </Typography>
                   </Box>
@@ -885,7 +1000,10 @@ const LeaveManagement = () => {
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteConfirmationOpen(false)} color="primary">
+              <Button
+                onClick={() => setDeleteConfirmationOpen(false)}
+                color="primary"
+              >
                 Cancel
               </Button>
               <Button onClick={confirmDeleteLeave} color="error">
