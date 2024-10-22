@@ -5,7 +5,6 @@ import Home from "./Dashboard";
 import SidenavEmp from "./Sidebar";
 import { useStore } from "../../store";
 import { Customers } from "./Customers";
-import { Leave } from "./Leave";
 import Tasks from "./Tasks";
 import Customer from "./Customers/Customer";
 import CheckBoxListPage from "./Customers/CheckBoxList";
