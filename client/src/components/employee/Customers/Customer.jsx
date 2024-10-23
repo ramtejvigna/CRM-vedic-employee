@@ -1,10 +1,21 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit } from 'lucide-react';
+import {
+    Edit,
+    FileText,
+    MessageCircle,
+    Mail,
+    ThumbsUp,
+    MoreHorizontal,
+    Check,
+    X,
+    ChevronDown,
+    Eye,
+    AlertCircle
+} from 'lucide-react';
 import axios from 'axios';
 import CheckBoxListPage from './CheckBoxList';
-import { FaDownload, FaEnvelope, FaStar, FaEye, FaWhatsapp } from "react-icons/fa";
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
@@ -32,6 +43,21 @@ const Customer = () => {
     const [pdfUrl, setPdfUrl] = useState(null);
     const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
     const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [expandedRow, setExpandedRow] = useState(null);
+
+    const handleActionClick = (action, pdf) => {
+        setActiveDropdown(null);
+        if(action === 'view') {
+            handleShowPdf(pdf.babyNames, pdf._id)
+        } else if(action === 'mail') {
+            
+        } else if(action === 'whatsapp') {
+
+        } else if(action === 'feedback') {
+            
+        }
+    };
 
     const navigate = useNavigate();
 
@@ -188,74 +214,156 @@ const Customer = () => {
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Generated PDFs Card */}
-                    <div className="w-full col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 relative overflow-hidden">
-                        <div className="absolute inset-0  opacity-30 rounded-lg"></div>
-                        <div className="relative z-10">
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Generated PDFs</h2>
-                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <p className="text-gray-600 dark:text-gray-300 mb-4"><strong>Number of PDFs Generated:</strong> {pdfs.length}</p>
-                                {pdfsLoading ? (
-                                    <div className='flex items-center justify-center w-full h-[300px]'>
-                                        <div className="rounded-full w-[50px] h-[50px] border border-gray-400 border-t-black animate-spin"></div>
-                                    </div>
-                                ) : (
-                                    <table className="min-w-full border-collapse border border-gray-200 dark:border-gray-700">
-                                        <thead>
-                                            <tr className="bg-gray-100 dark:bg-gray-700 ">
-                                                <th className="border  border-gray-200 dark:border-gray-700 p-2 text-center">S.No</th>
-                                                <th className="border  border-gray-200 dark:border-gray-700 p-2 text-center">pdf</th>
-                                                <th className="border border-gray-200 dark:border-gray-700 p-2 text-center">Generated Time/Date</th>
-                                                <th className="border border-gray-200 dark:border-gray-700 p-2 text-center">Rating</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {pdfs.map((pdf, index) => (
-                                                <tr key={pdf._id} className="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200">
-                                                    <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">{index + 1}</td>
-                                                    <td onClick={() => { handleShowPdf(pdf.babyNames, pdf._id) }} className="border border-gray-200 dark:border-gray-700 p-2 cursor-pointer text-center">show</td>
-                                                    <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">
-                                                        <span>
-                                                            {new Date(pdf.createdAt).toLocaleDateString('en-US', {
-                                                                day: '2-digit',
-                                                                month: '2-digit',
-                                                                year: 'numeric',
-                                                            })} {" "}
-                                                            {new Date(pdf.createdAt).toLocaleTimeString('en-US', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                            })}
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="border justify-center flex gap-2 border-gray-200 dark:border-gray-700 p-2 text-center">
-                                                        <button
-                                                            className="flex items-center text-gray-700 rounded-lg px-4 py-1 bg-gray-200 hover:bg-gray-300 transition duration-200"
-                                                        >
-                                                            <FaEye className="mr-2" /> {/* Eye icon */}
-                                                            view
-                                                        </button>
-                                                        <button
-                                                            className="flex items-center text-red-700 rounded-lg px-4 py-1 bg-red-200 hover:bg-red-300 transition duration-200"
-                                                        >
-                                                            <FaStar className="mr-2" /> {/* Star icon */}
-                                                            edit
-                                                        </button>
-                                                    </td>
-
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-
-                                )}
-
-                            </div>
+                {/* Generated PDFs Card */}
+                <div className="w-full bg-white mt-10 dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <div className="flex w-full items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Generated PDFs</h2>
+                        <div className="flex items-center space-x-2">
+                            <Eye className="h-4 w-4 text-gray-500" />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{pdfs.length} PDFs Generated</span>
                         </div>
                     </div>
 
+                    {pdfsLoading ? (
+                        <div className="flex items-center justify-center h-[400px]">
+                            <div className="relative w-16 h-16">
+                                <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
+                                <div className="absolute top-0 left-0 w-full h-full border-4 border-t-blue-500 rounded-full animate-spin"></div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            SNo.
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Generated Time/Date
+                                        </th>
+                                        <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {pdfs.map((pdf, index) => (
+                                        <React.Fragment key={pdf._id}>
+                                            <tr
+                                                className={`group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer
+                      ${expandedRow === pdf._id ? 'bg-gray-50 dark:bg-gray-800' : ''}`}
+                                                onClick={() => setExpandedRow(expandedRow === pdf._id ? null : pdf._id)}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{index + 1}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                            {new Date(pdf.createdAt).toLocaleDateString('en-US', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="text-sm text-gray-500">
+                                                            {new Date(pdf.createdAt).toLocaleTimeString('en-US', {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center justify-center space-x-4">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className={`flex items-center justify-center h-8 w-8 rounded-full transition-colors duration-300 
+                            ${pdf.whatsappStatus ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+                                                                {pdf.whatsappStatus ? (
+                                                                    <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <X className="h-3 w-3 text-red-600 dark:text-red-400" />
+                                                                )}
+                                                            </div>
+                                                            <span className="text-sm font-semibold text-gray-500">WhatsApp</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className={`flex items-center justify-center h-8 w-8 rounded-full transition-colors duration-300 
+                            ${pdf.mailStatus ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+                                                                {pdf.mailStatus ? (
+                                                                    <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <X className="h-3 w-3 text-red-600 dark:text-red-400" />
+                                                                )}
+                                                            </div>
+                                                            <span className="text-sm font-semibold text-gray-500">Email</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <div className="flex items-center justify-end space-x-2">
+                                                        <div className="relative">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setActiveDropdown(activeDropdown === pdf._id ? null : pdf._id);
+                                                                }}
+                                                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
+                                                            >
+                                                                <MoreHorizontal className="h-5 w-5" />
+                                                            </button>
+
+                                                            {activeDropdown === pdf._id && (
+                                                                <>
+                                                                    <div
+                                                                        className="fixed inset-0 z-10"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setActiveDropdown(null);
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20 animate-in slide-in-from-top-2 duration-200">
+                                                                        {[
+                                                                            { icon: FileText, label: 'View PDF', action: 'view' },
+                                                                            { icon: MessageCircle, label: 'Send to WhatsApp', action: 'whatsapp' },
+                                                                            { icon: Mail, label: 'Send to Mail', action: 'mail' },
+                                                                            { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' }
+                                                                        ].map((item, i) => (
+                                                                            <button
+                                                                                key={i}
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleActionClick(item.action, pdf);
+                                                                                }}
+                                                                                className="flex items-center w-full px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                                                                            >
+                                                                                <item.icon className="h-4 w-4 mr-3" />
+                                                                                <span>{item.label}</span>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
+
 
                 {fromSection === 'inProgress' ? (
                     <>
