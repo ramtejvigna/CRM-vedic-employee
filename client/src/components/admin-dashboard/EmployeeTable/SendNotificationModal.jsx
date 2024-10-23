@@ -31,7 +31,7 @@ const SendNotificationModal = ({ isOpen, onClose, employees, isDarkMode }) => {
     }
     try {
       await axios.post(
-        "http://localhost:3000/api/notifications",
+        "https://vedic-backend-neon.vercel.app/api/notifications",
         {
           message,
           recipients: selectedEmployees,

@@ -26,7 +26,7 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
   }
 
   try {
-    await axios.post("http://localhost:3000/api/send-pdf-email", {
+    await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
       email,
       pdfUrl,
       uniqueId,
@@ -45,7 +45,7 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
   }
 
   try {
-    await axios.post("http://localhost:3000/api/send-pdf-whatsapp", {
+    await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-whatsapp", {
       phoneNumber,
       pdfUrl,
       uniqueId,
@@ -78,7 +78,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/names")
+      .get("https://vedic-backend-neon.vercel.app/api/names")
       .then((response) => {
         setNames(response.data);
         filterNames(response.data);
@@ -165,7 +165,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
 
     try {
         setIsLoading(true);
-        const response = await axios.post("http://localhost:3000/api/create-pdf", {
+        const response = await axios.post("https://vedic-backend-neon.vercel.app/api/create-pdf", {
             names: selectedItems.map((item) => item.name),
             customerId: customerData._id,
         });

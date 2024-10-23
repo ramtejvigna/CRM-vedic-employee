@@ -20,7 +20,7 @@ export function SignIn() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/login', { email, phone });
+      const response = await axios.post('https://vedic-backend-neon.vercel.app/login', { email, phone });
       
       // Extract token and user details from the response
       const token = response.data.token;

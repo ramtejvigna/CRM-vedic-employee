@@ -22,7 +22,7 @@ const Tasks = () => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/employee/tasks`,
+          `https://vedic-backend-neon.vercel.app/api/employee/tasks`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTasks(response.data);
@@ -39,7 +39,7 @@ const Tasks = () => {
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/employee/tasks/${taskId}/status`,
+        `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -59,7 +59,7 @@ const Tasks = () => {
     try {
       setAddingComment(true);
       await axios.post(
-        `http://localhost:3000/api/employee/tasks/${taskId}/comments`,
+        `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/comments`,
         { newComment }, // Send the newComment object correctly
         { headers: { Authorization: `Bearer ${token}` } }
       );

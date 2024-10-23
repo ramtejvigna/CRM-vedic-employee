@@ -55,7 +55,7 @@ const Customer = () => {
     const fetchPdfs = async () => {
         try {
             setPdfsLoading(true);
-            const response = await axios.get(`http://localhost:3000/api/generatedpdf?customerId=${customerId}`);
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
             if (response.data.length > 0) {
                 setPdfs(response.data);
             }
@@ -110,7 +110,7 @@ const Customer = () => {
         }
 
         axios
-            .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+            .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
             .then(() => {
                 setCustomerDetails(updatedCustomer);
             })
