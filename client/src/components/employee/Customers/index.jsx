@@ -40,7 +40,7 @@ export const Customers = () => {
     if (employeeId) {
       axios
         .get(
-          `http://localhost:3000/customers/employees/${employeeId}/customers`
+          `https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`
         )
         .then((response) => setCustomerData(response.data))
         .catch((error) =>
@@ -90,7 +90,7 @@ export const Customers = () => {
     }));
 
     axios
-      .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+      .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
       .catch((error) => console.error("Error moving customer:", error));
   };
 

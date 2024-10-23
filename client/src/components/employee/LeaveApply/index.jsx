@@ -178,7 +178,7 @@ const LeaveManagement = () => {
     try {
       const token = Cookies.get("token");
       const response = await axios.get(
-        "http://localhost:3000/api/employees/leave-balance",
+        "https://vedic-backend-neon.vercel.app/api/employees/leave-balance",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -218,7 +218,7 @@ const LeaveManagement = () => {
     try {
       const token = Cookies.get("token");
       const response = await axios.get(
-        "http://localhost:3000/api/employees/leaves/history",
+        "https://vedic-backend-neon.vercel.app/api/employees/leaves/history",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -243,7 +243,7 @@ const LeaveManagement = () => {
     try {
       const token = Cookies.get("token");
       const response = await axios.get(
-        "http://localhost:3000/api/employees/leaves/pending",
+        "https://vedic-backend-neon.vercel.app/api/employees/leaves/pending",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -268,7 +268,7 @@ const LeaveManagement = () => {
       const employeeId = "your-employee-id"; // Replace with actual logic to get the employee ID
       const leaveWithEmployee = { ...leaveData, employee: employeeId };
       await axios.post(
-        "http://localhost:3000/api/employees/leaves/apply",
+        "https://vedic-backend-neon.vercel.app/api/employees/leaves/apply",
         leaveWithEmployee,
         {
           headers: {
@@ -319,7 +319,7 @@ const LeaveManagement = () => {
     try {
       const token = Cookies.get("token");
       await axios.delete(
-        `http://localhost:3000/api/employees/leaves/${leaveToDelete._id}`,
+        `https://vedic-backend-neon.vercel.app/api/employees/leaves/${leaveToDelete._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

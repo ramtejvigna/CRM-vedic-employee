@@ -34,7 +34,7 @@ const Customer = () => {
     const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
 
     const navigate = useNavigate();
-    
+
     useEffect(() => {
         const getCustomerDetails = async () => {
             if (customerData) {
@@ -55,8 +55,8 @@ const Customer = () => {
     const fetchPdfs = async () => {
         try {
             setPdfsLoading(true);
-            const response = await axios.get(`http://localhost:3000/api/generatedpdf?customerId=${customerId}`);
-            if(response.data.length > 0) {
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
+            if (response.data.length > 0) {
                 setPdfs(response.data);
             }
             setPdfsLoading(false);
@@ -82,8 +82,8 @@ const Customer = () => {
         setShowViewer(false); // Hide the PDF viewer
         setPdfUrl(''); // Reset PDF URL
         setEnabledRow(null); // Reset enabled row
-      };
-    
+    };
+
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
 
@@ -110,7 +110,7 @@ const Customer = () => {
         }
 
         axios
-            .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+            .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
             .then(() => {
                 setCustomerDetails(updatedCustomer);
             })
@@ -127,7 +127,7 @@ const Customer = () => {
         }
     }, [customerDetails, fromSection, section, feedback]);
 
-    
+
 
     if (loading) {
         return (
@@ -214,7 +214,7 @@ const Customer = () => {
                                             {pdfs.map((pdf, index) => (
                                                 <tr key={pdf._id} className="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200">
                                                     <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">{index + 1}</td>
-                                                    <td onClick={()=>{handleShowPdf(pdf.babyNames,pdf._id)}} className="border border-gray-200 dark:border-gray-700 p-2 cursor-pointer text-center">show</td>
+                                                    <td onClick={() => { handleShowPdf(pdf.babyNames, pdf._id) }} className="border border-gray-200 dark:border-gray-700 p-2 cursor-pointer text-center">show</td>
                                                     <td className="border border-gray-200 dark:border-gray-700 p-2 text-center">
                                                         <span>
                                                             {new Date(pdf.createdAt).toLocaleDateString('en-US', {
@@ -228,7 +228,7 @@ const Customer = () => {
                                                             })}
                                                         </span>
                                                     </td>
-                                                    
+
                                                     <td className="border justify-center flex gap-2 border-gray-200 dark:border-gray-700 p-2 text-center">
                                                         <button
                                                             className="flex items-center text-gray-700 rounded-lg px-4 py-1 bg-gray-200 hover:bg-gray-300 transition duration-200"
@@ -257,32 +257,32 @@ const Customer = () => {
 
                 </div>
 
-                <div className="mt-8">
-                    <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} />
-                    {showViewer && (
-                        <PDFViewer
-                        pdfUrl={pdfUrl}
-                        handleDownload={handleDownload}
-                        handleSendMail={handleSendMail}
-                        email={customerData.email} 
-                        enabledRow={enabledRow}
-                        pdfId={enabledRow} 
-                        onClose={handleClose} // Pass the close handler
-                        />
-                    )}
-      
-                </div>
-
                 {fromSection === 'inProgress' ? (
-                    <div className="w-1/2 mt-10">
-
-                        <div className="mt-10">
-                            <button onClick={handleAccept} className="bg-blue-500 text-white px-4 py-2 rounded">
-                                Confirm
-                            </button>
-                            <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2">Cancel</button>
+                    <>
+                        <div className="mt-8">
+                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} />
+                            {showViewer && (
+                                <PDFViewer
+                                    pdfUrl={pdfUrl}
+                                    handleDownload={handleDownload}
+                                    handleSendMail={handleSendMail}
+                                    email={customerData.email}
+                                    enabledRow={enabledRow}
+                                    pdfId={enabledRow}
+                                    onClose={handleClose} // Pass the close handler
+                                />
+                            )}
                         </div>
-                    </div>
+                        <div className="w-1/2 mt-10">
+
+                            <div className="mt-10">
+                                <button onClick={handleAccept} className="bg-blue-500 text-white px-4 py-2 rounded">
+                                    Confirm
+                                </button>
+                                <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2">Cancel</button>
+                            </div>
+                        </div>
+                    </>
                 ) : (
                     <></>
                 )}

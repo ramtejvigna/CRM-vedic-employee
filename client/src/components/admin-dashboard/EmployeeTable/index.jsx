@@ -29,7 +29,7 @@ const EmployeeTablle = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/employees?page=${currentPage}&limit=10`, {
+      const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/employees?page=${currentPage}&limit=10`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEmployees(response.data.employees);
@@ -43,7 +43,7 @@ const EmployeeTablle = () => {
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/employees', newEmployee, {
+      const response = await axios.post('https://vedic-backend-neon.vercel.app/api/employees', newEmployee, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAddingEmployee(false);

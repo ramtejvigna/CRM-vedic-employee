@@ -18,7 +18,7 @@ const BabyDatabase = () => {
 
     const fetchBabyNames = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/api/names");
+            const response = await axios.get("https://vedic-backend-neon.vercel.app/api/names");
             setBabyNames(response.data);
         } catch (err) {
             console.error(err);
@@ -79,7 +79,7 @@ const BabyDatabase = () => {
         const formData = new FormData();
         formData.append('csv', event.target.files[0]);
         try {
-            await axios.post("http://localhost:3000/uploadCsvNames", formData, {
+            await axios.post("https://vedic-backend-neon.vercel.app/uploadCsvNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             fetchBabyNames();
@@ -103,7 +103,7 @@ const BabyDatabase = () => {
 
     const saveEdit = async () => {
         try {
-            await axios.put(`http://localhost:3000/updateBabyName/${editingName._id}`, editingName);
+            await axios.put(`https://vedic-backend-neon.vercel.app/updateBabyName/${editingName._id}`, editingName);
             setEditingName(null);
             fetchBabyNames();
             toast.success("Baby name updated successfully!", {

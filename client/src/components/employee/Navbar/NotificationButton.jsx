@@ -27,7 +27,7 @@ const NotificationButton = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/notifications/get`, {
+      const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/notifications/get`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(response.data);
@@ -39,7 +39,7 @@ const NotificationButton = () => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`http://localhost:3000/api/notifications/${id}/read`, {}, {
+      await axios.put(`https://vedic-backend-neon.vercel.app/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchNotifications();
