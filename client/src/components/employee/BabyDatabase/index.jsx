@@ -155,7 +155,7 @@ const BabyDatabase = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleFilters}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white transition duration-300"
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white transition duration-300"
                     >
                         <Filter className="h-5 w-5 inline-block mr-2" />
                         Filters
@@ -188,6 +188,20 @@ const BabyDatabase = () => {
                             <Download className="h-5 w-5 inline-block mr-2" />
                             Export Names
                         </CSVLink>
+                    </motion.label>
+                    <motion.label
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-slate-700 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center"
+                    >
+                        <a
+                            href="/baby_names_records.csv" // Update the path accordingly
+                            download="baby_names_template.csv"
+                            className="flex items-center"
+                        >
+                            <Download className="h-5 w-5 inline-block mr-2" />
+                            Template
+                        </a>
                     </motion.label>
 
                 </div>
