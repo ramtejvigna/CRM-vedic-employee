@@ -124,6 +124,7 @@ export const Customers = () => {
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
             {[
+              "Customer ID",
               "Father Name",
               "Mother Name",
               "W/A number",
@@ -150,6 +151,9 @@ export const Customers = () => {
                 transition={{ duration: 0.2 }}
                 className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150 ease-in-out"
               >
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {customer.customerID}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                   {customer.fatherName}
                 </td>
@@ -259,6 +263,9 @@ export const Customers = () => {
   const newRequestsCount = Array.isArray(customerData["newRequests"])
     ? customerData["newRequests"].length
     : 0;
+  const inProgressCount = Array.isArray(customerData["inProgress"])
+    ? customerData["inProgress"].length
+    : 0;
 
   return (
     <div
@@ -286,6 +293,11 @@ export const Customers = () => {
               {tab === "newRequests" && newRequestsCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
                   {newRequestsCount}
+                </span>
+              )}
+              { tab === "inProgress" && inProgressCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
+                  {inProgressCount}
                 </span>
               )}
             </motion.button>
