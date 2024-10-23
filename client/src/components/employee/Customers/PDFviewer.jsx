@@ -3,10 +3,15 @@ import { FaDownload, FaWhatsapp, FaEnvelope } from 'react-icons/fa';
 
 const PDFViewer = ({ pdfUrl, handleDownload, handleSendMail, email, enabledRow, pdfId, onClose }) => {
   return (
-    <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-75">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
-      <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 text-3xl p-2 ">
-        &times; {/* Close button */}
+    <div className="fixed inset-0 flex justify-center items-center z-[1000] bg-black bg-opacity-75 backdrop-blur-md overflow-scroll scrollbar-hide">
+      <div className="bg-white rounded-lg shadow-xl p-7 w-full mx-auto max-w-[900px] h-full max-h-[700px] relative">
+        
+        {/* Close Button */}
+        <button 
+          onClick={onClose} 
+          className="absolute top-1 right-1 text-gray-400 text-3xl p-2 hover:text-gray-600 transition duration-200"
+        >
+          &times;
         </button>
 
         <h2 className="mb-4 text-xl font-semibold">Generated PDF:</h2>
@@ -42,13 +47,14 @@ const PDFViewer = ({ pdfUrl, handleDownload, handleSendMail, email, enabledRow, 
           </button>
         </div>
 
-        <iframe
-          src={pdfUrl}
-          width="100%"
-          height="600px" // Adjusted height for larger display
-          className="border rounded-lg"
-          title="PDF Viewer"
-        />
+        {/* PDF Iframe Viewer */}
+        <div className="flex items-center justify-center w-full h-[90%]">
+          <iframe
+            src={pdfUrl}
+            className="w-full h-full max-h-[600px] border rounded-lg object-fill" // Ensures image scales within the iframe
+            title="PDF Viewer"
+          />
+        </div>
       </div>
     </div>
   );
