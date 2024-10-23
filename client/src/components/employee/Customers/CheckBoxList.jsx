@@ -87,8 +87,14 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
       .get("https://vedic-backend-neon.vercel.app/api/names")
       .then((response) => {
         setNames(response.data);
-        filterNames(response.data);
-      })
+        filterNames({
+          gender: genderFilter,
+          startingLetter: startingLetterFilter,
+          book: bookFilter,
+          meaning: meaningFilter,
+          allNames: response.data,
+        });
+              })
       .catch((error) => console.error("Error fetching names:", error));
   }, [customerData?.babyGender, customerData?.preferredStartingLetter]);
 
@@ -137,100 +143,187 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
     }
   
     // Reapply filters based on the remaining tags
-    filterNames(names);
+    filterNames({
+      gender: type === "gender" ? "" : genderFilter,
+      startingLetter: type === "startingLetter" ? "" : startingLetterFilter,
+      book: type === "book" ? "" : bookFilter,
+      meaning: type === "meaning" ? "" : meaningFilter,
+      allNames: names, // Ensure you always pass the complete list of names
+    });
   };
   
   
 
   // Update the filterNames function to ensure it always reflects current filter states
-const filterNames = (allNames) => {
-  let filtered = allNames;
-
-  // Apply gender filter
-  if (genderFilter) {
-      filtered = filtered.filter((item) => item.gender === genderFilter);
+  const filterNames = ({ gender, startingLetter, book, meaning, allNames }) => {
+    let filtered = allNames;
+  
+    // Apply filters with the updated values passed in
+    if (gender) {
+      filtered = filtered.filter((item) => item.gender === gender);
+    }
+    if (startingLetter) {
+    // Normalize startingLetter to lowercase
+    const lowerCaseLetter = startingLetter.toLowerCase();
+    // Filter items based on the first character
+    filtered = filtered.filter((item) => 
+        item.name.charAt(0).toLowerCase() === lowerCaseLetter // Compare both in lowercase
+    );
   }
 
-  // Apply starting letter filter
-  if (startingLetterFilter) {
-      filtered = filtered.filter((item) => item.name.startsWith(startingLetterFilter));
-  }
-
-  // Apply additional filters
-  if (bookFilter) {
+    if (book) {
       filtered = filtered.filter((item) =>
-          item.bookName?.toLowerCase().includes(bookFilter.toLowerCase())
+        item.bookName?.toLowerCase().includes(book.toLowerCase())
       );
-  }
-
-  if (meaningFilter) {
+    }
+    if (meaning) {
       filtered = filtered.filter((item) =>
-          item.meaning?.toLowerCase().includes(meaningFilter.toLowerCase())
+        item.meaning?.toLowerCase().includes(meaning.toLowerCase())
       );
-  }
-
-  // Set filtered names and reset the page to the first page
-  setFilteredNames(filtered);
-  setCurrentPage(1);
-};
+    }
+  
+    // Set filtered names and reset pagination
+    setFilteredNames(filtered);
+    setCurrentPage(1);
+  };
+  
 
 // Update the input handling for gender
+// Gender change handler
 const handleGenderChange = (e) => {
   const selectedGender = e.target.value;
-  setGenderFilter(selectedGender);
   
-  // Update the tag
+  // Update the tag for gender
   const updatedTags = tags.filter(tag => tag.type !== 'gender');
   if (selectedGender) {
-      updatedTags.push({ type: 'gender', label: `Gender: ${selectedGender}`, value: selectedGender });
+    updatedTags.push({ type: 'gender', label: `Gender: ${selectedGender}`, value: selectedGender });
   }
   setTags(updatedTags);
 
-  // Reapply filters
-  filterNames(names);
+  // Set the gender filter
+  setGenderFilter(selectedGender);
+
+  // Pass the updated gender filter directly to `filterNames`
+  filterNames({
+    gender: selectedGender,
+    startingLetter: startingLetterFilter,
+    book: bookFilter,
+    meaning: meaningFilter,
+    allNames: names
+  });
 };
 
-// Update the input handling for starting letter
+
+// Starting letter change handler
 const handleStartingLetterChange = (e) => {
   const letter = e.target.value;
-  setStartingLetterFilter(letter);
-  
-  // Update the tag
+
+  // Update the tag for starting letter
   const updatedTags = tags.filter(tag => tag.type !== 'startingLetter');
   if (letter) {
-      updatedTags.push({ type: 'startingLetter', label: `Starting Letter: ${letter}`, value: letter });
+    updatedTags.push({ type: 'startingLetter', label: `Starting Letter: ${letter}`, value: letter });
   }
   setTags(updatedTags);
 
-  // Reapply filters
-  filterNames(names);
+  // Set the starting letter filter
+  setStartingLetterFilter(letter);
+
+  // Pass the updated filters
+  filterNames({
+    gender: genderFilter,
+    startingLetter: letter,
+    book: bookFilter,
+    meaning: meaningFilter,
+    allNames: names
+  });
 };
 
-// Update other input handlers similarly...
+
+// Book filter change handler
+const handleBookChange = (e) => {
+  const book = e.target.value;
+
+  // Update the book filter
+  setBookFilter(book);
+
+  // Update the tag for book
+  const updatedTags = tags.filter(tag => tag.type !== 'book');
+  if (book) {
+    updatedTags.push({ type: 'book', label: `Book: ${book}`, value: book });
+  }
+  setTags(updatedTags);
+
+  // Pass updated filters to `filterNames` to ensure the correct state is applied
+  filterNames({
+    gender: genderFilter,
+    startingLetter: startingLetterFilter,
+    book: book,
+    meaning: meaningFilter,
+    allNames: names
+  });
+};
+
+
+const handleMeaningChange = (e) => {
+  const meaning = e.target.value;
+
+  // Update the meaning filter
+  setMeaningFilter(meaning);
+
+  // Update the tag for meaning
+  const updatedTags = tags.filter(tag => tag.type !== 'meaning');
+  if (meaning) {
+    updatedTags.push({ type: 'meaning', label: `Meaning: ${meaning}`, value: meaning });
+  }
+  setTags(updatedTags);
+
+  // Pass updated filters to `filterNames` to ensure the correct state is applied
+  filterNames({
+    gender: genderFilter,
+    startingLetter: startingLetterFilter,
+    book: bookFilter,
+    meaning: meaning,
+    allNames: names
+  });
+};
+
 
   
   
 
   // Function to remove a tag and its associated filter
   const handleResetFilters = () => {
+    console.log("Resetting filters...");
     // Reset additional filters
     setBookFilter("");
     setMeaningFilter("");
-  
-    // Reset gender and starting letter filters to their default values
+
+    // Reset gender and starting letter filters
     setGenderFilter(customerData?.babyGender || "");
     setStartingLetterFilter(customerData?.preferredStartingLetter || "");
-  
-    // Reset tags to only include the default filters
-    setTags([
-      { label: `Gender: ${customerData?.babyGender}`, type: "gender" },
-      { label: `Starting Letter: ${customerData?.preferredStartingLetter}`, type: "startingLetter" },
-    ]);
-  
-    // Reapply default filters
-    filterNames(names);
-  };
-  
+
+    // Reset tags
+    const defaultTags = [
+        { label: `Gender: ${customerData?.babyGender}`, type: "gender" },
+        { label: `Starting Letter: ${customerData?.preferredStartingLetter}`, type: "startingLetter" },
+    ];
+    setTags(defaultTags);
+    console.log("Tags after reset:", defaultTags);
+
+    // Reset selected items
+    setSelectedItems([]);
+    console.log("Selected items after reset:", []);
+
+    // Reapply filters
+    filterNames({
+        gender: customerData?.babyGender || "",
+        startingLetter: customerData?.preferredStartingLetter || "",
+        book: "",
+        meaning: "",
+        allNames: names // Ensure you pass the original names to filter from
+    });
+};
+
   
 
   const handleItemSelection = (item) => {
@@ -277,11 +370,12 @@ const handleStartingLetterChange = (e) => {
 
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNames = filteredNames.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredNames.length / itemsPerPage);
+  const paginatedNames = Array.isArray(filteredNames)
+    ? filteredNames.slice(startIndex, startIndex + itemsPerPage)
+    : [];
+  
+  const totalPages = Math.ceil((filteredNames?.length || 0) / itemsPerPage);
+  
 
   return (
     <div className="max-w-7xl mx-auto mt-8">
@@ -310,7 +404,7 @@ const handleStartingLetterChange = (e) => {
         <input
           type="text"
           value={bookFilter}
-          onChange={(e) => setBookFilter(e.target.value)}
+          onChange={handleBookChange}  // Updated to handleBookChange
           className="mt-1 p-2 block w-full border rounded-md"
         />
       </div>
@@ -321,7 +415,7 @@ const handleStartingLetterChange = (e) => {
         <input
           type="text"
           value={meaningFilter}
-          onChange={(e) => setMeaningFilter(e.target.value)}
+          onChange={handleMeaningChange}  // Updated to handleMeaningChange
           className="mt-1 p-2 block w-full border rounded-md"
         />
       </div>
@@ -331,10 +425,7 @@ const handleStartingLetterChange = (e) => {
         <label className="block text-sm font-medium text-gray-700">Gender</label>
         <select
           value={genderFilter}
-          onChange={(e) => {
-            setGenderFilter(e.target.value);
-            filterNames(names);  // Reapply filters when gender is changed
-          }}
+          onChange={handleGenderChange}  // Updated to handleGenderChange
           className="mt-1 p-2 block w-full border rounded-md"
         >
           <option value="">Select Gender</option>
@@ -349,7 +440,7 @@ const handleStartingLetterChange = (e) => {
         <input
           type="text"
           value={startingLetterFilter}
-          onChange={(e) => setStartingLetterFilter(e.target.value)}
+          onChange={handleStartingLetterChange}  // Updated to handleStartingLetterChange
           maxLength={1}
           className="mt-1 p-2 block w-full border rounded-md"
         />
@@ -378,15 +469,8 @@ const handleStartingLetterChange = (e) => {
       )}
     </div>
 
-    {/* Apply Filters and Reset Buttons */}
-    <div className="flex justify-between mt-4">
-      <button
-        onClick={() => filterNames(names)}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Apply Filters
-      </button>
-
+    {/* Removed Apply Filters and Reset buttons */}
+    <div className="flex justify-end mt-4">
       <button
         onClick={handleResetFilters}
         className="bg-red-500 text-white px-4 py-2 rounded"
@@ -396,6 +480,7 @@ const handleStartingLetterChange = (e) => {
     </div>
   </div>
 )}
+
 
 
 
