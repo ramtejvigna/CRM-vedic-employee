@@ -152,7 +152,7 @@ const Customer = () => {
         if (customerDetails) {
             moveCustomer(customerDetails, fromSection, section, feedback);
             setShowEditModal(false);
-            if (section === 'inProgress') {
+            if (section === 'inProgress' || section === 'completed') {
                 navigate(-1);
             }
         }
