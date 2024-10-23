@@ -438,9 +438,9 @@ const LeaveManagement = () => {
             >
               {activeTab === 'apply' && (
                 <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
-                    <h2 className="text-2xl font-bold text-white">Leave Application</h2>
-                    <p className="text-blue-100 mt-1">Submit your leave request</p>
+                  <div className="p-6">
+                    <h2 className="text-2xl font-bold">Leave Application</h2>
+                    <p className="mt-1">Submit your leave request</p>
                   </div>
 
                   <form onSubmit={handleApplyLeave} className="p-6 space-y-6">
@@ -689,11 +689,7 @@ const LeaveManagement = () => {
 
                       {/* Pagination */}
                       <div
-                        className={`px-4 py-3 flex items-center justify-between border-t ${
-                          theme.palette.mode === "dark"
-                            ? "bg-gray-800 border-gray-700"
-                            : "bg-white border-gray-200"
-                        } sm:px-6`}
+                        className={`px-4 py-3 flex items-center justify-between border-t sm:px-6`}
                       >
                         <div className="flex-1 flex justify-between sm:hidden">
                           <button
@@ -908,11 +904,7 @@ const LeaveManagement = () => {
                     </tbody>
                   </table>
                   <div
-                    className={`px-4 py-3 flex items-center justify-between border-t ${
-                      theme.palette.mode === "dark"
-                        ? "bg-gray-800 border-gray-700"
-                        : "bg-white border-gray-200"
-                    } sm:px-6`}
+                    className={`px-4 py-3 flex items-center justify-between border-t sm:px-6`}
                   >
                     <div className="flex-1 flex justify-between sm:hidden">
                       <button
