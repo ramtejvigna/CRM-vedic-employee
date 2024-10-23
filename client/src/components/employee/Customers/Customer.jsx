@@ -51,7 +51,8 @@ const Customer = () => {
         if(action === 'view') {
             handleShowPdf(pdf.babyNames, pdf._id)
         } else if(action === 'mail') {
-            
+            handleSetPdfUrl(pdf.babyNames);
+            handleSendMail(pdfUrl,pdf._id,customerData.email);
         } else if(action === 'whatsapp') {
 
         } else if(action === 'feedback') {
@@ -97,10 +98,14 @@ const Customer = () => {
         }
     }, [customerId]);
 
+    const handleSetPdfUrl=async(babyNames)=>{
+        const generatedPdfUrl=await generatePdf(babyNames);
+        setPdfUrl(generatedPdfUrl);
+    }
     const handleShowPdf = async (babyNames, _id) => {
         const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
-        setEnabledRow(_id); // Enable buttons for the row that was clicked
+        setEnabledRow(_id);
         setShowViewer(true);
     };
 
