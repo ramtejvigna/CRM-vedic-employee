@@ -24,6 +24,7 @@ export const Customers = () => {
   const [nextSection, setNextSection] = useState("");
   const [details, setDetails] = useState("");
   const [paymentStatus, setPaymentStatus] = useState(false);
+  const [leadSource, setLeadSource] = useState('');
   const [feedback, setFeedback] = useState("");
   const [generatePdf, setGeneratePdf] = useState(false);
   const [paymentDate, setPaymentDate] = useState("");
@@ -284,8 +285,8 @@ export const Customers = () => {
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab)}
               className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${activeTab === tab
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                 }`}
             >
               {tab.charAt(0).toUpperCase() +
@@ -295,7 +296,7 @@ export const Customers = () => {
                   {newRequestsCount}
                 </span>
               )}
-              { tab === "inProgress" && inProgressCount > 0 && (
+              {tab === "inProgress" && inProgressCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
                   {inProgressCount}
                 </span>
@@ -358,6 +359,16 @@ export const Customers = () => {
                     placeholder="Transaction ID"
                     className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                   />
+                  <select
+                    value={leadSource}
+                    onChange={(e) => setLeadSource(e.target.value)}
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Select Lead Source</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="website">Website</option>
+                  </select>
                 </div>
               )}
               {activeTab === "inProgress" && (
