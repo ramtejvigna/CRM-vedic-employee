@@ -46,7 +46,7 @@ const Customer = () => {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [expandedRow, setExpandedRow] = useState(null);
 
-    const handleActionClick = (action, pdf) => {
+    const handleActionClick = async (action, pdf) => {
         setActiveDropdown(null);
         if (action === 'view') {
             handleShowPdf(pdf.babyNames, pdf._id)
@@ -126,6 +126,7 @@ const Customer = () => {
     const handleShowPdf = async (babyNames, _id) => {
         const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
+        console.log(generatedPdfUrl);
         setEnabledRow(_id);
         setShowViewer(true);
     };
