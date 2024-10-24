@@ -46,13 +46,15 @@ const Customer = () => {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [expandedRow, setExpandedRow] = useState(null);
 
-    const handleActionClick = (action, pdf) => {
+    const handleActionClick = async (action, pdf) => {
         setActiveDropdown(null);
         if(action === 'view') {
             handleShowPdf(pdf.babyNames, pdf._id)
-        } else if(action === 'mail') {
-            handleSetPdfUrl(pdf.babyNames);
+        } else if(action === 'mail') {         
+            await handleSetPdfUrl(pdf.babyNames);
+            console.log(pdfUrl);
             handleSendMail(pdfUrl,pdf._id,customerData.email);
+            fetchPdfs();
         } else if(action === 'whatsapp') {
 
         } else if(action === 'feedback') {
@@ -98,13 +100,14 @@ const Customer = () => {
         }
     }, [customerId]);
 
-    const handleSetPdfUrl=async(babyNames)=>{
-        const generatedPdfUrl=await generatePdf(babyNames);
-        setPdfUrl(generatedPdfUrl);
-    }
+const handleSetPdfUrl= async(babyNames)=>{
+    const url=await generatePdf(babyNames);
+    setPdfUrl(url);
+}
     const handleShowPdf = async (babyNames, _id) => {
         const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
+        console.log(generatedPdfUrl);
         setEnabledRow(_id);
         setShowViewer(true);
     };
@@ -373,7 +376,7 @@ const Customer = () => {
                 {fromSection === 'inProgress' ? (
                     <>
                         <div className="mt-8">
-                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} />
+                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} fetchPdfs={fetchPdfs}/>
                             {showViewer && (
                                 <PDFViewer
                                     pdfUrl={pdfUrl}

@@ -19,24 +19,45 @@ export const handleDownload = (pdfUrl, uniqueId) => {
   link.click();
 };
 
+// Function to convert Blob to base64
+const blobToBase64 = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(",")[1]); // Get base64 content without the data type prefix
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export const handleSendMail = async (pdfUrl, uniqueId, email) => {
-  if (!email || !pdfUrl) {
-    alert("Provide a valid email and ensure the PDF is generated.");
+  if (!email) {
+    alert("Provide a valid email");
     return;
   }
 
   try {
+    // Fetch the Blob from the Blob URL
+    const response = await fetch(pdfUrl);
+    const pdfBlob = await response.blob(); // Convert the response to a Blob
+
+    // Convert the Blob to base64
+    const base64Pdf = await blobToBase64(pdfBlob);
+
+    // Send the base64-encoded PDF to the backend
     await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
       email,
-      pdfUrl,
+      base64Pdf,
       uniqueId,
     });
+
     alert("PDF sent to email");
   } catch (error) {
     console.error("Error sending PDF to email", error);
     alert("Error sending email");
   }
 };
+
+
 
 export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
   if (!phoneNumber || !pdfUrl || !uniqueId) {
@@ -58,7 +79,7 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
 };
 
 
-const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, pdfUrl, setPdfUrl, setShowViewer }) => {
+const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, pdfUrl, setPdfUrl, setShowViewer , fetchPdfs }) => {
   const location = useLocation();
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [email, setEmail] = useState(customerData?.email || "");
@@ -81,7 +102,7 @@ const CheckBoxListPage = ({ customerData, pdfContent, setPdfContent, iframeRef, 
   ]);
  
 
-
+console.log(fetchPdfs);
   useEffect(() => {
     axios
       .get("https://vedic-backend-neon.vercel.app/api/names")
@@ -352,9 +373,10 @@ const handleMeaningChange = (e) => {
             names: selectedItems.map((item) => item.name),
             customerId: customerData._id,
         });
-        handleShowPdf(selectedItems);
-        toast.success("PDF generated");
-        selectedItems([]);
+        toast.success("PDF Generated Successfully");
+        setSelectedItems([]);
+        console.log("calling fetchPdfs"); 
+        fetchPdfs();
     } catch (error) {
         console.error("Error generating PDF:", error);
         toast.error("PDF generation failed");
