@@ -48,15 +48,15 @@ const Customer = () => {
 
     const handleActionClick = (action, pdf) => {
         setActiveDropdown(null);
-        if(action === 'view') {
+        if (action === 'view') {
             handleShowPdf(pdf.babyNames, pdf._id)
-        } else if(action === 'mail') {
+        } else if (action === 'mail') {
             handleSetPdfUrl(pdf.babyNames);
-            handleSendMail(pdfUrl,pdf._id,customerData.email);
-        } else if(action === 'whatsapp') {
+            handleSendMail(pdfUrl, pdf._id, customerData.email);
+        } else if (action === 'whatsapp') {
 
-        } else if(action === 'feedback') {
-            
+        } else if (action === 'feedback') {
+
         }
     };
 
@@ -98,8 +98,29 @@ const Customer = () => {
         }
     }, [customerId]);
 
-    const handleSetPdfUrl=async(babyNames)=>{
-        const generatedPdfUrl=await generatePdf(babyNames);
+    const refreshPdfs = useCallback(async () => {
+        try {
+            setPdfsLoading(true);
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
+            if (response.data.length > 0) {
+                setPdfs(response.data);
+            }
+            setPdfsLoading(false);
+        } catch (error) {
+            console.error('Error fetching PDFs:', error);
+            setPdfsLoading(false);
+        }
+    }, [customerId]);
+
+    useEffect(() => {
+        if (customerId) {
+            refreshPdfs();
+        }
+    }, [customerId, refreshPdfs]);
+
+
+    const handleSetPdfUrl = async (babyNames) => {
+        const generatedPdfUrl = await generatePdf(babyNames);
         setPdfUrl(generatedPdfUrl);
     }
     const handleShowPdf = async (babyNames, _id) => {
@@ -158,8 +179,6 @@ const Customer = () => {
         }
     }, [customerDetails, fromSection, section, feedback]);
 
-
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -187,16 +206,20 @@ const Customer = () => {
                                     <Edit size={20} />
                                 </button>
                             </div>
-                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <div className="border-t border-gray-200 flex flex-col gap-1 dark:border-gray-700 pt-4">
+                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Customer ID :</strong> {customerDetails.customerID || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Father's Name:</strong> {customerDetails.fatherName || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Mother's Name:</strong> {customerDetails.motherName || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Email:</strong> {customerDetails.email || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>WhatsApp Number:</strong> {customerDetails.whatsappNumber || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Baby's Gender:</strong> {customerDetails.babyGender || 'N/A'}</p>
                                 <hr className='my-2' />
-                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>payment date:</strong> {customerDetails?.paymentDate || 'N/A'}</p>
-                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>payment time:</strong> {customerDetails.paymentTime || 'N/A'}</p>
-                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>payment transaction id:</strong> {customerDetails?.payTransactionID || 'N/A'}</p>
+                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3">
+                                    <strong>Payment Date:</strong> {customerDetails?.paymentDate ? new Date(customerDetails.paymentDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                </p>
+
+                                <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Payment Time:</strong> {customerDetails.paymentTime || 'N/A'}</p>
+                                <p className="text-gray-600 dark:text-gray-300"><strong className='mr-1'>Payment Transaction ID:</strong> {customerDetails?.payTransactionID || 'N/A'}</p>
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Amount paid:</strong> {customerDetails?.amountPaid || 'N/A'}</p>
                             </div>
                         </div>
@@ -207,7 +230,7 @@ const Customer = () => {
                         <div className="absolute inset-0  opacity-30 rounded-lg"></div>
                         <div className="relative z-10">
                             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Astrological Details</h2>
-                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <div className="border-t flex flex-col gap-3 border-gray-200 dark:border-gray-700 pt-4">
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Zodiac Sign:</strong> Leo</p>
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Nakshatra:</strong> Ashwini</p>
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Destiny Number:</strong> 5</p>
@@ -373,7 +396,7 @@ const Customer = () => {
                 {fromSection === 'inProgress' ? (
                     <>
                         <div className="mt-8">
-                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} />
+                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} onPdfGenerated={refreshPdfs} />
                             {showViewer && (
                                 <PDFViewer
                                     pdfUrl={pdfUrl}
