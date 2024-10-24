@@ -397,7 +397,7 @@ const Customer = () => {
                 {fromSection === 'inProgress' ? (
                     <>
                         <div className="mt-8">
-                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} setShowViewer={setShowViewer} onPdfGenerated={refreshPdfs} />
+                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} onPdfGenerated={refreshPdfs} fetchPdfs={fetchPdfs} />
                             {showViewer && (
                                 <PDFViewer
                                     pdfUrl={pdfUrl}

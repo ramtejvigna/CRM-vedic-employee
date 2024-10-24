@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Filter } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { generatePdf } from './pdfDisplayComponent';
 
 // Constants
@@ -106,8 +107,12 @@ const TableHeader = () => (
   </thead>
 );
 
-const CheckBoxListPage = ({ customerData, setPdfUrl, setShowViewer, onPdfGenerated }) => {
+const CheckBoxListPage = ({ customerData, setPdfUrl, onPdfGenerated }) => {
   // State management
+  const location = useLocation();
+  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  const [email, setEmail] = useState(customerData?.email || "");
+  const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || "");
   const [names, setNames] = useState([]);
   const [filters, setFilters] = useState({
     gender: customerData?.babyGender || "",
@@ -189,7 +194,6 @@ const CheckBoxListPage = ({ customerData, setPdfUrl, setShowViewer, onPdfGenerat
       });
       const pdfUrl = await generatePdf(selectedItems);
       setPdfUrl(pdfUrl);
-      setShowViewer(true);
       toast.success("PDF generated successfully");
       setSelectedItems([]);
       onPdfGenerated();
@@ -325,7 +329,9 @@ const CheckBoxListPage = ({ customerData, setPdfUrl, setShowViewer, onPdfGenerat
           </div>
         </div>
       </div>
+      <ToastContainer position="bottom-right" />
     </div>
+    
   );
 };
 
