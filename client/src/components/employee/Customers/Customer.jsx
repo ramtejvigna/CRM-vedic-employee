@@ -18,10 +18,7 @@ import axios from 'axios';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
-import BabyNameModal from './babyNamemodal';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+
 
 const Customer = () => {
     const [pdfsLoading, setPdfsLoading] = useState(false);
