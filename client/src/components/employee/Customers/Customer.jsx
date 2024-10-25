@@ -15,15 +15,12 @@ import {
     AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
-import CheckBoxListPage from './CheckBoxList';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
 
 const Customer = () => {
-    const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
     const [pdfsLoading, setPdfsLoading] = useState(false);
-    const [pdfContent, setPdfContent] = useState("");
     const location = useLocation();
     const { customerData, section, fromSection } = location.state || {};
     const [customerDetails, setCustomerDetails] = useState(null);
@@ -39,7 +36,6 @@ const Customer = () => {
     });
     const [pdfs, setPdfs] = useState([]);
     const customerId = customerData?._id;
-    const iframeRef = useRef(null);
     const [pdfUrl, setPdfUrl] = useState(null);
     const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
     const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
@@ -179,6 +175,14 @@ const Customer = () => {
             }
         }
     }, [customerDetails, fromSection, section, feedback]);
+
+    const handleNavigate = () => {
+        navigate("generate-pdf", {
+            state: {
+                customerData
+            },
+        });        
+      };
 
     if (loading) {
         return (
@@ -396,8 +400,18 @@ const Customer = () => {
 
                 {fromSection === 'inProgress' ? (
                     <>
+                        <div className="flex justify-between items-center my-10">
+                            <button
+                                onClick={handleNavigate}
+                                className={`bg-blue-500 text-white px-4 py-2 rounded `}
+                                
+                                >
+                                Generate Pdf
+                                </button>
+
+                                
+                            </div>
                         <div className="mt-8">
-                            <CheckBoxListPage pdfContent={pdfContent} setPdfContent={setPdfContent} customerData={customerDetails} iframeRef={iframeRef} pdfUrl={pdfUrl} setPdfUrl={setPdfUrl} onPdfGenerated={refreshPdfs} fetchPdfs={fetchPdfs} />
                             {showViewer && (
                                 <PDFViewer
                                     pdfUrl={pdfUrl}
@@ -504,26 +518,7 @@ const Customer = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <AnimatePresence>
-                {pdfBlobUrl && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md    "
-                    >
-                        <div className="bg-white rounded-md w-[1000px]">
-                            <iframe
-                                src={pdfBlobUrl}
-                                width="100%"
-                                height="500px"
-                                className="border rounded-lg shadow-lg"
-                                title="PDF Viewer"
-                            />
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            
         </div>
     );
 };

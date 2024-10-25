@@ -31,10 +31,10 @@ const EmployeeManagement = () => {
           <Route path="/babyDatabase" element={<BabyDatabase />} />
           <Route path="/customers/viewDetailsIn" element={<Customer />} />
           <Route path="/customers/viewDetailsIn/generate-pdf" element={<CheckBoxListPage />} />
-        </Routes>
+          </Routes>
       </div>
     </div>
   )
 }
 
-export default EmployeeManagement
+export default EmployeeManagement;
