@@ -18,6 +18,10 @@ import axios from 'axios';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
+import BabyNameModal from './babyNamemodal';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const Customer = () => {
     const [pdfsLoading, setPdfsLoading] = useState(false);
@@ -41,19 +45,22 @@ const Customer = () => {
     const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [expandedRow, setExpandedRow] = useState(null);
-
+   
+    
     const handleActionClick = async (action, pdf) => {
+        console.log(pdf);
         setActiveDropdown(null);
         if (action === 'view') {
-            handleShowPdf(pdf.babyNames, pdf._id)
+            handleShowPdf(pdf.babyNames,pdf.additionalBabyNames );
         } else if (action === 'mail') {
-            handleSetPdfUrl(pdf.babyNames);
+            handleSetPdfUrl(pdf.babyNames,pdf.additionalBabyNames);
+            console.log(pdfUrl);
             handleSendMail(pdfUrl, pdf._id, customerData.email);
         } else if (action === 'whatsapp') {
 
         } else if (action === 'feedback') {
 
-        }
+        } 
     };
 
     const navigate = useNavigate();
@@ -115,15 +122,13 @@ const Customer = () => {
     }, [customerId, refreshPdfs]);
 
 
-    const handleSetPdfUrl = async (babyNames) => {
-        const generatedPdfUrl = await generatePdf(babyNames);
+    const handleSetPdfUrl = async (babyNames,additionalBabyNames) => {
+        const generatedPdfUrl = await generatePdf(babyNames,additionalBabyNames);
         setPdfUrl(generatedPdfUrl);
     }
-    const handleShowPdf = async (babyNames, _id) => {
-        const generatedPdfUrl = await generatePdf(babyNames); // Call the generatePdf function
+    const handleShowPdf = async (babyNames,additionalBabyNames ) => {
+        const generatedPdfUrl = await generatePdf(babyNames,additionalBabyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
-        console.log(generatedPdfUrl);
-        setEnabledRow(_id);
         setShowViewer(true);
     };
 
@@ -206,7 +211,7 @@ const Customer = () => {
                         <div className="absolute inset-0  opacity-30 rounded-lg"></div>
                         <div className="relative z-10">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile</h2>
+                                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Customer Profile</h2>
                                 <button onClick={() => setShowEditModal(true)} className="text-blue-500 hover:text-blue-700 transition duration-200">
                                     <Edit size={20} />
                                 </button>
@@ -368,7 +373,7 @@ const Customer = () => {
                                                                             { icon: FileText, label: 'View PDF', action: 'view' },
                                                                             { icon: MessageCircle, label: 'Send to WhatsApp', action: 'whatsapp' },
                                                                             { icon: Mail, label: 'Send to Mail', action: 'mail' },
-                                                                            { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' }
+                                                                            { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' },
                                                                         ].map((item, i) => (
                                                                             <button
                                                                                 key={i}
@@ -411,6 +416,7 @@ const Customer = () => {
 
                                 
                             </div>
+                        
                         <div className="mt-8">
                             {showViewer && (
                                 <PDFViewer
