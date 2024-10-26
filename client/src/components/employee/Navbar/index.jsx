@@ -58,6 +58,7 @@ const Navbar = () => {
                 />
                 <FaSearch className="h-7 w-5 text-gray-500 absolute left-3 top-2.5" />
               </div>
+              <NotificationButton />
               <div className="relative">
                 {/* User Icon */}
                 <button
@@ -100,20 +101,6 @@ const Navbar = () => {
                   </div>
                 </Transition>
               </div>
-              <NotificationButton />
-              <Link
-                to="/admin-dashboard/settings"
-                className="ml-3 p-1 rounded-full text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <FaCog className="h-6 w-4" />
-              </Link>
-              {/* Theme Toggle Button */}
-              <button
-                onClick={toggleDarkMode}
-                className="ml-3 p-1 rounded-full focus:outline-none"
-              >
-                {isDarkMode ? <FaSun className="h-6 w-4 text-yellow-400" /> : <FaMoon className="h-6 w-4 text-gray-600" />}
-              </button>
             </div>
           </div>
 
