@@ -33,16 +33,6 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
         <Typography variant="small" className="font-normal text-blue-gray-600 mb-4"> {/* Added margin bottom for spacing */}
           {description}
         </Typography>
-        <hr className="border-blue-gray-300 mb-4" /> {/* Divider line */}
-        {/* Additional Information */}
-        <div className="text-blue-gray-600 mt-4">
-          {/* Details section */}
-          <div className="mb-2">
-            <Typography variant="small" className="font-normal text-blue-gray-600">
-              {footer} {/* Only rendering footer text here */}
-            </Typography>
-          </div>
-        </div>
       </CardBody>
     </Card>
   );

@@ -10,10 +10,10 @@ import { useStore } from "../../store";
 export function StatisticsCard({ color, icon, title, value, footer }) {
   // Define colors for each card
   const floatingContainerColor = {
-    "Today's Money": "bg-[#303030]", // Dark gray for Today's Money
-    "Today's Users": "bg-blue-500", // blue for Today's Users
-    "New Clients": "bg-green-500", // green for New Clients
-    "Sales": "bg-pink-500", // pink for Sales
+    "Today's Revenue": "bg-[#303030]", // Dark gray for Today's Money
+    "Today's Customers": "bg-blue-500", // blue for Today's Users
+    "PDFs generated Today": "bg-green-500", // green for New Clients
+    "Total Tasks": "bg-pink-500", // pink for Sales
   };
   const { isDarkMode } = useStore()
 
