@@ -29,7 +29,14 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { Calendar, Clock, FileText, AlertCircle, CheckCircle, ChevronDown } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  FileText,
+  AlertCircle,
+  CheckCircle,
+  ChevronDown,
+} from "lucide-react";
 
 import {
   Info as InfoIcon,
@@ -161,7 +168,10 @@ const LeaveManagement = () => {
   useEffect(() => {
     if (leaveData.startDate && leaveData.endDate) {
       const duration =
-        differenceInDays(new Date(leaveData.endDate), new Date(leaveData.startDate)) + 1;
+        differenceInDays(
+          new Date(leaveData.endDate),
+          new Date(leaveData.startDate)
+        ) + 1;
       setLeaveDuration(duration > 0 ? duration : 0);
     } else {
       setLeaveDuration(0);
@@ -198,17 +208,18 @@ const LeaveManagement = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!leaveData.startDate) newErrors.startDate = 'Start date is required';
-    if (!leaveData.endDate) newErrors.endDate = 'End date is required';
-    if (!leaveData.leaveType) newErrors.leaveType = 'Leave type is required';
-    if (!leaveData.reason) newErrors.reason = 'Reason is required';
+    if (!leaveData.startDate) newErrors.startDate = "Start date is required";
+    if (!leaveData.endDate) newErrors.endDate = "End date is required";
+    if (!leaveData.leaveType) newErrors.leaveType = "Leave type is required";
+    if (!leaveData.reason) newErrors.reason = "Reason is required";
     if (leaveData.reason && leaveData.reason.length < 10) {
-      newErrors.reason = 'Reason must be at least 10 characters';
+      newErrors.reason = "Reason must be at least 10 characters";
     }
     if (leaveData.startDate && leaveData.endDate) {
       const start = new Date(leaveData.startDate);
       const end = new Date(leaveData.endDate);
-      if (end < start) newErrors.endDate = 'End date cannot be before start date';
+      if (end < start)
+        newErrors.endDate = "End date cannot be before start date";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -436,7 +447,7 @@ const LeaveManagement = () => {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
             >
-              {activeTab === 'apply' && (
+              {activeTab === "apply" && (
                 <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
                   <div className="p-6">
                     <h2 className="text-2xl font-bold">Leave Application</h2>
@@ -447,34 +458,52 @@ const LeaveManagement = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Start Date */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Start Date
+                        </label>
                         <div className="relative">
                           <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                           <input
                             type="date"
                             value={leaveData.startDate}
-                            onChange={(e) => setLeaveData(prev => ({ ...prev, startDate: e.target.value }))}
+                            onChange={(e) =>
+                              setLeaveData((prev) => ({
+                                ...prev,
+                                startDate: e.target.value,
+                              }))
+                            }
                             className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                           {errors.startDate && (
-                            <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.startDate}
+                            </p>
                           )}
                         </div>
                       </div>
 
                       {/* End Date */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          End Date
+                        </label>
                         <div className="relative">
                           <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                           <input
                             type="date"
                             value={leaveData.endDate}
-                            onChange={(e) => setLeaveData(prev => ({ ...prev, endDate: e.target.value }))}
+                            onChange={(e) =>
+                              setLeaveData((prev) => ({
+                                ...prev,
+                                endDate: e.target.value,
+                              }))
+                            }
                             className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                           {errors.endDate && (
-                            <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.endDate}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -483,11 +512,18 @@ const LeaveManagement = () => {
                     {/* Leave Type and Duration */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Leave Type</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Leave Type
+                        </label>
                         <div className="relative">
                           <select
                             value={leaveData.leaveType}
-                            onChange={(e) => setLeaveData(prev => ({ ...prev, leaveType: e.target.value }))}
+                            onChange={(e) =>
+                              setLeaveData((prev) => ({
+                                ...prev,
+                                leaveType: e.target.value,
+                              }))
+                            }
                             className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
                           >
                             <option value="">Select Leave Type</option>
@@ -498,13 +534,17 @@ const LeaveManagement = () => {
                           </select>
                           <ChevronDown className="absolute right-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
                           {errors.leaveType && (
-                            <p className="mt-1 text-sm text-red-600">{errors.leaveType}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.leaveType}
+                            </p>
                           )}
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Duration (Days)
+                        </label>
                         <div className="relative">
                           <Clock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                           <input
@@ -519,18 +559,27 @@ const LeaveManagement = () => {
 
                     {/* Reason */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Leave</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reason for Leave
+                      </label>
                       <div className="relative">
                         <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                         <textarea
                           value={leaveData.reason}
-                          onChange={(e) => setLeaveData(prev => ({ ...prev, reason: e.target.value }))}
+                          onChange={(e) =>
+                            setLeaveData((prev) => ({
+                              ...prev,
+                              reason: e.target.value,
+                            }))
+                          }
                           rows={1}
                           className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Please provide detailed reason for your leave request..."
                         />
                         {errors.reason && (
-                          <p className="mt-1 text-sm text-red-600">{errors.reason}</p>
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.reason}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -538,7 +587,9 @@ const LeaveManagement = () => {
                     {/* Leave Balance */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700">Leave Balance</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          Leave Balance
+                        </span>
                         <span className="text-sm font-medium text-gray-900">
                           {leaveBalance} / 15 days
                         </span>
@@ -557,8 +608,8 @@ const LeaveManagement = () => {
                       disabled={isSubmitting}
                       className={`w-full py-4 rounded-lg text-white font-medium transition-all ${
                         isSubmitting
-                          ? 'bg-blue-400 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl'
+                          ? "bg-blue-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl"
                       }`}
                     >
                       <div className="flex items-center justify-center gap-2">
@@ -578,10 +629,10 @@ const LeaveManagement = () => {
                   </form>
                 </div>
               )}
-  {activeTab === "pending" && (
+              {activeTab === "pending" && (
                 <div className="overflow-x-auto">
                   {pendingLeaves.length === 0 ? (
-                    <EmptyState />
+                    <EmptyState text='pending' />
                   ) : (
                     <>
                       <table className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
@@ -811,182 +862,119 @@ const LeaveManagement = () => {
 
               {activeTab === "history" && (
                 <div className="overflow-x-auto">
-                  <table className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                    <thead className="bg-gray-200 dark:bg-gray-700">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          S.No
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Leave Type
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Start Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          End Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Duration
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Leave Applied Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      <AnimatePresence>
-                        {leaveHistory
-                          .slice(
-                            page * rowsPerPage,
-                            page * rowsPerPage + rowsPerPage
-                          )
-                          .map((leave, index) => (
-                            <motion.tr
-                              key={leave._id}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {page * rowsPerPage + index + 1}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {leave.leaveType}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {new Date(leave.startDate).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {new Date(leave.endDate).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {differenceInDays(
-                                  new Date(leave.endDate),
-                                  new Date(leave.startDate)
-                                ) + 1}{" "}
-                                days
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span
-                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                                    leave.status
-                                  )}`}
+                  {leaveHistory.length === 0 ? (
+                    <EmptyState text="history" />
+                  ) : (
+                    <>
+                      <table className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+                        <thead className="bg-gray-200 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              S.No
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Leave Type
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Start Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              End Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Duration
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Leave Applied Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                          <AnimatePresence>
+                            {leaveHistory
+                              .slice(
+                                page * rowsPerPage,
+                                page * rowsPerPage + rowsPerPage
+                              )
+                              .map((leave, index) => (
+                                <motion.tr
+                                  key={leave._id}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
                                 >
-                                  {leave.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {leave.createdAt
-                                  ? new Date(
-                                      leave.createdAt
-                                    ).toLocaleDateString()
-                                  : "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button
-                                  onClick={() => handleLeaveDetails(leave)}
-                                  className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200 mr-4"
-                                >
-                                  <InfoIcon size={18} />
-                                </button>
-                              </td>
-                            </motion.tr>
-                          ))}
-                      </AnimatePresence>
-                    </tbody>
-                  </table>
-                  <div
-                    className={`px-4 py-3 flex items-center justify-between border-t sm:px-6`}
-                  >
-                    <div className="flex-1 flex justify-between sm:hidden">
-                      <button
-                        onClick={() => {
-                          setPage((prev) => Math.max(prev - 1, 0));
-                        }}
-                        disabled={page === 0}
-                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {page * rowsPerPage + index + 1}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {leave.leaveType}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {new Date(
+                                      leave.startDate
+                                    ).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {new Date(
+                                      leave.endDate
+                                    ).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {differenceInDays(
+                                      new Date(leave.endDate),
+                                      new Date(leave.startDate)
+                                    ) + 1}{" "}
+                                    days
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                                        leave.status
+                                      )}`}
+                                    >
+                                      {leave.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    {leave.createdAt
+                                      ? new Date(
+                                          leave.createdAt
+                                        ).toLocaleDateString()
+                                      : "N/A"}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button
+                                      onClick={() => handleLeaveDetails(leave)}
+                                      className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200 mr-4"
+                                    >
+                                      <InfoIcon size={18} />
+                                    </button>
+                                  </td>
+                                </motion.tr>
+                              ))}
+                          </AnimatePresence>
+                        </tbody>
+                      </table>
+                      <div
+                        className={`px-4 py-3 flex items-center justify-between border-t sm:px-6`}
                       >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPage((prev) =>
-                            Math.min(
-                              prev + 1,
-                              Math.ceil(leaveHistory.length / rowsPerPage) - 1
-                            )
-                          );
-                        }}
-                        disabled={
-                          page ===
-                          Math.ceil(leaveHistory.length / rowsPerPage) - 1
-                        }
-                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm text-gray-700">
-                          Showing {page * rowsPerPage + 1} to{" "}
-                          {Math.min(
-                            (page + 1) * rowsPerPage,
-                            leaveHistory.length
-                          )}{" "}
-                          of {leaveHistory.length} results
-                        </p>
-                      </div>
-                      <div>
-                        <nav
-                          className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                          aria-label="Pagination"
-                        >
+                        <div className="flex-1 flex justify-between sm:hidden">
                           <button
                             onClick={() => {
                               setPage((prev) => Math.max(prev - 1, 0));
                             }}
                             disabled={page === 0}
-                            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
-                              theme.palette.mode === "dark"
-                                ? "border-gray-700 bg-gray-800"
-                                : "border-gray-300 bg-white"
-                            } text-sm font-medium text-gray-500 hover:bg-gray-50`}
+                            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                           >
                             Previous
                           </button>
-                          {Array.from(
-                            {
-                              length: Math.ceil(
-                                leaveHistory.length / rowsPerPage
-                              ),
-                            },
-                            (_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => setPage(i)}
-                                className={`relative inline-flex items-center px-4 py-2 border ${
-                                  theme.palette.mode === "dark"
-                                    ? "border-gray-700 bg-gray-800"
-                                    : "border-gray-300 bg-white"
-                                } text-sm font-medium ${
-                                  page === i
-                                    ? "text-indigo-600"
-                                    : "text-gray-500"
-                                }`}
-                              >
-                                {i + 1}
-                              </button>
-                            )
-                          )}
                           <button
                             onClick={() => {
                               setPage((prev) =>
@@ -1001,18 +989,94 @@ const LeaveManagement = () => {
                               page ===
                               Math.ceil(leaveHistory.length / rowsPerPage) - 1
                             }
-                            className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-                              theme.palette.mode === "dark"
-                                ? "border-gray-700 bg-gray-800"
-                                : "border-gray-300 bg-white"
-                            } text-sm font-medium text-gray-500 hover:bg-gray-50`}
+                            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                           >
                             Next
                           </button>
-                        </nav>
+                        </div>
+                        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              Showing {page * rowsPerPage + 1} to{" "}
+                              {Math.min(
+                                (page + 1) * rowsPerPage,
+                                leaveHistory.length
+                              )}{" "}
+                              of {leaveHistory.length} results
+                            </p>
+                          </div>
+                          <div>
+                            <nav
+                              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                              aria-label="Pagination"
+                            >
+                              <button
+                                onClick={() => {
+                                  setPage((prev) => Math.max(prev - 1, 0));
+                                }}
+                                disabled={page === 0}
+                                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
+                                  theme.palette.mode === "dark"
+                                    ? "border-gray-700 bg-gray-800"
+                                    : "border-gray-300 bg-white"
+                                } text-sm font-medium text-gray-500 hover:bg-gray-50`}
+                              >
+                                Previous
+                              </button>
+                              {Array.from(
+                                {
+                                  length: Math.ceil(
+                                    leaveHistory.length / rowsPerPage
+                                  ),
+                                },
+                                (_, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => setPage(i)}
+                                    className={`relative inline-flex items-center px-4 py-2 border ${
+                                      theme.palette.mode === "dark"
+                                        ? "border-gray-700 bg-gray-800"
+                                        : "border-gray-300 bg-white"
+                                    } text-sm font-medium ${
+                                      page === i
+                                        ? "text-indigo-600"
+                                        : "text-gray-500"
+                                    }`}
+                                  >
+                                    {i + 1}
+                                  </button>
+                                )
+                              )}
+                              <button
+                                onClick={() => {
+                                  setPage((prev) =>
+                                    Math.min(
+                                      prev + 1,
+                                      Math.ceil(
+                                        leaveHistory.length / rowsPerPage
+                                      ) - 1
+                                    )
+                                  );
+                                }}
+                                disabled={
+                                  page ===
+                                  Math.ceil(leaveHistory.length / rowsPerPage) -
+                                    1
+                                }
+                                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
+                                  theme.palette.mode === "dark"
+                                    ? "border-gray-700 bg-gray-800"
+                                    : "border-gray-300 bg-white"
+                                } text-sm font-medium text-gray-500 hover:bg-gray-50`}
+                              >
+                                Next
+                              </button>
+                            </nav>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
               )}
             </motion.div>
