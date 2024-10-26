@@ -8,7 +8,7 @@ import { Customers } from "./Customers";
 import Tasks from "./Tasks";
 import Customer from "./Customers/Customer";
 import CheckBoxListPage from "./Customers/CheckBoxList";
-import LeaveManagement from "./LeaveApply";
+import LeaveManagement from "./LeaveApply/index2";
 import BabyDatabase from "./BabyDatabase";
 const EmployeeManagement = () => {
   const { isDarkMode } = useStore()
