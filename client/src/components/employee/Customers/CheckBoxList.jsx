@@ -53,7 +53,7 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
             const base64Pdf = await blobToBase64(pdfBlob);
             console.log(pdfUrl,pdfBlob,base64Pdf);
     
-    await axios.post("http://localhost:3000/api/send-pdf-email", {
+    await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
       email,
       base64Pdf,
       uniqueId,
