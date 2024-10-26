@@ -20,6 +20,7 @@ import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
 
 
+
 const Customer = () => {
     const [pdfsLoading, setPdfsLoading] = useState(false);
     const location = useLocation();
@@ -42,6 +43,11 @@ const Customer = () => {
     const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [expandedRow, setExpandedRow] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [mailUrl,setMailUrl]=useState(null);
+    const [pdfId, setPdfId] = useState(null);
+
+    
    
     
     const handleActionClick = async (action, pdf) => {
@@ -49,8 +55,8 @@ const Customer = () => {
         if (action === 'view') {
             handleShowPdf(pdf.babyNames,pdf.additionalBabyNames );
         } else if (action === 'mail') {
-            handleSetPdfUrl(pdf.babyNames,pdf.additionalBabyNames);
-            handleSendMail(pdfUrl, pdf._id, customerData.email);
+            await handleSetPdfUrl(pdf.babyNames,pdf.additionalBabyNames);
+            setPdfId(pdf._id);
         } else if (action === 'whatsapp') {
 
         } else if (action === 'feedback') {
@@ -117,10 +123,24 @@ const Customer = () => {
     }, [customerId, refreshPdfs]);
 
 
-    const handleSetPdfUrl = async (babyNames,additionalBabyNames) => {
-        const generatedPdfUrl = await generatePdf(babyNames,additionalBabyNames);
-        setPdfUrl(generatedPdfUrl);
-    }
+    const handleSetPdfUrl = async (babyNames, additionalBabyNames) => {
+        try {
+          const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
+          setMailUrl(generatedPdfUrl);
+        } catch (error) {
+          console.error("Error generating PDF URL:", error);
+          alert("Error generating PDF URL");
+        }
+      };
+      
+      // Watch for changes to mailUrl and pdfId and send mail if both are available
+      useEffect(() => {
+        if (mailUrl && pdfId) {
+          handleSendMail(mailUrl, pdfId, customerData.email);
+        }
+      }, [mailUrl, pdfId]);
+
+
     const handleShowPdf = async (babyNames,additionalBabyNames ) => {
         const generatedPdfUrl = await generatePdf(babyNames,additionalBabyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
@@ -175,6 +195,12 @@ const Customer = () => {
             }
         }
     }, [customerDetails, fromSection, section, feedback]);
+    const confirmMoveToCompleted = () => {
+        handleAccept();
+        setShowConfirmModal(false); // Close modal
+        // Place your action code here
+
+    };
 
     const handleNavigate = () => {
         navigate("generate-pdf", {
@@ -415,6 +441,29 @@ const Customer = () => {
 
                 {fromSection === 'inProgress' ? (
                     <>
+                        {showConfirmModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                        <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
+                        <p className="mb-6">Are you sure you want to move this Customer to completed?</p>
+                        
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmMoveToCompleted}
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
                         <div className="mt-8">
                             {showViewer && (
                                 <PDFViewer
@@ -431,7 +480,7 @@ const Customer = () => {
                         <div className="w-1/2 mt-10">
 
                             <div className="mt-10">
-                                <button onClick={handleAccept} className="bg-blue-500 text-white px-4 py-2 rounded">
+                                <button onClick={()=>{setShowConfirmModal(true)}} className="bg-blue-500 text-white px-4 py-2 rounded">
                                     Move To Completed
                                 </button>
                                 
