@@ -35,6 +35,7 @@ const LeaveHistory = ({
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLeaveHistory();
@@ -42,6 +43,7 @@ const LeaveHistory = ({
 
   const fetchLeaveHistory = async () => {
     try {
+      setLoading(true);
       const token = Cookies.get("token");
       const response = await axios.get(
         "https://vedic-backend-neon.vercel.app/api/employees/leaves/history",
@@ -61,6 +63,8 @@ const LeaveHistory = ({
         message: "Failed to fetch leave history",
         severity: "error",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,6 +92,14 @@ const LeaveHistory = ({
   const emptyRows =
     rowsPerPage -
     Math.min(rowsPerPage, leaveHistory.length - page * rowsPerPage);
+
+  if (loading) {
+    return (
+      <div className="h-[400px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -371,7 +383,7 @@ const LeaveHistory = ({
                               theme.palette.mode === "dark" ? "text-slate-400" : "text-slate-600"
                             }`}
                           >
-                            {selectedLeave.leaveType}
+                            {selectedLeave?.leaveType}
                           </p>
                         </div>
 
@@ -388,8 +400,8 @@ const LeaveHistory = ({
                               theme.palette.mode === "dark" ? "text-slate-300" : "text-slate-700"
                             }`}
                           >
-                            {new Date(selectedLeave.startDate).toLocaleDateString()} -{" "}
-                            {new Date(selectedLeave.endDate).toLocaleDateString()}
+                            {new Date(selectedLeave?.startDate).toLocaleDateString()} -{" "}
+                            {new Date(selectedLeave?.endDate).toLocaleDateString()}
                           </span>
                         </div>
 
@@ -407,8 +419,8 @@ const LeaveHistory = ({
                             }`}
                           >
                             {Math.ceil(
-                              (new Date(selectedLeave.endDate) -
-                                new Date(selectedLeave.startDate)) /
+                              (new Date(selectedLeave?.endDate) -
+                                new Date(selectedLeave?.startDate)) /
                                 (1000 * 60 * 60 * 24)
                             ) + 1}{" "}
                             days
@@ -418,10 +430,10 @@ const LeaveHistory = ({
                         <div>
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                              selectedLeave.status
+                              selectedLeave?.status
                             )}`}
                           >
-                            {selectedLeave.status}
+                            {selectedLeave?.status}
                           </span>
                         </div>
 
@@ -438,11 +450,11 @@ const LeaveHistory = ({
                               theme.palette.mode === "dark" ? "text-slate-400" : "text-slate-600"
                             }`}
                           >
-                            {selectedLeave.reason}
+                            {selectedLeave?.reason}
                           </p>
                         </div>
 
-                        {selectedLeave.adminComments && (
+                        {selectedLeave?.adminComments && (
                           <div>
                             <h4
                               className={`text-sm font-medium ${
@@ -456,7 +468,7 @@ const LeaveHistory = ({
                                 theme.palette.mode === "dark" ? "text-slate-400" : "text-slate-600"
                               }`}
                             >
-                              {selectedLeave.adminComments}
+                              {selectedLeave?.adminComments}
                             </p>
                           </div>
                         )}
