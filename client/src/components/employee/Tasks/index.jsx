@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
   ChevronUp,
@@ -70,7 +70,7 @@ const Tasks = () => {
     try {
       const response = await axios.get(
         // `https://vedic-backend-neon.vercel.app/api/employee/tasks`,
-        `http://localhost:3000/api/employee/tasks`,
+        `https://vedic-backend-neon.vercel.app/api/employee/tasks`,
         {
           params: {
             page: currentPage,
@@ -80,7 +80,7 @@ const Tasks = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      console.log(response.data)
       if (response.data && Array.isArray(response.data.tasks)) {
         setTasks(response.data.tasks);
         setTotalTasks(response.data.totalTasks);
@@ -114,10 +114,14 @@ const Tasks = () => {
   };
 
   const handleAddComment = async (taskId, newComment) => {
+
     try {
+      console.log(newComment)
       setAddingComment(true);
       await axios.post(
         `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/comments`,
+        // `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/comments`,
+
         { newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -289,7 +293,7 @@ const Tasks = () => {
               whileTap={{ scale: 0.95 }}
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium 
+              className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium
                        bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
                        border border-gray-200 dark:border-gray-700
                        hover:bg-gray-50 dark:hover:bg-gray-700
@@ -346,6 +350,21 @@ const Tasks = () => {
           </motion.div>
         )}
       </div>
+
+      {/* TaskModal */}
+      {selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          updateTaskStatus={updateTaskStatus}
+          statusOptions={statusOptions}
+          comment={comment}
+          setComment={setComment}
+          handleAddComment={handleAddComment}
+          addingComment={addingComment}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };
@@ -425,7 +444,10 @@ const TaskCard = ({ task, updateTaskStatus, setSelectedTask, isDarkMode }) => {
             {task.status}
           </span>
           <button
-            onClick={() => setSelectedTask(task)}
+            onClick={() => {
+              console.log("Viewing task details:", task);
+              setSelectedTask(task);
+            }}
             className="flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition-colors duration-200"
           >
             <Eye size={16} />

@@ -277,7 +277,7 @@ const LeaveApplication = ({
         </div>
 
         {/* Leave Balance */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">
               Leave Balance
@@ -292,7 +292,7 @@ const LeaveApplication = ({
               style={{ width: `${(leaveBalance / 15) * 100}%` }}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Submit Button */}
         <button

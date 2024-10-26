@@ -270,6 +270,7 @@ useEffect(() => {
         item.bookName?.toLowerCase().includes(book.toLowerCase())
       );
     }
+    
     if (meaning) {
       filtered = filtered.filter((item) =>
         item.meaning?.toLowerCase().includes(meaning.toLowerCase())
