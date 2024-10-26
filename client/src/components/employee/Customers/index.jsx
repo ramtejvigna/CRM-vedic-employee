@@ -65,6 +65,10 @@ export const Customers = () => {
     const updatedCustomer = { ...customer, additionalDetails: details };
 
     if (toSection === "inProgress") {
+      if (!paymentDate || !paymentTime || !amountPaid || !transactionId) {
+        alert("Please enter all payment details before moving to In Progress.");
+        return;
+      }
       updatedCustomer.paymentStatus = paymentStatus;
       updatedCustomer.customerStatus = "inProgress";
       updatedCustomer.paymentDate = paymentDate;
@@ -97,7 +101,12 @@ export const Customers = () => {
 
   const handleAccept = useCallback(() => {
     if (selectedCustomer) {
-      setPaymentStatus(paymentDate && paymentTime);
+      if (activeTab === "newRequests" && nextSection === "inProgress") {
+        if (!paymentDate || !paymentTime || !amountPaid || !transactionId) {
+          alert("Please enter all payment details before moving to In Progress.");
+          return;
+        }
+      }
       moveCustomer(selectedCustomer, activeTab, nextSection, details);
       setShowModal(false);
     }
@@ -335,18 +344,21 @@ export const Customers = () => {
                 <div className="space-y-4">
                   <input
                     type="date"
+                    required
                     value={paymentDate}
                     onChange={(e) => setPaymentDate(e.target.value)}
                     className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                   />
                   <input
                     type="time"
+                    required
                     value={paymentTime}
                     onChange={(e) => setPaymentTime(e.target.value)}
                     className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                   />
                   <input
                     type="text"
+                    required
                     value={amountPaid}
                     onChange={(e) => setAmountPaid(e.target.value)}
                     placeholder="Amount Paid"
@@ -354,21 +366,12 @@ export const Customers = () => {
                   />
                   <input
                     type="text"
+                    required
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value)}
                     placeholder="Transaction ID"
                     className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                   />
-                  <select
-                    value={leadSource}
-                    onChange={(e) => setLeadSource(e.target.value)}
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">Select Lead Source</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="website">Website</option>
-                  </select>
                 </div>
               )}
               {activeTab === "inProgress" && (
