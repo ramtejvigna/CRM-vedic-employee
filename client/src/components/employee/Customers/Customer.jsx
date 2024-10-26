@@ -45,13 +45,11 @@ const Customer = () => {
    
     
     const handleActionClick = async (action, pdf) => {
-        console.log(pdf);
         setActiveDropdown(null);
         if (action === 'view') {
             handleShowPdf(pdf.babyNames,pdf.additionalBabyNames );
         } else if (action === 'mail') {
             handleSetPdfUrl(pdf.babyNames,pdf.additionalBabyNames);
-            console.log(pdfUrl);
             handleSendMail(pdfUrl, pdf._id, customerData.email);
         } else if (action === 'whatsapp') {
 
@@ -250,7 +248,22 @@ const Customer = () => {
                         </div>
                     </div>
                 </div>
-
+                {fromSection === 'inProgress' ? (
+                    <>
+                        <div className="flex justify-between items-center my-10">
+                            <button
+                                onClick={handleNavigate}
+                                className={`bg-blue-500 text-white px-4 py-2 rounded `}
+                                
+                                >
+                                Generate Pdf
+                                </button>
+                                </div>
+                    </>
+                            ) : (
+                    <></>
+                )}
+                                      
                 {/* Generated PDFs Card */}
                 <div className="w-full bg-white mt-10 dark:bg-gray-800 rounded-lg shadow-lg p-6">
                     <div className="flex w-full items-center justify-between mb-6">
@@ -402,18 +415,6 @@ const Customer = () => {
 
                 {fromSection === 'inProgress' ? (
                     <>
-                        <div className="flex justify-between items-center my-10">
-                            <button
-                                onClick={handleNavigate}
-                                className={`bg-blue-500 text-white px-4 py-2 rounded `}
-                                
-                                >
-                                Generate Pdf
-                                </button>
-
-                                
-                            </div>
-                        
                         <div className="mt-8">
                             {showViewer && (
                                 <PDFViewer

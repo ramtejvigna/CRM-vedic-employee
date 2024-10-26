@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation,useNavigate } from "react-router-dom";
@@ -10,6 +10,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import {
+  Edit,
+  ArrowLeft,
+  ArrowRight,
+} from 'lucide-react';
 
 export const handleDownload = (pdfUrl, uniqueId) => {
   if (!pdfUrl) {
@@ -39,14 +44,9 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
   }
 
   try {
-    // Fetch the Blob from the Blob URL
     const response = await fetch(pdfUrl);
     const pdfBlob = await response.blob(); // Convert the response to a Blob
-
-    // Convert the Blob to base64
     const base64Pdf = await blobToBase64(pdfBlob);
-
-    // Send the base64-encoded PDF to the backend
     await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
       email,
       base64Pdf,
@@ -103,14 +103,18 @@ const CheckBoxListPage = () => {
   ]);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isModalOpen, setModalOpen] = useState(false);
-    const [numberOfNames, setNumberOfNames] = useState(0);
+    const [numberOfNames, setNumberOfNames] = useState();
     const [additionalBabyNames, setAdditionalBabyNames] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
-    const [babyNames, setBabyNames]=useState([])
+    const [showNumberInput, setShowNumberInput]=useState(true);
+    const sliderRef = useRef(null);
+
     
     
     const handleCloseModal = () => {
         setModalOpen(false);
+        setNumberOfNames();
+        setShowNumberInput(true);
         
     };
 
@@ -128,20 +132,42 @@ const CheckBoxListPage = () => {
 
     const handleSubmit = () => {
         console.log("Submitted baby names:", additionalBabyNames);
-        handleCloseModal();
+        setModalOpen(false);
 
 
     };
 
     const settings = {
-        dots: true,
-        infinite: false,
-        speed: 500,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        arrows: false,
-        beforeChange: (_, next) => setCurrentStep(next),
+      dots: true,
+      infinite: false,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      arrows: false,
+      beforeChange: (_, next) => setCurrentStep(next),
+      appendDots: (dots) => (
+        <div className="overflow-hidden flex items-center justify-center mt-4">
+          {dots
+            .filter((_, index) => Math.abs(currentStep - index) <= 1) // Show only previous, current, and next dots
+            .map((dot, index) => (
+              <span key={index} className="transition-opacity duration-300 ease-in-out mx-1">
+                {dot}
+              </span>
+            ))}
+        </div>
+      ),
+      customPaging: (i) => (
+        <div
+          className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-300 ease-in-out ${
+            currentStep === i
+              ? "bg-gray-800"  // Current dot color
+              : "bg-gray-300 opacity-75"  // Previous and next dots color
+          }`}
+        />
+      ),
     };
+    
+    
 
 
   const navigate = useNavigate();
@@ -440,7 +466,7 @@ const handleMeaningChange = (e) => {
   return (
     <div className="max-w-7xl mx-auto mt-8">
       <ToastContainer
-                position="bottom-right"
+                position="top-right"
                 autoClose={3000}
                 // Unique container ID
             />
@@ -659,70 +685,132 @@ const handleMeaningChange = (e) => {
         
       </div>
       <div className="mt-8">
-                        {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
-                        <h2 className="text-2xl font-semibold text-center mb-6">Baby Names Input</h2>
-                        
-                        {/* Input for number of names */}
-                        <div className="mb-4">
-                            <input
-                                type="number"
-                                value={numberOfNames}
-                                onChange={handleNumberOfNamesChange}
-                                placeholder="Enter number of names"
-                                min="0"
-                                className="border border-gray-300 rounded-md w-full p-2 focus:outline-none focus:border-indigo-500"
-                            />
-                        </div>
+      {isModalOpen && (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+      <h2 className="text-2xl font-semibold text-center mb-6">Additional Baby Names</h2>
 
-                        {/* Carousel for input fields */}
-                        {numberOfNames > 0 && (
-                            <Slider {...settings} className="mb-6">
-                                {additionalBabyNames.map((_, index) => (
-                                    <div key={index} className="p-4 flex flex-col items-center">
-                                        <h3 className="text-xl font-medium mb-4">Entry {index + 1}</h3>
-                                        <label className="w-full mb-2">
-                                            <span className="text-sm font-medium">Baby Name:</span>
-                                            <input
-                                                type="text"
-                                                value={additionalBabyNames[index].name}
-                                                onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                                                className="border border-gray-300 rounded-md w-full p-2 mt-1 focus:outline-none focus:border-indigo-500"
-                                            />
-                                        </label>
-                                        <label className="w-full mb-2">
-                                            <span className="text-sm font-medium">Meaning:</span>
-                                            <input
-                                                type="text"
-                                                value={additionalBabyNames[index].meaning}
-                                                onChange={(e) => handleInputChange(index, 'meaning', e.target.value)}
-                                                className="border border-gray-300 rounded-md w-full p-2 mt-1 focus:outline-none focus:border-indigo-500"
-                                            />
-                                        </label>
-                                    </div>
-                                ))}
-                            </Slider>
-                        )}
+      {/* Step 1: Enter the number of names */}
+      {showNumberInput ? (
+        <div className="mb-4 flex items-center justify-center">
+        <input
+          type="number"
+          value={numberOfNames}
+          onChange={handleNumberOfNamesChange}
+          placeholder="Enter number of names"
+          min="0"
+          className="border border-gray-300 rounded-md w-2/3 p-2 focus:outline-none focus:border-indigo-500 mr-2"
+        />
+        <button
+          onClick={() => setShowNumberInput(false)}
+          className="bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600"
+        >
+          Enter
+        </button>
+      </div>
+      
+      ) : (
+        <>
+        <p>No of Names:{numberOfNames}</p>
+          <button
+            onClick={() => setShowNumberInput(true)}
+            className=" text-blue-700 py-2 px-4 rounded-md mb-6 "
+          >
+            <Edit size={20}/>
+          </button>
 
-                        {/* Next/Add Button */}
-                        <div className="flex justify-between mt-4">
-                            {currentStep === numberOfNames - 1 ? (
-                                <button onClick={handleSubmit} className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
-                                    Add
-                                </button>
-                            ) : (
-                                <button onClick={() => setCurrentStep(currentStep + 1)} className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
-                                    Next
-                                </button>
-                            )}
-                            <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+          {numberOfNames > 0 && (
+  <div className="relative">
+    <Slider {...settings} ref={sliderRef} className="mb-6">
+      {additionalBabyNames.map((_, index) => (
+        <div key={index} className="p-4 flex flex-col items-center">
+          <h3 className="text-xl font-medium mb-4">Entry {index + 1}</h3>
+
+          {/* Baby Name Input */}
+          <label className="w-full mb-2 text-left pl-6"> {/* Increased padding-left to shift to the right */}
+            <div>
+              <span className="text-sm font-medium">Baby Name:</span>
+            </div>
+            <input
+              type="text"
+              value={additionalBabyNames[index].name}
+              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+              required
+              className="border border-gray-300 rounded-md w-3/4 p-2 mt-1 focus:outline-none focus:border-indigo-500" 
+            />
+          </label>
+
+          {/* Meaning Input */}
+          <label className="w-full mb-2 text-left pl-6"> {/* Increased padding-left to shift to the right */}
+            <div>
+              <span className="text-sm font-medium">Meaning:</span>
+            </div>
+            <input
+              type="text"
+              value={additionalBabyNames[index].meaning}
+              onChange={(e) => handleInputChange(index, 'meaning', e.target.value)}
+              required
+              className="border border-gray-300 rounded-md w-3/4 p-2 mt-1 focus:outline-none focus:border-indigo-500" 
+            />
+          </label>
+        </div>
+      ))}
+    </Slider>
+
+    {/* Navigation Buttons */}
+    <button
+      onClick={() => {
+        if (currentStep > 0) {
+          setCurrentStep(currentStep - 1);
+          sliderRef.current.slickGoTo(currentStep - 1);
+        }
+      }}
+      className={`absolute left-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === 0 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
+      disabled={currentStep === 0}
+    >
+      <ArrowLeft size={20} />
+    </button>
+
+    <button
+      onClick={() => {
+        if (currentStep < numberOfNames - 1) {
+          setCurrentStep(currentStep + 1);
+          sliderRef.current.slickGoTo(currentStep + 1);
+        }
+      }}
+      className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === numberOfNames - 1 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
+      disabled={currentStep === numberOfNames - 1}
+    >
+      <ArrowRight size={24} />
+    </button>
+
+    <button
+      onClick={handleSubmit}
+      disabled={currentStep !== numberOfNames - 1}
+      className="bg-blue-300 text-gray-700 py-2 px-4 rounded-md mt-6 hover:bg-blue-400"
+    >
+      Add
+    </button>
+  </div>
+)}
+
+
+        </>
+      )}
+
+      <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700 mt-4">
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
             </div>
       
     
