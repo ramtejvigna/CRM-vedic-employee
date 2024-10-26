@@ -46,9 +46,14 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
 
   try {
     const response = await fetch(pdfUrl);
-    const pdfBlob = await response.blob(); // Convert the response to a Blob
-    const base64Pdf = await blobToBase64(pdfBlob);
-    await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const pdfBlob = await response.blob(); // Convert the response to a Blob
+            const base64Pdf = await blobToBase64(pdfBlob);
+            console.log(pdfUrl,pdfBlob,base64Pdf);
+    
+    await axios.post("http://localhost:3000/api/send-pdf-email", {
       email,
       base64Pdf,
       uniqueId,
@@ -428,6 +433,7 @@ const handleMeaningChange = (e) => {
   
   const handleGeneratePdf = async () => {
     console.log(additionalBabyNames);
+    console.log(selectedItems);
     if (selectedItems.length === 0) {
         alert("No items selected!");
         return;
