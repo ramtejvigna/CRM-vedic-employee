@@ -70,7 +70,7 @@ const Tasks = () => {
     try {
       const response = await axios.get(
         // `https://vedic-backend-neon.vercel.app/api/employee/tasks`,
-        `http://localhost:3000/api/employee/tasks`,
+        `https://vedic-backend-neon.vercel.app/api/employee/tasks`,
         {
           params: {
             page: currentPage,
@@ -120,7 +120,7 @@ const Tasks = () => {
       setAddingComment(true);
       await axios.post(
         `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/comments`,
-        // `http://localhost:3000/api/employee/tasks/${taskId}/comments`,
+        // `https://vedic-backend-neon.vercel.app/api/employee/tasks/${taskId}/comments`,
 
         { newComment },
         { headers: { Authorization: `Bearer ${token}` } }
