@@ -432,9 +432,9 @@ const Customer = () => {
 
                             <div className="mt-10">
                                 <button onClick={handleAccept} className="bg-blue-500 text-white px-4 py-2 rounded">
-                                    Confirm
+                                    Move To Completed
                                 </button>
-                                <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2">Cancel</button>
+                                
                             </div>
                         </div>
                     </>
