@@ -15,30 +15,7 @@ const PDFViewer = ({ pdfUrl, handleDownload, handleSendMail, email, enabledRow, 
         </button>
 
         <h2 className="mb-4 text-xl font-semibold">Generated PDF:</h2>
-
-        {/* Button container */}
-        <div className="flex justify-end mb-4 space-x-2">
-          <button
-            onClick={() => handleDownload(pdfUrl, pdfId)}
-            
-            className="rounded-lg px-4 py-2 transition duration-200 "
-          >
-            <FaDownload />
-          </button>
-          <button
-            onClick={() => { /* Add your WhatsApp functionality here */ }}
-            className="rounded-lg px-4 py-2 transition duration-200"
-          >
-            <FaWhatsapp />
-          </button>
-          <button
-            onClick={() => handleSendMail(pdfUrl, pdfId, email)}
-            disabled={enabledRow !== pdfId}
-            className="rounded-lg px-4 py-2 transition duration-200"
-          >
-            <FaEnvelope />
-          </button>
-        </div>
+     
 
         {/* PDF Iframe Viewer */}
         <div className="flex items-center justify-center w-full h-[80%]">

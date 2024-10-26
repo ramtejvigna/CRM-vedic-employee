@@ -14,7 +14,7 @@ import {
     Eye,
     AlertCircle
 } from 'lucide-react';
-import axios from 'axios';
+import axios, { formToJSON } from 'axios';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
 import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
@@ -437,6 +437,26 @@ const Customer = () => {
                         </div>
                     )}
                 </div>
+                
+                {fromSection ==="completed"?(
+                    <>
+                    <div className="mt-8">
+                            {showViewer && (
+                                <PDFViewer
+                                    pdfUrl={pdfUrl}
+                                    handleDownload={handleDownload}
+                                    handleSendMail={handleSendMail}
+                                    email={customerData.email}
+                                    enabledRow={enabledRow}
+                                    pdfId={enabledRow}
+                                    onClose={handleClose} // Pass the close handler
+                                />
+                            )}
+                        </div>
+                    </>
+                ):(
+                    <></>
+                )}
 
 
                 {fromSection === 'inProgress' ? (
