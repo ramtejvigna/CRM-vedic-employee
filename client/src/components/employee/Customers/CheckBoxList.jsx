@@ -12,9 +12,10 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import {
   Edit,
-  ArrowLeft,
+  
   ArrowRight,
 } from 'lucide-react';
+import { FaAngleLeft,FaAngleRight,FaArrowLeft } from "react-icons/fa";
 
 export const handleDownload = (pdfUrl, uniqueId) => {
   if (!pdfUrl) {
@@ -108,6 +109,7 @@ const CheckBoxListPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [showNumberInput, setShowNumberInput]=useState(true);
     const sliderRef = useRef(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     
     
@@ -171,6 +173,24 @@ const CheckBoxListPage = () => {
 
 
   const navigate = useNavigate();
+
+  const handleSearch = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    
+    // Filter names based on the search term
+    const filtered = filteredNames.filter(babyName => 
+        babyName.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredNames(filtered);
+};
+
+useEffect(() => {
+    // Reset filtered names if the search term is cleared
+    if (!searchTerm) {
+        setFilteredNames(names);
+    }
+}, [searchTerm]);
 
 
   useEffect(() => {
@@ -470,30 +490,49 @@ const handleMeaningChange = (e) => {
                 autoClose={3000}
                 // Unique container ID
             />
+      
+      <button 
+        onClick={()=>{navigate(-1)}}
+        className="top-4 left-4 flex items-center text-gray-500 hover:text-gray-700"
+      >
+        <FaArrowLeft size={20} />
+        <span className="ml-2"></span>
+      </button>
       <h1 className="text-4xl font-bold mb-20">Baby Names</h1>
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-64">
-                        <input
-                            type="text"
-                            placeholder="Search Names"
-                            value={startingLetterFilter}
-                            onChange={handleStartingLetterChange}
-                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
-                        />
-                        <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowFilters((prev) => !prev)}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white transition duration-300"
-                    >
-                        <Filter className="h-5 w-5 inline-block mr-2" />
-                        Filters
-                    </motion.button>
-                </div>
-                </div>
+    {/* Search and Filter Section */}
+    <div className="flex items-center space-x-4 w-full sm:w-auto">
+        <div className="relative w-full sm:w-64">
+        <input
+                type="text"
+                placeholder="Search Names"
+                value={searchTerm} // Controlled input value
+                onChange={handleSearch} // Update search term and filter names
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+            />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+        </div>
+
+        <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowFilters((prev) => !prev)}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white transition duration-300 flex items-center"
+        >
+            <Filter className="h-5 w-5 mr-2" />
+            Filters
+        </motion.button>
+    </div>
+
+    {/* Additional Baby Names Button */}
+    <button
+        onClick={() => setModalOpen(true)}
+        className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition duration-300"
+    >
+        Additional Baby Names
+    </button>
+</div>
+
       
       {showFilters && (
   <div className="bg-white p-4 rounded-lg mb-6 shadow-md">
@@ -666,12 +705,7 @@ const handleMeaningChange = (e) => {
           </button>
         </div>
       </div>
-      <button
-                onClick={()=>setModalOpen(true)}
-                className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
-            >
-                Open Baby Names Modal
-            </button>
+      
 
       <div className="flex justify-between items-center my-10">
       <button
@@ -688,75 +722,47 @@ const handleMeaningChange = (e) => {
       {isModalOpen && (
   <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+    <button 
+          onClick={handleCloseModal}
+          className="absolute top-1 right-1 text-gray-400 text-3xl p-2 hover:text-gray-600 transition duration-200"
+        >
+          &times;
+        </button>
       <h2 className="text-2xl font-semibold text-center mb-6">Additional Baby Names</h2>
 
       {/* Step 1: Enter the number of names */}
       {showNumberInput ? (
         <div className="mb-4 flex items-center justify-center">
-        <input
-          type="number"
-          value={numberOfNames}
-          onChange={handleNumberOfNamesChange}
-          placeholder="Enter number of names"
-          min="0"
-          className="border border-gray-300 rounded-md w-2/3 p-2 focus:outline-none focus:border-indigo-500 mr-2"
-        />
-        <button
-          onClick={() => setShowNumberInput(false)}
-          className="bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600"
-        >
-          Enter
-        </button>
-      </div>
-      
+          
+          <input
+            type="number"
+            value={numberOfNames}
+            onChange={handleNumberOfNamesChange}
+            placeholder="Enter number of names"
+            min="0"
+            className="border border-gray-300 rounded-md w-1/3 p-2 focus:outline-none focus:border-indigo-500 mr-2 text-center"
+          />
+          <button
+            onClick={() => setShowNumberInput(false)}
+            className="bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600"
+          >
+            Enter
+          </button>
+        </div>
       ) : (
         <>
-        <p>No of Names:{numberOfNames}</p>
-          <button
-            onClick={() => setShowNumberInput(true)}
-            className=" text-blue-700 py-2 px-4 rounded-md mb-6 "
-          >
-            <Edit size={20}/>
-          </button>
+          <p className="flex items-center  mb-6">
+  <span>No of Names: {numberOfNames}</span>
+  <button
+    onClick={() => setShowNumberInput(true)}
+    className="text-blue-700 py-2 px-4 rounded-md"
+  >
+    <Edit size={20} />
+  </button>
+</p>
 
-          {numberOfNames > 0 && (
+{numberOfNames > 0 && (
   <div className="relative">
-    <Slider {...settings} ref={sliderRef} className="mb-6">
-      {additionalBabyNames.map((_, index) => (
-        <div key={index} className="p-4 flex flex-col items-center">
-          <h3 className="text-xl font-medium mb-4">Entry {index + 1}</h3>
-
-          {/* Baby Name Input */}
-          <label className="w-full mb-2 text-left pl-6"> {/* Increased padding-left to shift to the right */}
-            <div>
-              <span className="text-sm font-medium">Baby Name:</span>
-            </div>
-            <input
-              type="text"
-              value={additionalBabyNames[index].name}
-              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-              required
-              className="border border-gray-300 rounded-md w-3/4 p-2 mt-1 focus:outline-none focus:border-indigo-500" 
-            />
-          </label>
-
-          {/* Meaning Input */}
-          <label className="w-full mb-2 text-left pl-6"> {/* Increased padding-left to shift to the right */}
-            <div>
-              <span className="text-sm font-medium">Meaning:</span>
-            </div>
-            <input
-              type="text"
-              value={additionalBabyNames[index].meaning}
-              onChange={(e) => handleInputChange(index, 'meaning', e.target.value)}
-              required
-              className="border border-gray-300 rounded-md w-3/4 p-2 mt-1 focus:outline-none focus:border-indigo-500" 
-            />
-          </label>
-        </div>
-      ))}
-    </Slider>
-
     {/* Navigation Buttons */}
     <button
       onClick={() => {
@@ -765,11 +771,42 @@ const handleMeaningChange = (e) => {
           sliderRef.current.slickGoTo(currentStep - 1);
         }
       }}
-      className={`absolute left-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === 0 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
+      className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === 0 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
       disabled={currentStep === 0}
     >
-      <ArrowLeft size={20} />
+      <FaAngleLeft size={20} />
     </button>
+
+    {/* Slider for additional baby names */}
+    <Slider {...settings} ref={sliderRef} className="mb-4 ml-11 w-full max-w-[calc(100%-100px)] relative"> {/* Ensure relative positioning */}
+      {additionalBabyNames.map((_, index) => (
+        <div key={index} className="p-4 flex flex-col items-center">
+          {/* Baby Name Input */}
+          <label className="w-full mb-4">
+            <span className="text-sm font-medium">Baby Name: <span className="text-red-500">*</span></span>
+            <input
+              type="text"
+              value={additionalBabyNames[index].name}
+              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+              required
+              className="border border-gray-300 rounded-md w-full max-w-xs p-2 mt-1 focus:outline-none focus:border-indigo-500 text-left"
+            />
+          </label>
+
+          {/* Meaning Input */}
+          <label className="w-full mb-4">
+            <span className="text-sm font-medium">Meaning: <span className="text-red-500">*</span></span>
+            <input
+              type="text"
+              value={additionalBabyNames[index].meaning}
+              onChange={(e) => handleInputChange(index, 'meaning', e.target.value)}
+              required
+              className="border border-gray-300 rounded-md w-full max-w-xs p-2 mt-1 focus:outline-none focus:border-indigo-500 text-left"
+            />
+          </label>
+        </div>
+      ))}
+    </Slider>
 
     <button
       onClick={() => {
@@ -778,29 +815,34 @@ const handleMeaningChange = (e) => {
           sliderRef.current.slickGoTo(currentStep + 1);
         }
       }}
-      className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === numberOfNames - 1 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
+      className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 ${currentStep === numberOfNames - 1 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-gray-300"}`}
       disabled={currentStep === numberOfNames - 1}
     >
-      <ArrowRight size={24} />
+      <FaAngleRight size={24} />
     </button>
 
-    <button
-      onClick={handleSubmit}
-      disabled={currentStep !== numberOfNames - 1}
-      className="bg-blue-300 text-gray-700 py-2 px-4 rounded-md mt-6 hover:bg-blue-400"
-    >
-      Add
-    </button>
+    {/* Submit Button */}
+    {currentStep === numberOfNames - 1 && ( // Only show button on last step
+      <button
+        onClick={() => {
+          const allFilled = additionalBabyNames.every(entry => entry.name && entry.meaning);
+          if (!allFilled) {
+            toast.error('Please fill out all fields before submitting.');
+            return;
+          }
+          handleSubmit();
+        }}
+        className="bg-blue-300 text-gray-700 py-2 px-4 rounded-md mt-6 hover:bg-blue-400"
+      >
+        Add
+      </button>
+    )}
   </div>
 )}
-
-
         </>
       )}
 
-      <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700 mt-4">
-        Close
-      </button>
+      
     </div>
   </div>
 )}
