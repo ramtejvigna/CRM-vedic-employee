@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts } from 'pdf-lib';
 import pdfTemplate from "../../../assets/Template.pdf";
 
 // Extracted generatePdf function to reuse it elsewhere
-export const generatePdf = async (babyNames) => {
+export const generatePdf = async (babyNames, additionalBabyNames) => {
   try {
     const pdfTemplateBytes = await fetch(pdfTemplate).then(res => {
       if (!res.ok) throw new Error('Network response was not ok');
@@ -13,10 +13,10 @@ export const generatePdf = async (babyNames) => {
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontSize = 25;
     const lineSpacing = 40;
-    const lineSpacing1=52;
+    const lineSpacing1 = 52;
     const firstPage = pdfDoc.getPage(0);
-    let secondPage = pdfDoc.getPage(1);  // Initially assume second page
-    let thirdPage = pdfDoc.getPageCount() > 2 ? pdfDoc.getPage(2) : null;  // Check if third page already exists
+    let secondPage = pdfDoc.getPage(1);
+    let thirdPage = pdfDoc.getPageCount() > 2 ? pdfDoc.getPage(2) : null;
 
     // Static data
     const staticData = {
@@ -32,55 +32,46 @@ export const generatePdf = async (babyNames) => {
       luckyDay: 'Sunday',
       luckyGod: 'Shiva',
       luckyMetal: 'Silver',
-  };
+    };
 
     // Embed static data on the first page
     let textYPosition = 620;
-    firstPage.drawText(staticData.gender, { x: 320, y: textYPosition, size: fontSize, font }); // Gender
-        textYPosition -= lineSpacing;  // Move down for the next value
+    firstPage.drawText(staticData.gender, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.birthDate, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.birthTime, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.zodiacSign, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.nakshatra, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.destinyNumber.toString(), { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing;
+    firstPage.drawText(staticData.luckyDay, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing1;
+    firstPage.drawText(staticData.gemstone, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing1;
+    firstPage.drawText(staticData.luckyGod, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing1;
+    firstPage.drawText(staticData.luckyMetal, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing1;
+    firstPage.drawText(staticData.luckyColour, { x: 320, y: textYPosition, size: fontSize, font });
+    textYPosition -= lineSpacing1;
+    firstPage.drawText(staticData.numerology.toString(), { x: 320, y: textYPosition, size: fontSize, font });
 
-        firstPage.drawText(staticData.birthDate, { x: 320, y: textYPosition, size: fontSize, font }); // Birth Date
-        textYPosition -= lineSpacing;
-
-        firstPage.drawText(staticData.birthTime, { x: 320, y: textYPosition, size: fontSize, font }); // Birth Time
-        textYPosition -= lineSpacing;
-
-        firstPage.drawText(staticData.zodiacSign, { x: 320, y: textYPosition, size: fontSize, font }); // Zodiac Sign
-        textYPosition -= lineSpacing;
-
-        firstPage.drawText(staticData.nakshatra, { x: 320, y: textYPosition, size: fontSize, font }); // Nakshatra
-        textYPosition -= lineSpacing;
-
-        firstPage.drawText(staticData.destinyNumber.toString(), { x: 320, y: textYPosition, size: fontSize, font }); // Destiny Number
-        textYPosition -= lineSpacing;
-
-        firstPage.drawText(staticData.luckyDay, { x: 320, y: textYPosition, size: fontSize, font }); // Lucky Day
-        textYPosition -= lineSpacing1;
-
-        firstPage.drawText(staticData.gemstone, { x: 320, y: textYPosition, size: fontSize, font }); // Gemstone
-        textYPosition -= lineSpacing1;
-
-        firstPage.drawText(staticData.luckyGod, { x: 320, y: textYPosition, size: fontSize, font }); // Lucky God
-        textYPosition -= lineSpacing1;
-
-        firstPage.drawText(staticData.luckyMetal, { x: 320, y: textYPosition, size: fontSize, font }); // Lucky Metal
-        textYPosition -= lineSpacing1;
-
-        firstPage.drawText(staticData.luckyColour, { x: 320, y: textYPosition, size: fontSize, font }); // Lucky Colour
-        textYPosition -= lineSpacing1;
-
-        firstPage.drawText(staticData.numerology.toString(), { x: 320, y: textYPosition, size: fontSize, font }); // Numerology
-
-
-    // Embed babyNames on the second (or third) page
+    // Combine babyNames and AdditionalBabyNames
+    const allBabyNames = [...babyNames, ...additionalBabyNames];
+    
+    // Embed allBabyNames on the second (or third) page
     let yPosition = 600;
-    babyNames.forEach(({ name, meaning }, index) => {
+    allBabyNames.forEach(({ name, meaning }, index) => {
       if (yPosition < 100 && !thirdPage) {
-        // Move to third page, check if it's already present
-        thirdPage = pdfDoc.addPage();  // Add third page if it doesn't exist
+        // Move to third page if needed
+        thirdPage = pdfDoc.addPage();
         yPosition = 600;
       } else if (yPosition < 100 && thirdPage) {
-        // If we already have the third page, use it
+        // Use third page if it already exists
         secondPage = thirdPage;
         yPosition = 600;
       }
