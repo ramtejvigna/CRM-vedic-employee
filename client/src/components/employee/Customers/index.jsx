@@ -3,14 +3,9 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus,
-  Edit,
-  Trash2,
   Eye,
   Check,
   X,
-  EyeOff,
-  ReceiptText,
 } from "lucide-react";
 import { useStore } from "../../../store"; // Assuming you have a store for dark mode
 import { useNavigate } from "react-router-dom";
@@ -30,6 +25,7 @@ export const Customers = () => {
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentTime, setPaymentTime] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
+  const [reason, setReason] = useState("")
   const [transactionId, setTransactionId] = useState("");
   const [showCheckBoxList, setShowCheckBoxList] = useState(false);
   const { isDarkMode } = useStore();
@@ -137,7 +133,7 @@ export const Customers = () => {
               "Customer ID",
               "Father Name",
               "Mother Name",
-              "W/A number",
+              "Whatsapp number",
               "Baby Gender",
               "Actions",
             ].map((header) => (
@@ -338,7 +334,7 @@ export const Customers = () => {
               className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
             >
               <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-                Payment Details
+                {activeTab === 'rejected' ? "Reason for Accepting" : "Payment Details"}
               </h2>
               {activeTab === "newRequests" && (
                 <div className="space-y-4">
@@ -446,6 +442,18 @@ export const Customers = () => {
                   >
                     Move to In Progress
                   </button>
+                </div>
+              )}
+              {activeTab === "rejected" && (
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    required
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Reason for Acceptance"
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  />
                 </div>
               )}
 
