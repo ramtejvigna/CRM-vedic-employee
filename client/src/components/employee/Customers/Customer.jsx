@@ -221,6 +221,7 @@ const Customer = () => {
     if (!customerDetails) {
         return <div className="text-center mt-10">No customer details found.</div>;
     }
+    console.log(customerDetails)
 
     return (
         <div className="min-h-screen p-4 sm:p-8">
@@ -250,7 +251,7 @@ const Customer = () => {
                                 </p>
 
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Payment Time:</strong> {customerDetails.paymentTime || 'N/A'}</p>
-                                <p className="text-gray-600 dark:text-gray-300"><strong className='mr-1'>Payment Transaction ID:</strong> {customerDetails?.payTransactionID || 'N/A'}</p>
+                                {/* <p className="text-gray-600 dark:text-gray-300"><strong className='mr-1'>Payment Transaction ID:</strong> {customerDetails?.payTransactionID || 'N/A'}</p> */}
                                 <p className="text-gray-600 dark:text-gray-300 grid grid-cols-2 w-2/3"><strong>Amount paid:</strong> {customerDetails?.amountPaid || 'N/A'}</p>
                             </div>
                         </div>
