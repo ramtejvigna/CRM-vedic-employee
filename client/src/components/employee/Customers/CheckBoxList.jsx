@@ -43,7 +43,7 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
     alert("Provide a valid email");
     return;
   }
-
+  
   try {
     const response = await fetch(pdfUrl);
             if (!response.ok) {
@@ -540,19 +540,19 @@ const handleMeaningChange = (e) => {
 </div>
 
       
-      {showFilters && (
+{showFilters && (
   <div className="bg-white p-4 rounded-lg mb-6 shadow-md">
     <h2 className="text-xl font-semibold mb-4">Filters</h2>
 
     {/* Filter Input Fields */}
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {/* Book Filter */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Book</label>
         <input
           type="text"
           value={bookFilter}
-          onChange={handleBookChange}  // Updated to handleBookChange
+          onChange={handleBookChange} 
           className="mt-1 p-2 block w-full border rounded-md"
         />
       </div>
@@ -563,7 +563,7 @@ const handleMeaningChange = (e) => {
         <input
           type="text"
           value={meaningFilter}
-          onChange={handleMeaningChange}  // Updated to handleMeaningChange
+          onChange={handleMeaningChange} 
           className="mt-1 p-2 block w-full border rounded-md"
         />
       </div>
@@ -573,7 +573,7 @@ const handleMeaningChange = (e) => {
         <label className="block text-sm font-medium text-gray-700">Gender</label>
         <select
           value={genderFilter}
-          onChange={handleGenderChange}  // Updated to handleGenderChange
+          onChange={handleGenderChange} 
           className="mt-1 p-2 block w-full border rounded-md"
         >
           <option value="">Select Gender</option>
@@ -588,7 +588,7 @@ const handleMeaningChange = (e) => {
         <input
           type="text"
           value={startingLetterFilter}
-          onChange={handleStartingLetterChange}  // Updated to handleStartingLetterChange
+          onChange={handleStartingLetterChange} 
           maxLength={1}
           className="mt-1 p-2 block w-full border rounded-md"
         />
@@ -617,7 +617,7 @@ const handleMeaningChange = (e) => {
       )}
     </div>
 
-    {/* Removed Apply Filters and Reset buttons */}
+    {/* Reset button */}
     <div className="flex justify-end mt-4">
       <button
         onClick={handleResetFilters}
@@ -634,15 +634,16 @@ const handleMeaningChange = (e) => {
 
 
 
+
       <div className="overflow-x-auto max-h-96 mb-4 rounded-lg shadow-lg">
         <table className="min-w-full table-auto border-collapse bg-white rounded-lg">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Book Name</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">BookName</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name In Hindi</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning In Hindi</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Shlok No</th>
@@ -660,10 +661,10 @@ const handleMeaningChange = (e) => {
                     className="rounded"
                   />
                 </td>
-                <td className="px-4 py-2">{item.bookName}</td>
-                <td className="px-4 py-2">{item.gender}</td>
                 <td className="px-4 py-2">{item.name}</td>
                 <td className="px-4 py-2">{item.meaning}</td>
+                <td className="px-4 py-2">{item.gender}</td>
+                <td className="px-4 py-2">{item.bookName}</td>
                 <td className="px-4 py-2">{item.nameInHindi}</td>
                 <td className="px-4 py-2">{item.meaningInHindi}</td>
                 <td className="px-4 py-2">{item.shlokNo}</td>
