@@ -62,7 +62,7 @@ export const generatePdf = async (babyNames, additionalBabyNames) => {
 
     // Combine babyNames and AdditionalBabyNames
     const allBabyNames = [...babyNames, ...additionalBabyNames];
-    console.log(allBabyNames);
+    
     
     // Embed allBabyNames on the second (or third) page
     let yPosition = 600;

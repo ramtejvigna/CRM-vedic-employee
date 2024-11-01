@@ -102,25 +102,7 @@ const Customer = () => {
         }
     }, [customerId]);
 
-    const refreshPdfs = useCallback(async () => {
-        try {
-            setPdfsLoading(true);
-            const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
-            if (response.data.length > 0) {
-                setPdfs(response.data);
-            }
-            setPdfsLoading(false);
-        } catch (error) {
-            console.error('Error fetching PDFs:', error);
-            setPdfsLoading(false);
-        }
-    }, [customerId]);
 
-    useEffect(() => {
-        if (customerId) {
-            refreshPdfs();
-        }
-    }, [customerId, refreshPdfs]);
 
 
     const handleSetPdfUrl = async (babyNames, additionalBabyNames) => {
@@ -135,11 +117,19 @@ const Customer = () => {
 
     // Watch for changes to mailUrl and pdfId and send mail if both are available
     useEffect(() => {
-        if (mailUrl && pdfId) {
-            handleSendMail(mailUrl, pdfId, customerData.email);
-        }
+        const sendMailAndFetchPdfs = async () => {
+            if (mailUrl && pdfId) {
+                try {
+                    await handleSendMail(mailUrl, pdfId, customerData.email);
+                    await fetchPdfs(); // Re-fetch PDFs after sending mail
+                } catch (error) {
+                    console.error("Error sending mail:", error);
+                }
+            }
+        };
+    
+        sendMailAndFetchPdfs();
     }, [mailUrl, pdfId]);
-
 
     const handleShowPdf = async (babyNames, additionalBabyNames) => {
         const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
@@ -221,7 +211,6 @@ const Customer = () => {
     if (!customerDetails) {
         return <div className="text-center mt-10">No customer details found.</div>;
     }
-    console.log(customerDetails)
 
     return (
         <div className="min-h-screen p-4 sm:p-8">
@@ -269,7 +258,7 @@ const Customer = () => {
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Gemstone:</strong> Ruby</p>
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Lucky Metal:</strong> Gold</p>
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Numerology:</strong> 3</p>
-                                <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> A</p>
+                                <p className="text-gray-600 dark:text-gray-300"><strong>Preferred Starting Letter:</strong> {customerDetails?.preferredStartingLetter}</p>
                                 <p className="text-gray-600 dark:text-gray-300"><strong>Suggested Baby Names:</strong> Aryan, Aadhya</p>
                             </div>
                         </div>
