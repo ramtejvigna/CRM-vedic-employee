@@ -146,26 +146,12 @@ const Customer = () => {
     const moveCustomer = (customer, fromSection, toSection, details) => {
         const updatedCustomer = { ...customer, additionalDetails: details };
 
-        if (toSection === 'inProgress') {
-            updatedCustomer.paymentStatus = paymentStatus;
-            updatedCustomer.customerStatus = 'inProgress';
-            updatedCustomer.paymentDate = paymentDate;
-            updatedCustomer.paymentTime = paymentTime;
-            updatedCustomer.amountPaid = amountPaid;
-            updatedCustomer.transactionId = transactionId;
-        } else if (toSection === 'completed') {
+        if (toSection === 'completed') {
             updatedCustomer.feedback = feedback;
             updatedCustomer.pdfGenerated = generatePdf
                 ? customer.pdfGenerated + 1
                 : customer.pdfGenerated;
             updatedCustomer.customerStatus = 'completed';
-        } else if (toSection === 'newRequests') {
-            updatedCustomer.feedback = '';
-            updatedCustomer.pdfGenerated = 0;
-            updatedCustomer.paymentStatus = paymentStatus;
-            updatedCustomer.customerStatus = 'newRequests';
-        } else if (toSection === 'rejected') {
-            updatedCustomer.customerStatus = 'rejected';
         }
 
         axios
