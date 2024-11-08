@@ -2,31 +2,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Eye,
-  Check,
-  X,
-} from "lucide-react";
+import { Eye, Check, X } from "lucide-react";
 import { useStore } from "../../../store"; // Assuming you have a store for dark mode
 import { useNavigate } from "react-router-dom";
 import CheckBoxListPage from "./CheckBoxList";
 
 export const Customers = () => {
   const [customerData, setCustomerData] = useState({});
-  const [activeTab, setActiveTab] = useState("newRequests");
+  const [activeTab, setActiveTab] = useState("assignedCustomers");
   const [showModal, setShowModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [nextSection, setNextSection] = useState("");
   const [details, setDetails] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState(false);
-  const [leadSource, setLeadSource] = useState('');
   const [feedback, setFeedback] = useState("");
-  const [generatePdf, setGeneratePdf] = useState(false);
-  const [paymentDate, setPaymentDate] = useState("");
-  const [paymentTime, setPaymentTime] = useState("");
-  const [amountPaid, setAmountPaid] = useState("");
-  const [reason, setReason] = useState("")
-  const [transactionId, setTransactionId] = useState("");
   const [showCheckBoxList, setShowCheckBoxList] = useState(false);
   const { isDarkMode } = useStore();
   const navigate = useNavigate();
@@ -36,9 +24,7 @@ export const Customers = () => {
   useEffect(() => {
     if (employeeId) {
       axios
-        .get(
-          `https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`
-        )
+        .get(`http://localhost:8000/customers/employees/${employeeId}/customers`)
         .then((response) => setCustomerData(response.data))
         .catch((error) =>
           console.error("Error fetching customer data:", error)
@@ -60,26 +46,9 @@ export const Customers = () => {
   const moveCustomer = (customer, fromSection, toSection, details) => {
     const updatedCustomer = { ...customer, additionalDetails: details };
 
-    if (toSection === "inProgress") {
-      if (!paymentDate || !paymentTime || !amountPaid || !transactionId) {
-        alert("Please enter all payment details before moving to In Progress.");
-        return;
-      }
-      updatedCustomer.paymentStatus = paymentStatus;
-      updatedCustomer.customerStatus = "inProgress";
-      updatedCustomer.paymentDate = paymentDate;
-      updatedCustomer.paymentTime = paymentTime;
-      updatedCustomer.amountPaid = amountPaid;
-      updatedCustomer.transactionId = transactionId;
-    } else if (toSection === "completed") {
+    if (toSection === "completed") {
       updatedCustomer.feedback = feedback;
       updatedCustomer.customerStatus = "completed";
-    } else if (toSection === "newRequests") {
-      updatedCustomer.feedback = "";
-      updatedCustomer.paymentStatus = paymentStatus;
-      updatedCustomer.customerStatus = "newRequests";
-    } else if (toSection === "rejected") {
-      updatedCustomer.customerStatus = "rejected";
     }
 
     setCustomerData((prevData) => ({
@@ -97,26 +66,10 @@ export const Customers = () => {
 
   const handleAccept = useCallback(() => {
     if (selectedCustomer) {
-      if (activeTab === "newRequests" && nextSection === "inProgress") {
-        if (!paymentDate || !paymentTime || !amountPaid || !transactionId) {
-          alert("Please enter all payment details before moving to In Progress.");
-          return;
-        }
-      }
       moveCustomer(selectedCustomer, activeTab, nextSection, details);
       setShowModal(false);
     }
-  }, [
-    selectedCustomer,
-    paymentDate,
-    paymentTime,
-    nextSection,
-    details,
-    activeTab,
-    amountPaid,
-    transactionId,
-    paymentStatus,
-  ]);
+  }, [selectedCustomer, nextSection, details, activeTab]);
 
   const renderTable = (customers, fromSection, nextSection) => (
     <motion.div
@@ -174,61 +127,38 @@ export const Customers = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
-                    {(fromSection === "newRequests" ||
-                      fromSection === "rejected") && (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
-                          onClick={() => {
-                            setSelectedCustomer(customer);
-                            setNextSection(nextSection);
-                            setShowModal(true);
-                            if (fromSection === "newRequests") {
-                              setPaymentStatus(false);
-                            }
-                          }}
-                        >
-                          <Check size={20} />
-                        </motion.button>
-                      )}
-                    {fromSection !== "newRequests" &&
-                      fromSection !== "rejected" && (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
-                          onClick={() => {
-                            setSelectedCustomer(customer);
-                            setNextSection(nextSection);
-                            (fromSection === 'newRequests' ? (
-                              setShowModal(true)
-                            ) : (
-                              navigate('viewDetailsIn', {
-                                state: {
-                                  customerData: customer, // Pass customer data
-                                  fromSection: fromSection, // Pass current section
-                                  section: nextSection    // Pass section info
-                                }
-                              })
-                            ))
-                          }}
-                        >
-                          <Eye size={20} />
-                        </motion.button>
-                      )}
-                    {fromSection === "newRequests" && (
+                    {fromSection === "assignedCustomers" && (
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
-                        onClick={() =>
-                          moveCustomer(customer, fromSection, "rejected")
-                        }
+                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setNextSection(nextSection);
+                          setShowModal(true);
+                        }}
                       >
-                        <X size={20} />
+                        <Check size={20} />
                       </motion.button>
                     )}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
+                      onClick={() => {
+                        setSelectedCustomer(customer);
+                        setNextSection(nextSection);
+                        navigate('viewDetailsIn', {
+                          state: {
+                            customerData: customer, // Pass customer data
+                            fromSection: fromSection, // Pass current section
+                            section: nextSection    // Pass section info
+                          }
+                        });
+                      }}
+                    >
+                      <Eye size={20} />
+                    </motion.button>
                   </div>
                 </td>
               </motion.tr>
@@ -253,24 +183,17 @@ export const Customers = () => {
       ? customerData[activeTab]
       : [];
     switch (activeTab) {
-      case "newRequests":
-        return renderTable(filteredCustomers, "newRequests", "inProgress");
-      case "inProgress":
-        return renderTable(filteredCustomers, "inProgress", "completed");
+      case "assignedCustomers":
+        return renderTable(filteredCustomers, "assignedCustomers", "completed");
       case "completed":
-        return renderTable(filteredCustomers, "completed", "inProgress");
-      case "rejected":
-        return renderTable(filteredCustomers, "rejected", "newRequests");
+        return renderTable(filteredCustomers, "completed", "assignedCustomers");
       default:
         return null;
     }
   };
 
-  const newRequestsCount = Array.isArray(customerData["newRequests"])
-    ? customerData["newRequests"].length
-    : 0;
-  const inProgressCount = Array.isArray(customerData["inProgress"])
-    ? customerData["inProgress"].length
+  const assignedCustomersCount = Array.isArray(customerData["assignedCustomers"])
+    ? customerData["assignedCustomers"].length
     : 0;
 
   return (
@@ -283,7 +206,7 @@ export const Customers = () => {
           Customer Management
         </h1>
         <div className="flex p-2 mb-6 justify-center space-x-2 overflow-x-auto">
-          {["newRequests", "inProgress", "completed", "rejected"].map((tab) => (
+          {["assignedCustomers", "completed"].map((tab) => (
             <motion.button
               key={tab}
               whileHover={{ scale: 1.05 }}
@@ -296,14 +219,9 @@ export const Customers = () => {
             >
               {tab.charAt(0).toUpperCase() +
                 tab.slice(1).replace(/([A-Z])/g, " $1")}
-              {tab === "newRequests" && newRequestsCount > 0 && (
+              {tab === "assignedCustomers" && assignedCustomersCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
-                  {newRequestsCount}
-                </span>
-              )}
-              {tab === "inProgress" && inProgressCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
-                  {inProgressCount}
+                  {assignedCustomersCount}
                 </span>
               )}
             </motion.button>
@@ -334,129 +252,47 @@ export const Customers = () => {
               className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
             >
               <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-                {activeTab === 'rejected' ? "Reason for Accepting" : "Payment Details"}
+                Payment Details
               </h2>
-              {activeTab === "newRequests" && (
-                <div className="space-y-4">
-                  <input
-                    type="date"
-                    required
-                    value={paymentDate}
-                    onChange={(e) => setPaymentDate(e.target.value)}
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  />
-                  <input
-                    type="time"
-                    required
-                    value={paymentTime}
-                    onChange={(e) => setPaymentTime(e.target.value)}
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  />
-                  <input
-                    type="text"
-                    required
-                    value={amountPaid}
-                    onChange={(e) => setAmountPaid(e.target.value)}
-                    placeholder="Amount Paid"
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  />
-                  <input
-                    type="text"
-                    required
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                    placeholder="Transaction ID"
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-              )}
-              {activeTab === "inProgress" && (
-                <div className="space-y-4">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {selectedCustomer?.email}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Payment Date & Time:{" "}
-                    {new Date(selectedCustomer?.paymentDate).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}{" "}
-                    - {selectedCustomer?.paymentTime}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Preferred God : {selectedCustomer?.preferredGod}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    PDF's Generated - {selectedCustomer?.pdfGenerated}
-                  </p>
-                  <label className="block my-2 mt-4 text-gray-600 dark:text-gray-300">
-                    Feedback
-                  </label>
-                  <textarea
-                    onChange={(e) => setFeedback(e.target.value)}
-                    className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none dark:bg-gray-700 dark:text-white"
-                  />
-                  <button
-                    className="p-2 px-4 bg-blue-500 text-white rounded-lg"
-                    onClick={() => {
-                      setSelectedCustomer(selectedCustomer);
-                      setShowCheckBoxList(true);
-                    }}
-                  >
-                    Generate PDF
-                  </button>
-                </div>
-              )}
-              {activeTab === "completed" && (
-                <div className="space-y-4">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {selectedCustomer?.email}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Payment Date & Time:{" "}
-                    {new Date(selectedCustomer?.paymentDate).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}{" "}
-                    - {selectedCustomer?.paymentTime}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Preferred God : {selectedCustomer?.preferredGod}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Given Feedback : {selectedCustomer?.feedback}
-                  </p>
-                  <button
-                    className="p-2 px-4 bg-yellow-500 bg-opacity-80 rounded-lg my-10"
-                    onClick={() =>
-                      moveCustomer(selectedCustomer, "completed", "inProgress")
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-300">
+                  {selectedCustomer?.email}
+                </p>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Payment Date & Time:{" "}
+                  {new Date(selectedCustomer?.paymentDate).toLocaleDateString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     }
-                  >
-                    Move to In Progress
-                  </button>
-                </div>
-              )}
-              {activeTab === "rejected" && (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    required
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="Reason for Acceptance"
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-              )}
-
+                  )}{" "}
+                  - {selectedCustomer?.paymentTime}
+                </p>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Preferred God : {selectedCustomer?.preferredGod}
+                </p>
+                <p className="text-gray-600 dark:text-gray-300">
+                  PDF's Generated - {selectedCustomer?.pdfGenerated}
+                </p>
+                <label className="block my-2 mt-4 text-gray-600 dark:text-gray-300">
+                  Feedback
+                </label>
+                <textarea
+                  onChange={(e) => setFeedback(e.target.value)}
+                  className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none dark:bg-gray-700 dark:text-white"
+                />
+                <button
+                  className="p-2 px-4 bg-blue-500 text-white rounded-lg"
+                  onClick={() => {
+                    setSelectedCustomer(selectedCustomer);
+                    setShowCheckBoxList(true);
+                  }}
+                >
+                  Generate PDF
+                </button>
+              </div>
               <div className="mt-10">
                 <button
                   onClick={handleAccept}
