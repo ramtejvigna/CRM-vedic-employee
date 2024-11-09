@@ -21,10 +21,12 @@ export const Customers = () => {
 
   const employeeId = Cookies.get("employeeId");
 
+
+
   useEffect(() => {
     if (employeeId) {
       axios
-        .get(`http://localhost:8000/customers/employees/${employeeId}/customers`)
+        .get(`https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`)
         .then((response) => setCustomerData(response.data))
         .catch((error) =>
           console.error("Error fetching customer data:", error)
@@ -152,7 +154,8 @@ export const Customers = () => {
                           state: {
                             customerData: customer, // Pass customer data
                             fromSection: fromSection, // Pass current section
-                            section: nextSection    // Pass section info
+                            section: nextSection,    // Pass section info
+
                           }
                         });
                       }}

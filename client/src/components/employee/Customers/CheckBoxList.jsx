@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Cookies from "js-cookie";
 import {
   Edit,
   
@@ -89,7 +90,8 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
 
 const CheckBoxListPage = () => {
   const { state } = useLocation();
-  const { customerData  } = state || {};
+  const { customerDetails  } = state || {};
+  const customerData  = customerDetails;
   const [email, setEmail] = useState(customerData?.email || "");
   const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || "");
   const [names, setNames] = useState([]);
@@ -114,8 +116,24 @@ const CheckBoxListPage = () => {
     const [showNumberInput, setShowNumberInput]=useState(true);
     const sliderRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [employee, setEmployee] = useState(null);
 
+    const employeeId = Cookies.get("employeeId");
     
+
+    useEffect(() => {
+      const fetchEmployee = async () => {
+          try {
+              const id=employeeId;
+              const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/employees/get-employee?id=${id}`);
+              setEmployee(response.data.employee);
+          } catch (err) {
+              setError(err.response ? err.response.data : 'Error fetching employee details');
+          }
+      };
+      
+      fetchEmployee();
+  }, [employeeId]);
     
     const handleCloseModal = () => {
         setModalOpen(false);
@@ -127,7 +145,7 @@ const CheckBoxListPage = () => {
     const handleNumberOfNamesChange = (e) => {
         const count = parseInt(e.target.value, 10);
         setNumberOfNames(count);
-        setAdditionalBabyNames(Array.from({ length: count }, () => ({ name: '', meaning: '' })));
+        setAdditionalBabyNames(Array.from({ length: count }, () => ({ nameEnglish: '', meaning: '' })));
     };
 
     const handleInputChange = (index, field, value) => {
@@ -197,6 +215,7 @@ useEffect(() => {
 }, [searchTerm]);
 
 
+
   useEffect(() => {
     axios
       .get("https://vedic-backend-neon.vercel.app/api/names")
@@ -261,7 +280,7 @@ useEffect(() => {
     const lowerCaseLetter = startingLetter.toLowerCase();
     // Filter items based on the first character
     filtered = filtered.filter((item) => 
-        item.name.charAt(0).toLowerCase() === lowerCaseLetter // Compare both in lowercase
+        item.nameEnglish.charAt(0).toLowerCase() === lowerCaseLetter // Compare both in lowercase
     );
   }
 
@@ -431,41 +450,74 @@ const handleMeaningChange = (e) => {
 
   
   
-  const handleGeneratePdf = async () => {
-    console.log(additionalBabyNames);
-    console.log(selectedItems);
-    if (selectedItems.length === 0) {
-        alert("No items selected!");
-        return;
-    }
+//   const handleGeneratePdf = async () => {
+//     console.log(additionalBabyNames);
+//     console.log(selectedItems);
+//     if (selectedItems.length === 0) {
+//         alert("No items selected!");
+//         return;
+//     }
 
-    try {
-        setIsLoading(true);
-        const response = await axios.post("https://vedic-backend-neon.vercel.app/api/create-pdf", {
-            names: selectedItems.map((item) => item.name),
-            customerId: customerData._id,
-            additionalBabyNames:additionalBabyNames,
-        });
+//     try {
+//         setIsLoading(true);
+//         const response = await axios.post("http://localhost:8000/api/create-pdf", {
+//             names: selectedItems.map((item) => item.name),
+//             customerId: customerData._id,
+//             additionalBabyNames:additionalBabyNames,
+//         });
 
-        toast.success("PDF Generated Successfully", {
+//         toast.success("PDF Generated Successfully", {
             
-        });
+//         });
 
-        setSelectedItems([]);
+//         setSelectedItems([]);
 
-        // Delay navigation to allow the toast to be visible
-        setTimeout(() => {
-            console.log("Navigating back");
-            navigate(-1);
-        }, 3000); // Adjust the timeout duration as needed (2000 ms = 2 seconds)
-    } catch (error) {
-        console.error("Error generating PDF:", error);
-        toast.error("PDF generation failed");
-    } finally {
-        setIsLoading(false); // Ensure loading state is set to false in any case
-    }
+//         // Delay navigation to allow the toast to be visible
+//         setTimeout(() => {
+//             console.log("Navigating back");
+//             navigate(-1);
+//         }, 3000); // Adjust the timeout duration as needed (2000 ms = 2 seconds)
+//     } catch (error) {
+//         console.error("Error generating PDF:", error);
+//         toast.error("PDF generation failed");
+//     } finally {
+//         setIsLoading(false); // Ensure loading state is set to false in any case
+//     }
+// };
+
+const handleGeneratePdf = async () => {
+  console.log(additionalBabyNames);
+  console.log(selectedItems);
+  if (selectedItems.length === 0) {
+      alert("No items selected!");
+      return;
+  }
+
+  try {
+      setIsLoading(true);
+      const response = await axios.post("https://vedic-backend-neon.vercel.app/api/create-pdf", {
+          names: selectedItems.map((item) => item._id), // Use item._id instead of item.name
+          customerId: customerData._id,
+          additionalBabyNames: additionalBabyNames,
+          generatedBy: employee.firstName,
+      });
+
+      toast.success("PDF Generated Successfully");
+
+      setSelectedItems([]);
+
+      // Delay navigation to allow the toast to be visible
+      setTimeout(() => {
+          console.log("Navigating back");
+          navigate(-1);
+      }, 3000); // Adjust the timeout duration as needed (3000 ms = 3 seconds)
+  } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("PDF generation failed");
+  } finally {
+      setIsLoading(false); // Ensure loading state is set to false in any case
+  }
 };
-
 
 
   const handleClose = () => {
@@ -640,14 +692,24 @@ const handleMeaningChange = (e) => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(English)</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">BookName</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name In Hindi</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning In Hindi</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Shlok No</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(Devangari)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Numerology</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Zodiac</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Rashi</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Nakshatra</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Planetary Influence</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Element</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Page No</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Syllable Count</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Character Significance</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Mantra Ref</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Related Festival</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Extra Note</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Research Tag</th>
             </tr>
           </thead>
           <tbody>
@@ -661,14 +723,24 @@ const handleMeaningChange = (e) => {
                     className="rounded"
                   />
                 </td>
-                <td className="px-4 py-2">{item.name}</td>
+                <td className="px-4 py-2">{item.nameEnglish}</td>
                 <td className="px-4 py-2">{item.meaning}</td>
                 <td className="px-4 py-2">{item.gender}</td>
                 <td className="px-4 py-2">{item.bookName}</td>
-                <td className="px-4 py-2">{item.nameInHindi}</td>
-                <td className="px-4 py-2">{item.meaningInHindi}</td>
-                <td className="px-4 py-2">{item.shlokNo}</td>
+                <td className="px-4 py-2">{item.nameDevanagari}</td>
+                <td className="px-4 py-2">{item.numerology}</td>
+                <td className="px-4 py-2">{item.zodiac}</td>
+                <td className="px-4 py-2">{item.rashi}</td>
+                <td className="px-4 py-2">{item.nakshatra}</td>
+                <td className="px-4 py-2">{item.planetaryInfluence}</td>
+                <td className="px-4 py-2">{item.element}</td>
                 <td className="px-4 py-2">{item.pageNo}</td>
+                <td className="px-4 py-2">{item.syllableCount}</td>
+                <td className="px-4 py-2">{item.characterSignificance}</td>
+                <td className="px-4 py-2">{item.mantraRef}</td>
+                <td className="px-4 py-2">{item.relatedFestival}</td>
+                <td className="px-4 py-2">{item.extraNote}</td>
+                <td className="px-4 py-2">{item.researchTag}</td>
               </tr>
             ))}
           </tbody>
@@ -793,7 +865,7 @@ const handleMeaningChange = (e) => {
             <span className="text-sm font-medium">Baby Name: <span className="text-red-500">*</span></span>
             <input
               type="text"
-              value={additionalBabyNames[index].name}
+              value={additionalBabyNames[index].nameEnglish}
               onChange={(e) => handleInputChange(index, 'name', e.target.value)}
               required
               className="border border-gray-300 rounded-md w-full max-w-xs p-2 mt-1 focus:outline-none focus:border-indigo-500 text-left"
@@ -832,7 +904,7 @@ const handleMeaningChange = (e) => {
     {currentStep === numberOfNames - 1 && ( // Only show button on last step
       <button
         onClick={() => {
-          const allFilled = additionalBabyNames.every(entry => entry.name && entry.meaning);
+          const allFilled = additionalBabyNames.every(entry => entry.nameEnglish && entry.meaning);
           if (!allFilled) {
             toast.error('Please fill out all fields before submitting.');
             return;
