@@ -207,281 +207,273 @@ const Customer = () => {
     return (
 
         <div className="min-h-screen p-4 sm:p-8">
+          <div className="flex items-center mb-6">
+      <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-900 hover:text-blue-500"
+      >
+          <ArrowLeft size={20} className="mr-2" /> {/* Back arrow icon */}
+      </button>
+      <h2 className="text-lg font-semibold">Customer Details</h2>
+      
+  </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-300 flex flex-col">
-            
-            {/* Back Button and Header */}
-            <div className="flex items-center mb-6">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center text-gray-900 hover:text-blue-500"
-                >
-                    <ArrowLeft size={20} className="mr-2" /> {/* Back arrow icon */}
-                </button>
-                <h2 className="text-lg font-semibold">Customer Details</h2>
-            </div>
-        
-            {/* Customer Name in Large Font */}
-            <p className="text-2xl font-medium ml-4 mb-4">{customerDetails.fatherName}</p>
-        {/* Bordered Box around Customer Info */}
-        <div className="border border-gray-900 rounded-lg p-4 mb-4">
-        <h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
-        
-            {/* Grid Layout for Customer Info */}
-            <div className="grid grid-cols-2 md:grid-cols-4 ">
-                {[
-                    { label: "customer Id", value: customerDetails.customerID },
-                    { label: "date Joined", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
-                    { label: "Contact No", value: customerDetails.whatsappNumber },
-                    { label: "Email", value: customerDetails.email }
-                ].map((item, index) => (
-                    <div key={index} className="flex flex-col">
-                        
-                        {/* Label with Full-width HR Line */}
-                        <p className="text-sm font-bold text-gray-500 capitalize">{item.label}</p>
-                        <hr className="my-3 border-gray-300 w-full" />
-        
-                        {/* Value with Full-width HR Line */}
-                        <p className=" text-gray-900">{item.value}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-            
-                    {/* Main Content Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Baby Details Card */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-900 p-6">
-                            <h2 className="text-lg font-semibold mb-4">Baby Details</h2>
-                            <hr className="my-3 border-gray-300 w-full" />
-        
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Gender:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.babyGender || "N/A"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Place of Birth:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.birthplace || "N/A"}</p>
-                                </div>
-                                <div>
-            <p className="text-sm font-medium text-gray-500">Date of Birth:</p>
-            <p className="mt-1 text-gray-900">
-                {customerDetails.babyBirthDate
-                    ? new Date(customerDetails.babyBirthDate).toLocaleDateString()
-                    : "N/A"}
-            </p>
-        </div>
-        
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Time of Birth:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.babyBirthTime || "N/A"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Mother's Name:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.motherName || "N/A"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Father's Name:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.fatherName || "N/A"}</p>
-                                </div>
-                                <div>
-            <p className="text-sm font-medium text-gray-500">Preferred Starting Letter:</p>
-            <p className="mt-1 text-gray-900">{customerDetails.preferredStartingLetter || "N/A"}</p>
-        </div>
-        
-        {/* Horizontal Line */}
-        <div className="col-span-2 my-4">
-                        <hr className="border-t border-gray-200" />
-                    </div>
-        <div>
-            <p className="text-sm font-medium text-gray-500">Zodiac Sign:</p>
-            <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Leo"}</p>
-        </div>
-        
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Nakshatra:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ashwini"}</p>
-                                </div>
-                               
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Numerology No :</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "3"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Lucky Colour:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "blue"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Gemstone:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ruby"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Destiny Number:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "7"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Lucky Day:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "friday"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Lucky God:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Lord Shiva"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Lucky Metal:</p>
-                                    <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Gold"}</p>
-                                </div>
-                            </div>
-                        </div>
-                      {/* Right Column */}
-                      <div className="space-y-6">
-                        {/* Payment Data Card */}
-                        <div className="border border-gray-900 rounded-lg p-6">
-                          <h2 className="text-lg font-medium text-gray-500 mb-4">Payment Data</h2>
-                          <div className="space-y-4">
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">Payment Date</p>
-                              <p className="mt-1">{customerDetails?.paymentDate ? new Date(customerDetails.paymentDate).toLocaleDateString() : "N/A"}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">Payment Time</p>
-                              <p className="mt-1">{customerDetails?.paymentTime || "N/A"}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">Astro Offer</p>
-                              <p className="mt-1">{customerDetails?.offer || "N/A"}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">Source (Instagram Lead)</p>
-                              <p className="mt-1">{customerDetails?.otherSource || "N/A"}</p>
-                            </div>
-                          </div>
-                        </div>
-            
-                        {/* PDFs Generated Card */}
-                        <div
-              className="border border-gray-900 rounded-lg p-6 overflow-visible transition-all duration-300"
-              style={{
-                maxHeight: activeDropdown ? '1000px' : '800px',
-              }}
-            >
-              <h2 className="text-lg font-semibold mb-4">PDF's Generated</h2>
-              <div
-                className="overflow-visible transition-all duration-300"
-                style={{
-                  maxHeight: activeDropdown ? '900px' : '700px',
-                }}
-              >
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-4 py-2 text-left">PDF</th>
-                      <th className="px-4 py-2 text-left">Generated</th>
-                      <th className="px-4 py-2 text-center">
-                        <MessageCircle className="inline h-4 w-4" />
-                      </th>
-                      <th className="px-4 py-2 text-center">
-                        <Mail className="inline h-4 w-4" />
-                      </th>
-                      <th className="px-4 py-2 text-center">Feedback</th>
-                      <th className="px-4 py-2 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="overflow-y-auto">
-                    {pdfs.map((pdf) => (
-                      <tr key={pdf._id} className="border-b">
-                        <td className="px-4 py-2">
-                          <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
-                            <FileText className="h-4 w-4 text-blue-600" />
-                          </button>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex flex-col">
-                            <span className="text-sm">{new Date(pdf.createdAt).toLocaleDateString()}</span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(pdf.createdAt).toLocaleTimeString()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <div className={`h-3 w-3 rounded-full ${pdf.whatsappStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex justify-center space-x-1">
-                            {[...Array(3)].map((_, i) => (
-                              <Star key={i} className={`h-4 w-4 ${i < 3 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right relative">
-                          <div className="flex items-center justify-end space-x-2">
-                            <div className="relative">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleDropdown(pdf._id);
-                                }}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
-                              >
-                                <MoreHorizontal className="h-5 w-5" />
-                              </button>
-        
-                              {activeDropdown === pdf._id && (
-                                <>
-                                  {/* Background overlay to close the dropdown when clicked outside */}
-                                  <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveDropdown(null);
-                                    }}
-                                  />
-                                  {/* Dropdown menu */}
-                                  <div
-                                    className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
-                                    style={{
-                                      top: '100%',
-                                      right: '0',
-                                    }}
-                                  >
-                                    {[
-                                      { icon: FileText, label: 'View PDF', action: 'view' },
-                                      { icon: MessageCircle, label: 'Send to WhatsApp', action: 'whatsapp' },
-                                      { icon: Mail, label: 'Send to Mail', action: 'mail' },
-                                      { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' },
-                                    ].map((item, i) => (
-                                      <button
-                                        key={i}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleActionClick(item.action, pdf);
-                                        }}
-                                        className="flex items-center w-full px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-                                      >
-                                        <item.icon className="h-4 w-4 mr-3" />
-                                        <span>{item.label}</span>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+  <p className="text-2xl font-medium ml-4 mb-4">{customerDetails.fatherName}</p>
+
+  <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
+  {/* Customer Name in Large Font */}
+  
+{/* Bordered Box around Customer Info */}
+<h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
+
+  {/* Grid Layout for Customer Info */}
+  <div className="grid grid-cols-2 md:grid-cols-4 ">
+      {[
+          { label: "customer Id", value: customerDetails.customerID },
+          { label: "date Joined", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
+          { label: "Contact No", value: customerDetails.whatsappNumber },
+          { label: "Email", value: customerDetails.email }
+      ].map((item, index) => (
+          <div key={index} className="flex flex-col">
+              
+              {/* Label with Full-width HR Line */}
+              <p className="text-sm font-bold text-gray-500 capitalize">{item.label}</p>
+              <hr className="my-3 border-gray-300 w-full" />
+
+              {/* Value with Full-width HR Line */}
+              <p className=" text-gray-900">{item.value}</p>
+          </div>
+      ))}
+  </div>
+
+</div>
+
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Baby Details Card */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
+                  <h2 className="text-lg font-semibold mb-4">Baby Details</h2>
+                  <hr className="my-3 border-gray-300 w-full" />
+
+                  <div className="grid grid-cols-2 gap-4">
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Gender:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.babyGender || "N/A"}</p>
                       </div>
-                    </div>
-         
-        </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Place of Birth:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.birthplace || "N/A"}</p>
+                      </div>
+                      <div>
+  <p className="text-sm font-medium text-gray-500">Date of Birth:</p>
+  <p className="mt-1 text-gray-900">
+      {customerDetails.babyBirthDate
+          ? new Date(customerDetails.babyBirthDate).toLocaleDateString()
+          : "N/A"}
+  </p>
+</div>
+
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Time of Birth:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.babyBirthTime || "N/A"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Mother's Name:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.motherName || "N/A"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Father's Name:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.fatherName || "N/A"}</p>
+                      </div>
+                      <div>
+  <p className="text-sm font-medium text-gray-500">Preferred Starting Letter:</p>
+  <p className="mt-1 text-gray-900">{customerDetails.preferredStartingLetter || "N/A"}</p>
+</div>
+
+{/* Horizontal Line */}
+<div className="col-span-2 my-4">
+              <hr className="border-t border-gray-200" />
+          </div>
+<div>
+  <p className="text-sm font-medium text-gray-500">Zodiac Sign:</p>
+  <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Leo"}</p>
+</div>
+
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Nakshatra:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ashwini"}</p>
+                      </div>
+                     
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Numerology No :</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "3"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Lucky Colour:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "blue"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Gemstone:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ruby"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Destiny Number:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "7"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Lucky Day:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "friday"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Lucky God:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Lord Shiva"}</p>
+                      </div>
+                      <div>
+                          <p className="text-sm font-medium text-gray-500">Lucky Metal:</p>
+                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Gold"}</p>
+                      </div>
+                  </div>
+              </div>
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Payment Data Card */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
+                <h2 className="text-lg font-medium text-gray-500 mb-4">Payment Data</h2>
+                <hr className="my-3 border-gray-300 w-full" />
+
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Payment Date</p>
+                    <p className="mt-1">{customerDetails?.paymentDate ? new Date(customerDetails.paymentDate).toLocaleDateString() : "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Payment Time</p>
+                    <p className="mt-1">{customerDetails?.paymentTime || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Astro Offer</p>
+                    <p className="mt-1">{customerDetails?.offer || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Source (Instagram Lead)</p>
+                    <p className="mt-1">{customerDetails?.otherSource || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+  
+              {/* PDFs Generated Card */}
+             {/* PDFs Generated Card */}
+             {/* PDFs Generated Card */}
+<div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
+  <h2 className="text-lg font-semibold mb-4">PDF's Generated</h2>
+  <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
+    <table className="w-full">
+      <thead>
+        <tr className="border-b">
+          <th className="px-4 py-2 text-left">PDF</th>
+          <th className="px-4 py-2 text-left">Generated</th>
+          <th className="px-4 py-2 text-center">
+            <MessageCircle className="inline h-4 w-4" />
+          </th>
+          <th className="px-4 py-2 text-center">
+            <Mail className="inline h-4 w-4" />
+          </th>
+          <th className="px-4 py-2 text-center">Feedback</th>
+          <th className="px-4 py-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pdfs.map((pdf) => (
+          <tr key={pdf._id} className="border-b">
+            <td className="px-4 py-2">
+              <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
+                <FileText className="h-4 w-4 text-blue-600" />
+              </button>
+            </td>
+            <td className="px-4 py-2">
+              <div className="flex flex-col">
+                <span className="text-sm">{new Date(pdf.createdAt).toLocaleDateString()}</span>
+                <span className="text-xs text-gray-500">
+                  {new Date(pdf.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-center">
+              <div className={`h-3 w-3 rounded-full ${pdf.whatsappStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
+            </td>
+            <td className="px-4 py-2 text-center">
+              <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
+            </td>
+            <td className="px-4 py-2">
+              <div className="flex justify-center space-x-1">
+                {[...Array(3)].map((_, i) => (
+                  <Star key={i} className={`h-4 w-4 ${i < 3 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                ))}
+              </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-right relative">
+              <div className="flex items-center justify-end space-x-2">
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDropdown(pdf._id);
+                    }}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </button>
+
+                  {activeDropdown === pdf._id && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveDropdown(null);
+                        }}
+                      />
+                      <div
+                        className="absolute right-0 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
+                        style={{
+                          bottom: '100%',
+                          right: '0',
+                          marginBottom: '0.5rem'
+                        }}
+                      >
+                        {[
+                          { icon: FileText, label: 'View PDF', action: 'view' },
+                          { icon: MessageCircle, label: 'Send to WhatsApp', action: 'whatsapp' },
+                          { icon: Mail, label: 'Send to Mail', action: 'mail' },
+                          { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' },
+                        ].map((item, i) => (
+                          <button
+                            key={i}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleActionClick(item.action, pdf);
+                            }}
+                            className="flex items-center w-full px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                          >
+                            <item.icon className="h-4 w-4 mr-3" />
+                            <span>{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+            </div>
+          </div>
+
+
                     {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') ? (
                                         <>
                                             <div className="flex justify-between items-center my-10">
@@ -493,15 +485,8 @@ const Customer = () => {
                                                     Generate Pdf
                                                 </button>
                                             </div>
-                                            
-                                        </>
-                                    ) : (
-                                        <></>
-                                    )}
 
-                   {customerDetails.customerStatus === "inWorking" ? (
-                    <>
-                    {showConfirmModal && (
+                                            {showConfirmModal && (
                              <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
                                  <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
                                      <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
@@ -530,11 +515,12 @@ const Customer = () => {
                        </button>
                     </div>
                 </div>
-                    </>
-                   ):
-                   (
-                      <></>
-                   )}
+                                            
+                                        </>
+                                    ) : (
+                                        <></>
+                                    )}
+
                   
                         <div className="mt-8">
                         {showViewer && (
