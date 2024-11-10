@@ -129,20 +129,6 @@ export const Customers = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
-                    {fromSection === "assignedCustomers" && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
-                        onClick={() => {
-                          setSelectedCustomer(customer);
-                          setNextSection(nextSection);
-                          setShowModal(true);
-                        }}
-                      >
-                        <Check size={20} />
-                      </motion.button>
-                    )}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -239,81 +225,6 @@ export const Customers = () => {
           {renderContent()}
         </motion.div>
       </div>
-
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md"
-            >
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-                Payment Details
-              </h2>
-              <div className="space-y-4">
-                <p className="text-gray-600 dark:text-gray-300">
-                  {selectedCustomer?.email}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Payment Date & Time:{" "}
-                  {new Date(selectedCustomer?.paymentDate).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}{" "}
-                  - {selectedCustomer?.paymentTime}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Preferred God : {selectedCustomer?.preferredGod}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  PDF's Generated - {selectedCustomer?.pdfGenerated}
-                </p>
-                <label className="block my-2 mt-4 text-gray-600 dark:text-gray-300">
-                  Feedback
-                </label>
-                <textarea
-                  onChange={(e) => setFeedback(e.target.value)}
-                  className="border border-gray-300 h-20 rounded-xl p-2 mb-4 w-full resize-none dark:bg-gray-700 dark:text-white"
-                />
-                <button
-                  className="p-2 px-4 bg-blue-500 text-white rounded-lg"
-                  onClick={() => {
-                    setSelectedCustomer(selectedCustomer);
-                    setShowCheckBoxList(true);
-                  }}
-                >
-                  Generate PDF
-                </button>
-              </div>
-              <div className="mt-10">
-                <button
-                  onClick={handleAccept}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {showCheckBoxList && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
