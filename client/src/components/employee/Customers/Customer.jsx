@@ -95,7 +95,6 @@ const Customer = () => {
           const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
           if (response.data.length > 0) {
               setPdfs(response.data);
-              console.log("response data:",response.data);
           }
           setPdfsLoading(false);
       } catch (error) {
@@ -139,7 +138,6 @@ const Customer = () => {
     }, [mailUrl, pdfId]);
 
     const handleShowPdf = async (babyNames, additionalBabyNames) => {
-      console.log(babyNames);
         const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
         setPdfUrl(generatedPdfUrl); // Set the URL state
         setShowViewer(true);

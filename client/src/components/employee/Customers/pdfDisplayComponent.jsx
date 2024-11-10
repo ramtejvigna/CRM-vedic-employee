@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts } from 'pdf-lib';
 import pdfTemplate from "../../../assets/Template.pdf";
 
 // Extracted generatePdf function to reuse it elsewhere
-export const generatePdf = async (babyNames) => {
+export const generatePdf = async (babyNames,additionalBabyNames) => {
   try {
     const pdfTemplateBytes = await fetch(pdfTemplate).then(res => {
       if (!res.ok) throw new Error('Network response was not ok');
@@ -71,31 +71,11 @@ export const generatePdf = async (babyNames) => {
 
         firstPage.drawText(staticData.numerology.toString(), { x: 320, y: textYPosition, size: fontSize, font }); // Numerology
 
-
-    // Embed babyNames on the second (or third) page
+        
+    const mergedBabyNames = [...babyNames, ...additionalBabyNames];
     let yPosition = 600;
     const pageLimit=100;
-    // babyNames.forEach(({ nameEnglish, meaning }, index) => {
-    //   if (yPosition < 100 && !thirdPage) {
-    //     // Move to third page, check if it's already present
-    //     thirdPage = pdfDoc.addPage();  // Add third page if it doesn't exist
-    //     yPosition = 600;
-    //   } else if (yPosition < 100 && thirdPage) {
-    //     // If we already have the third page, use it
-    //     secondPage = thirdPage;
-    //     yPosition = 600;
-    //   }
-
-    //   // Draw text on the current page (either second or third)
-    //   secondPage.drawText(`Name: ${nameEnglish}`, { x: 50, y: yPosition, size: fontSize, font });
-    //   yPosition -= 60;
-    //   secondPage.drawText(`Meaning: ${meaning}`, { x: 50, y: yPosition, size: fontSize, font });
-    //   yPosition -= 80;
-    // });
-
-    // Save the PDF and return Blob URL
-    console.log(babyNames);
-    for (const { nameEnglish, meaning } of babyNames) {
+    for (const { nameEnglish, meaning } of mergedBabyNames) {
       // If we reach the bottom of the current page, switch pages
       if (yPosition < pageLimit) {
         if (currentPage === secondPage && thirdPage) {

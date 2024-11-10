@@ -155,7 +155,7 @@ const CheckBoxListPage = () => {
     };
 
     const handleSubmit = () => {
-        console.log("Submitted baby names:", additionalBabyNames);
+        console.log(additionalBabyNames);
         setModalOpen(false);
 
 
@@ -450,44 +450,8 @@ const handleMeaningChange = (e) => {
 
   
   
-//   const handleGeneratePdf = async () => {
-//     console.log(additionalBabyNames);
-//     console.log(selectedItems);
-//     if (selectedItems.length === 0) {
-//         alert("No items selected!");
-//         return;
-//     }
-
-//     try {
-//         setIsLoading(true);
-//         const response = await axios.post("http://localhost:8000/api/create-pdf", {
-//             names: selectedItems.map((item) => item.name),
-//             customerId: customerData._id,
-//             additionalBabyNames:additionalBabyNames,
-//         });
-
-//         toast.success("PDF Generated Successfully", {
-            
-//         });
-
-//         setSelectedItems([]);
-
-//         // Delay navigation to allow the toast to be visible
-//         setTimeout(() => {
-//             console.log("Navigating back");
-//             navigate(-1);
-//         }, 3000); // Adjust the timeout duration as needed (2000 ms = 2 seconds)
-//     } catch (error) {
-//         console.error("Error generating PDF:", error);
-//         toast.error("PDF generation failed");
-//     } finally {
-//         setIsLoading(false); // Ensure loading state is set to false in any case
-//     }
-// };
 
 const handleGeneratePdf = async () => {
-  console.log(additionalBabyNames);
-  console.log(selectedItems);
   if (selectedItems.length === 0) {
       alert("No items selected!");
       return;
@@ -508,7 +472,6 @@ const handleGeneratePdf = async () => {
 
       // Delay navigation to allow the toast to be visible
       setTimeout(() => {
-          console.log("Navigating back");
           navigate(-1);
       }, 3000); // Adjust the timeout duration as needed (3000 ms = 3 seconds)
   } catch (error) {
@@ -866,7 +829,7 @@ const handleGeneratePdf = async () => {
             <input
               type="text"
               value={additionalBabyNames[index].nameEnglish}
-              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+              onChange={(e) => handleInputChange(index, 'nameEnglish', e.target.value)}
               required
               className="border border-gray-300 rounded-md w-full max-w-xs p-2 mt-1 focus:outline-none focus:border-indigo-500 text-left"
             />
