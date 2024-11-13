@@ -14,7 +14,8 @@ import {
     Eye,
     AlertCircle,
     ArrowLeft,
-    Star
+    Star,
+    FilePlus2,
 } from 'lucide-react';
 import axios, { formToJSON } from 'axios';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
@@ -218,8 +219,15 @@ const Customer = () => {
       
   </div>
 
-  <p className="text-2xl font-medium ml-4 mb-4">{customerDetails.fatherName}</p>
-
+  <div className="flex justify-between items-center mb-4">
+        <p className="text-2xl font-medium ml-4">{customerDetails.fatherName}</p>
+        <button
+            onClick={() => setShowConfirmModal(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+            Move to Completed
+        </button>
+    </div>
   <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
   {/* Customer Name in Large Font */}
   
@@ -359,13 +367,19 @@ const Customer = () => {
                   </div>
                 </div>
               </div>
-  
-              {/* PDFs Generated Card */}
-             {/* PDFs Generated Card */}
-             {/* PDFs Generated Card */}
+
 <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
-  <h2 className="text-lg font-semibold mb-4">PDF's Generated</h2>
-  <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
+<div className="flex justify-between items-center mb-4">
+    <h2 className="text-lg font-semibold">PDFs Generated</h2>
+    {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') && (
+      <button
+        onClick={handleNavigate}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        <FilePlus2 />
+      </button>
+    )}
+  </div>  <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
     <table className="w-full">
       <thead>
         <tr className="border-b">
@@ -472,71 +486,22 @@ const Customer = () => {
 </div>
             </div>
           </div>
-
-
-                    {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') ? (
-                                        <>
-                                            <div className="flex justify-between items-center my-10">
-                                                <button
-                                                    onClick={handleNavigate}
-                                                    className={`bg-blue-500 text-white px-4 py-2 rounded `}
-        
-                                                >
-                                                    Generate Pdf
-                                                </button>
-                                            </div>
-
-                                            {showConfirmModal && (
-                             <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-                                 <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                                     <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
-                                     <p className="mb-6">Are you sure you want to move this Customer to completed?</p>
-                                     <div className="flex justify-end space-x-4">
-                                         <button
-                                             onClick={() => setShowConfirmModal(false)}
-                                             className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
-                                         >
-                                             Cancel
-                                         </button>
-                                         <button
-                                             onClick={confirmMoveToCompleted}
-                                             className="bg-blue-500 text-white px-4 py-2 rounded"
-                                         >
-                                             Confirm
-                                         </button>
-                                     </div>
-                                </div>
-                             </div>
-                        )}
-                    <div className="w-1/2 mt-10">
-                     <div className="mt-10">
-                        <button onClick={() => { setShowConfirmModal(true) }} className="bg-blue-500 text-white px-4 py-2 rounded">
-                             Move To Completed
-                       </button>
-                    </div>
-                </div>
-                                            
-                                        </>
-                                    ) : (
-                                        <></>
-                                    )}
-
-                  
-                        <div className="mt-8">
-                        {showViewer && (
-                            <PDFViewer
-                                pdfUrl={pdfUrl}
-                                handleDownload={handleDownload}
-                                handleSendMail={handleSendMail}
-                                email={customerDetails.email}
-                                enabledRow={enabledRow}
-                                pdfId={enabledRow}
-                                onClose={handleClose} // Pass the close handler
-                            />
-                        )}
-                    </div>
-                
-                </div>
+      
+            <div className="mt-8">
+            {showViewer && (
+                <PDFViewer
+                    pdfUrl={pdfUrl}
+                    handleDownload={handleDownload}
+                    handleSendMail={handleSendMail}
+                    email={customerDetails.email}
+                    enabledRow={enabledRow}
+                    pdfId={enabledRow}
+                    onClose={handleClose} // Pass the close handler
+                />
+            )}
+        </div>
+    
+    </div>
     );
 };
 

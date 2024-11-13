@@ -472,6 +472,7 @@ const handleGeneratePdf = async () => {
 
       // Delay navigation to allow the toast to be visible
       setTimeout(() => {
+
           navigate(-1);
       }, 3000); // Adjust the timeout duration as needed (3000 ms = 3 seconds)
   } catch (error) {
