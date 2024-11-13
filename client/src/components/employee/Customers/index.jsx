@@ -7,6 +7,20 @@ import { useStore } from "../../../store";
 import { useNavigate } from "react-router-dom";
 import CheckBoxListPage from "./CheckBoxList";
 
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-64">
+    <div className="relative w-16 h-16">
+      <div className="absolute top-0 left-0 w-full h-full">
+        <motion.div 
+          className="w-16 h-16 border-4 border-blue-500 rounded-full border-t-transparent"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+    </div>
+  </div>
+);
+
 export const Customers = () => {
   const [customerData, setCustomerData] = useState({
     assignedCustomers: [],
@@ -15,6 +29,7 @@ export const Customers = () => {
   const [activeTab, setActiveTab] = useState("assignedCustomers");
   const [showCheckBoxList, setShowCheckBoxList] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { isDarkMode } = useStore();
   const navigate = useNavigate();
   const employeeId = Cookies.get("employeeId");
@@ -23,10 +38,12 @@ export const Customers = () => {
     const fetchCustomers = async () => {
       if (!employeeId) {
         console.error("Employee ID not found in cookies");
+        setIsLoading(false);
         return;
       }
 
       try {
+        setIsLoading(true);
         const response = await axios.get(
           `https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`
         );
@@ -44,6 +61,8 @@ export const Customers = () => {
       } catch (error) {
         console.error("Error fetching customer data:", error);
         setCustomerData({ assignedCustomers: [], completed: [] });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -56,6 +75,7 @@ export const Customers = () => {
 
   const renderTable = (customers, fromSection, nextSection) => {
     const validCustomers = Array.isArray(customers) ? customers : [];
+    const assignedOrCompletedHeader = fromSection === "completed" ? "Completed On" : "Assigned On";
     
     return (
       <motion.div
@@ -70,10 +90,10 @@ export const Customers = () => {
             <tr>
               {[
                 "Customer ID",
-                "Father Name",
-                "Mother Name",
+                "Customer Name",
                 "Whatsapp number",
                 "Baby Gender",
+                assignedOrCompletedHeader,
                 "Actions"
               ].map((header) => (
                 <th
@@ -101,16 +121,18 @@ export const Customers = () => {
                       {customer.customerID}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {customer.fatherName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {customer.motherName}
+                      {customer.customerName ? customer.customerName : ""}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {customer.whatsappNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {customer.babyGender}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      {fromSection === "completed" 
+                        ? new Date(customer.completedOn).toLocaleDateString() 
+                        : new Date(customer.assignedOn).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -155,6 +177,10 @@ export const Customers = () => {
   };
 
   const renderContent = () => {
+    if (isLoading) {
+      return <LoadingSpinner />;
+    }
+
     const customers = customerData[activeTab] || [];
     const nextSection = activeTab === "assignedCustomers" ? "completed" : "assignedCustomers";
     
