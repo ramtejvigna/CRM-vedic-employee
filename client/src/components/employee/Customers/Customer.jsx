@@ -197,6 +197,30 @@ const Customer = () => {
 
   };
 
+  const handleSubmitFeedback = async () => {
+    if (selectedRating > 0 && selectedPdf) {
+      console.log(selectedRating,selectedPdf._id);
+      try {
+        // Send pdfId and rating in the body of the PUT request
+        const response = await axios.put(
+          `${api}/api/feedback`, // No need to pass pdfId in the URL
+          {
+            pdfId: selectedPdf._id,  // Pass the pdfId in the body
+            rating: selectedRating,   // Pass the selected rating
+          }
+        );        
+        // Reset form and close modal
+        setSelectedRating(0);
+        setShowFeedbackModal(false);
+      } catch (error) {
+        console.error('Error submitting feedback:', error.message);
+        alert('An error occurred while submitting feedback.');
+      }
+    } else {
+      alert('Please select a rating');
+    }
+  };
+
   const handleNavigate = () => {
     navigate("generate-pdf", {
       state: {
