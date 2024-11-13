@@ -25,199 +25,211 @@ import PDFViewer from './PDFviewer';
 
 
 const Customer = () => {
-    const [pdfsLoading, setPdfsLoading] = useState(false);
-    const location = useLocation();
-    const { customerData, section, fromSection } = location.state || {};
-    const [customerDetails, setCustomerDetails] = useState(null);
-    const [feedback, setFeedback] = useState('');
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [editData, setEditData] = useState({
-        fatherName: '',
-        motherName: '',
-        email: '',
-        whatsappNumber: '',
-        babyGender: ''
-    });
-    const [pdfs, setPdfs] = useState([]);
-    const customerId = customerData?._id;
-    const [pdfUrl, setPdfUrl] = useState(null);
-    const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
-    const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const [expandedRow, setExpandedRow] = useState(null);
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [mailUrl, setMailUrl] = useState(null);
-    const [pdfId, setPdfId] = useState(null);
+  const [pdfsLoading, setPdfsLoading] = useState(false);
+  const location = useLocation();
+  const { customerData, section, fromSection } = location.state || {};
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [feedback, setFeedback] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [editData, setEditData] = useState({
+    fatherName: '',
+    motherName: '',
+    email: '',
+    whatsappNumber: '',
+    babyGender: ''
+  });
+  const [pdfs, setPdfs] = useState([]);
+  const customerId = customerData?._id;
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [enabledRow, setEnabledRow] = useState(null); // State to track which row's buttons are enabled
+  const [showViewer, setShowViewer] = useState(false); // State to control PDF viewer visibility
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [mailUrl, setMailUrl] = useState(null);
+  const [pdfId, setPdfId] = useState(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [selectedPdf, setSelectedPdf]=useState(null);
 
-    
 
 
-    const toggleDropdown = (pdfId) => {
-        setActiveDropdown(activeDropdown === pdfId ? null : pdfId);
-      };
 
-    const handleActionClick = async (action, pdf) => {
-        setActiveDropdown(null);
-        if (action === 'view') {
-            handleShowPdf(pdf.babyNames, pdf.additionalBabyNames);
-        } else if (action === 'mail') {
-            await handleSetPdfUrl(pdf.babyNames, pdf.additionalBabyNames);
-            setPdfId(pdf._id);
-        } else if (action === 'whatsapp') {
+  const toggleDropdown = (pdfId) => {
+    setActiveDropdown(activeDropdown === pdfId ? null : pdfId);
+  };
 
-        } else if (action === 'feedback') {
+  const handleActionClick = async (action, pdf) => {
+    setActiveDropdown(null);
+    if (action === 'view') {
+      handleShowPdf(pdf.babyNames, pdf.additionalBabyNames);
+    } else if (action === 'mail') {
+      await handleSetPdfUrl(pdf.babyNames, pdf.additionalBabyNames);
+      setPdfId(pdf._id);
+    } else if (action === 'whatsapp') {
 
-        }
-    };
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const getCustomerDetails = async () => {
-            if (customerData) {
-                setCustomerDetails(customerData);
-                setEditData({
-                    fatherName: customerData.fatherName || '',
-                    motherName: customerData.motherName || '',
-                    email: customerData.email || '',
-                    whatsappNumber: customerData.whatsappNumber || '',
-                    babyGender: customerData.babyGender || ''
-                });
-            }
-            setLoading(false);
-        };
-        getCustomerDetails();
-    }, [customerData]);
-
-    const fetchPdfs = async () => {
-      try {
-          setPdfsLoading(true);
-          const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
-          if (response.data.length > 0) {
-              setPdfs(response.data);
-          }
-          setPdfsLoading(false);
-      } catch (error) {
-          console.error('Error fetching PDFs:', error);
+    } else if (action === 'feedback') {
+      if (pdf.whatsappStatus || pdf.mailStatus) {
+        // If at least one status is true, show the feedback modal
+        setSelectedPdf(pdf); // Store the PDF object
+        setShowFeedbackModal(true); // Show the feedback modal
+      } else {
+        // If both statuses are false, raise a message
+        alert("Feedback can only be given if the PDF has been sent via WhatsApp or email.");
       }
+
+    }
+  };
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const getCustomerDetails = async () => {
+      if (customerData) {
+        setCustomerDetails(customerData);
+        setEditData({
+          fatherName: customerData.fatherName || '',
+          motherName: customerData.motherName || '',
+          email: customerData.email || '',
+          whatsappNumber: customerData.whatsappNumber || '',
+          babyGender: customerData.babyGender || ''
+        });
+      }
+      setLoading(false);
+    };
+    getCustomerDetails();
+  }, [customerData]);
+
+  const fetchPdfs = async () => {
+    try {
+      setPdfsLoading(true);
+      const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/generatedpdf?customerId=${customerId}`);
+      if (response.data.length > 0) {
+        setPdfs(response.data);
+      }
+      setPdfsLoading(false);
+    } catch (error) {
+      console.error('Error fetching PDFs:', error);
+    }
   };
 
   useEffect(() => {
-      if (customerId) {
-          fetchPdfs();
-      }
+    if (customerId) {
+      fetchPdfs();
+    }
   }, [customerId]);
 
 
 
 
-    const handleSetPdfUrl = async (babyNames, additionalBabyNames) => {
+  const handleSetPdfUrl = async (babyNames, additionalBabyNames) => {
+    try {
+      const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
+      setMailUrl(generatedPdfUrl);
+    } catch (error) {
+      console.error("Error generating PDF URL:", error);
+      alert("Error generating PDF URL");
+    }
+  };
+
+  // Watch for changes to mailUrl and pdfId and send mail if both are available
+  useEffect(() => {
+    const sendMailAndFetchPdfs = async () => {
+      if (mailUrl && pdfId) {
         try {
-            const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
-            setMailUrl(generatedPdfUrl);
+          await handleSendMail(mailUrl, pdfId, customerData.email);
+          await fetchPdfs(); // Re-fetch PDFs after sending mail
         } catch (error) {
-            console.error("Error generating PDF URL:", error);
-            alert("Error generating PDF URL");
+          console.error("Error sending mail:", error);
         }
+      }
     };
 
-    // Watch for changes to mailUrl and pdfId and send mail if both are available
-    useEffect(() => {
-        const sendMailAndFetchPdfs = async () => {
-            if (mailUrl && pdfId) {
-                try {
-                    await handleSendMail(mailUrl, pdfId, customerData.email);
-                    await fetchPdfs(); // Re-fetch PDFs after sending mail
-                } catch (error) {
-                    console.error("Error sending mail:", error);
-                }
-            }
-        };
-    
-        sendMailAndFetchPdfs();
-    }, [mailUrl, pdfId]);
+    sendMailAndFetchPdfs();
+  }, [mailUrl, pdfId]);
 
-    const handleShowPdf = async (babyNames, additionalBabyNames) => {
-        const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
-        setPdfUrl(generatedPdfUrl); // Set the URL state
-        setShowViewer(true);
-    };
+  const handleShowPdf = async (babyNames, additionalBabyNames) => {
+    const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
+    setPdfUrl(generatedPdfUrl); // Set the URL state
+    setShowViewer(true);
+  };
 
-    const handleClose = () => {
-        setShowViewer(false); // Hide the PDF viewer
-        setPdfUrl(''); // Reset PDF URL
-        setEnabledRow(null); // Reset enabled row
-    };
+  const handleClose = () => {
+    setShowViewer(false); // Hide the PDF viewer
+    setPdfUrl(''); // Reset PDF URL
+    setEnabledRow(null); // Reset enabled row
+  };
 
-    const moveCustomer = (customer, fromSection, toSection, details) => {
-        const updatedCustomer = { ...customer, additionalDetails: details };
+  const moveCustomer = (customer, fromSection, toSection, details) => {
+    const updatedCustomer = { ...customer, additionalDetails: details };
 
-        if (toSection === 'completed') {
-            updatedCustomer.feedback = feedback;
-            updatedCustomer.pdfGenerated = generatePdf
-                ? customer.pdfGenerated + 1
-                : customer.pdfGenerated;
-            updatedCustomer.customerStatus = 'completed';
-        }
-
-        axios
-            .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
-            .then(() => {
-                setCustomerDetails(updatedCustomer);
-            })
-            .catch((error) => console.error('Error moving customer:', error));
-    };
-
-    const handleAccept = useCallback(() => {
-        if (customerDetails) {
-            moveCustomer(customerDetails, fromSection, section, feedback);
-            setShowEditModal(false);
-            if (section === 'inProgress' || section === 'completed') {
-                navigate(-1);
-            }
-        }
-    }, [customerDetails, fromSection, section, feedback]);
-    const confirmMoveToCompleted = () => {
-        handleAccept();
-        setShowConfirmModal(false); // Close modal
-        // Place your action code here
-
-    };
-
-    const handleNavigate = () => {
-        navigate("generate-pdf", {
-            state: {
-                customerDetails,
-            },
-        });
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+    if (toSection === 'completed') {
+      updatedCustomer.feedback = feedback;
+      updatedCustomer.pdfGenerated = generatePdf
+        ? customer.pdfGenerated + 1
+        : customer.pdfGenerated;
+      updatedCustomer.customerStatus = 'completed';
+      updatedCustomer.completedOn = new Date();
     }
 
-    if (!customerDetails) {
-        return <div className="text-center mt-10">No customer details found.</div>;
-    }
+    axios
+      .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
+      .then(() => {
+        setCustomerDetails(updatedCustomer);
+      })
+      .catch((error) => console.error('Error moving customer:', error));
+  };
 
+  const handleAccept = useCallback(() => {
+    if (customerDetails) {
+      moveCustomer(customerDetails, fromSection, section, feedback);
+      setShowEditModal(false);
+      if (section === 'inProgress' || section === 'completed') {
+        navigate(-1);
+      }
+    }
+  }, [customerDetails, fromSection, section, feedback]);
+  const confirmMoveToCompleted = () => {
+    handleAccept();
+    setShowConfirmModal(false); // Close modal
+    // Place your action code here
+
+  };
+
+  const handleNavigate = () => {
+    navigate("generate-pdf", {
+      state: {
+        customerDetails,
+      },
+    });
+  };
+
+  if (loading) {
     return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-        <div className="min-h-screen p-4 sm:p-8">
-          <div className="flex items-center mb-6">
-      <button
+  if (!customerDetails) {
+    return <div className="text-center mt-10">No customer details found.</div>;
+  }
+
+  return (
+
+    <div className="min-h-screen p-4 sm:p-8">
+      <div className="flex items-center mb-6">
+        <button
           onClick={() => navigate(-1)}
           className="flex items-center text-gray-900 hover:text-blue-500"
-      >
+        >
           <ArrowLeft size={20} className="mr-2" /> {/* Back arrow icon */}
-      </button>
-      <h2 className="text-lg font-semibold">Customer Details</h2>
-      
-  </div>
+        </button>
+        <h2 className="text-lg font-semibold">Customer Details</h2>
+
+      </div>
 
   <div className="flex justify-between items-center mb-4">
         <p className="text-2xl font-medium ml-4">{customerDetails.fatherName}</p>
@@ -234,119 +246,119 @@ const Customer = () => {
 {/* Bordered Box around Customer Info */}
 <h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
 
-  {/* Grid Layout for Customer Info */}
-  <div className="grid grid-cols-2 md:grid-cols-4 ">
-      {[
-          { label: "customer Id", value: customerDetails.customerID },
-          { label: "date Joined", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
-          { label: "Contact No", value: customerDetails.whatsappNumber },
-          { label: "Email", value: customerDetails.email }
-      ].map((item, index) => (
-          <div key={index} className="flex flex-col">
-              
+        {/* Grid Layout for Customer Info */}
+        <div className="grid grid-cols-2 md:grid-cols-4 ">
+          {[
+            { label: "customer Id", value: customerDetails.customerID },
+            { label: "date Joined", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
+            { label: "Contact No", value: customerDetails.whatsappNumber },
+            { label: "Email", value: customerDetails.email }
+          ].map((item, index) => (
+            <div key={index} className="flex flex-col">
+
               {/* Label with Full-width HR Line */}
               <p className="text-sm font-bold text-gray-500 capitalize">{item.label}</p>
               <hr className="my-3 border-gray-300 w-full" />
 
               {/* Value with Full-width HR Line */}
               <p className=" text-gray-900">{item.value}</p>
-          </div>
-      ))}
-  </div>
+            </div>
+          ))}
+        </div>
 
-</div>
+      </div>
 
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Baby Details Card */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
-                  <h2 className="text-lg font-semibold mb-4">Baby Details</h2>
-                  <hr className="my-3 border-gray-300 w-full" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Baby Details Card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
+          <h2 className="text-lg font-semibold mb-4">Baby Details</h2>
+          <hr className="my-3 border-gray-300 w-full" />
 
-                  <div className="grid grid-cols-2 gap-4">
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Gender:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.babyGender || "N/A"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Place of Birth:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.birthplace || "N/A"}</p>
-                      </div>
-                      <div>
-  <p className="text-sm font-medium text-gray-500">Date of Birth:</p>
-  <p className="mt-1 text-gray-900">
-      {customerDetails.babyBirthDate
-          ? new Date(customerDetails.babyBirthDate).toLocaleDateString()
-          : "N/A"}
-  </p>
-</div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Gender:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.babyGender || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Place of Birth:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.birthplace || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Date of Birth:</p>
+              <p className="mt-1 text-gray-900">
+                {customerDetails.babyBirthDate
+                  ? new Date(customerDetails.babyBirthDate).toLocaleDateString()
+                  : "N/A"}
+              </p>
+            </div>
 
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Time of Birth:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.babyBirthTime || "N/A"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Mother's Name:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.motherName || "N/A"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Father's Name:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.fatherName || "N/A"}</p>
-                      </div>
-                      <div>
-  <p className="text-sm font-medium text-gray-500">Preferred Starting Letter:</p>
-  <p className="mt-1 text-gray-900">{customerDetails.preferredStartingLetter || "N/A"}</p>
-</div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Time of Birth:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.babyBirthTime || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Mother's Name:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.motherName || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Father's Name:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.fatherName || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Preferred Starting Letter:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.preferredStartingLetter || "N/A"}</p>
+            </div>
 
-{/* Horizontal Line */}
-<div className="col-span-2 my-4">
+            {/* Horizontal Line */}
+            <div className="col-span-2 my-4">
               <hr className="border-t border-gray-200" />
-          </div>
-<div>
-  <p className="text-sm font-medium text-gray-500">Zodiac Sign:</p>
-  <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Leo"}</p>
-</div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Zodiac Sign:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Leo"}</p>
+            </div>
 
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Nakshatra:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ashwini"}</p>
-                      </div>
-                     
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Numerology No :</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "3"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Lucky Colour:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "blue"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Gemstone:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ruby"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Destiny Number:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "7"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Lucky Day:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "friday"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Lucky God:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Lord Shiva"}</p>
-                      </div>
-                      <div>
-                          <p className="text-sm font-medium text-gray-500">Lucky Metal:</p>
-                          <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Gold"}</p>
-                      </div>
-                  </div>
-              </div>
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Payment Data Card */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
-                <h2 className="text-lg font-medium text-gray-500 mb-4">Payment Data</h2>
-                <hr className="my-3 border-gray-300 w-full" />
+            <div>
+              <p className="text-sm font-medium text-gray-500">Nakshatra:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ashwini"}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-500">Numerology No :</p>
+              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "3"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Lucky Colour:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "blue"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Gemstone:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ruby"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Destiny Number:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "7"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Lucky Day:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "friday"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Lucky God:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Lord Shiva"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Lucky Metal:</p>
+              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Gold"}</p>
+            </div>
+          </div>
+        </div>
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Payment Data Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
+            <h2 className="text-lg font-medium text-gray-500 mb-4">Payment Data</h2>
+            <hr className="my-3 border-gray-300 w-full" />
 
                 <div className="space-y-4">
                   <div>
@@ -417,12 +429,20 @@ const Customer = () => {
             <td className="px-4 py-2 text-center">
               <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
             </td>
-            <td className="px-4 py-2">
-              <div className="flex justify-center space-x-1">
-                {[...Array(3)].map((_, i) => (
-                  <Star key={i} className={`h-4 w-4 ${i < 3 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                ))}
-              </div>
+            <td className="px-4 py-2 text-center">
+              <span className="text-sm font-medium">
+                {pdf.rating === 0
+                  ? "-"
+                  : pdf.rating === 5
+                  ? "Outstanding"
+                  : pdf.rating === 4
+                  ? "Good"
+                  : pdf.rating === 3
+                  ? "Satisfactory"
+                  : pdf.rating === 2
+                  ? "Needs Improvement"
+                  : "Poor"}
+              </span>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right relative">
               <div className="flex items-center justify-end space-x-2">
@@ -458,7 +478,7 @@ const Customer = () => {
                           { icon: FileText, label: 'View PDF', action: 'view' },
                           { icon: MessageCircle, label: 'Send to WhatsApp', action: 'whatsapp' },
                           { icon: Mail, label: 'Send to Mail', action: 'mail' },
-                          { icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' },
+                          ...(pdf.rating === 0 ? [{ icon: ThumbsUp, label: 'Give Feedback', action: 'feedback' }] : []),
                         ].map((item, i) => (
                           <button
                             key={i}
@@ -500,6 +520,40 @@ const Customer = () => {
                 />
             )}
         </div>
+
+        {showFeedbackModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg w-80 text-center">
+      <h2 className="text-xl font-semibold mb-4">Feedback For Pdf</h2>
+      <div className="flex justify-center mb-4">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`cursor-pointer text-3xl ${star <= selectedRating ? 'text-yellow-500' : 'text-gray-400'}`}
+            onClick={() => handleStarClick(star)}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <div>
+        <button
+          onClick={handleSubmitFeedback}
+          className="bg-green-500 text-white py-2 px-4 rounded-md mt-4 w-full hover:bg-green-600"
+        >
+          Submit
+        </button>
+        {/* Close icon */}
+        <button
+          onClick={() => { setShowFeedbackModal(false); setSelectedRating(0); }}
+          className="absolute top-0 right-0 text-xl text-gray-500 hover:text-gray-700 p-2"
+        >
+          ✖
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     
     </div>
     );
