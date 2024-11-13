@@ -162,7 +162,7 @@ const Customer = () => {
     }
 
     axios
-      .put(`http://localhost:3000/customers/${customer._id}`, updatedCustomer)
+      .put(`https://vedic-backend-neon.vercel.app/customers/${customer._id}`, updatedCustomer)
       .then(() => {
         setCustomerDetails(updatedCustomer);
       })
