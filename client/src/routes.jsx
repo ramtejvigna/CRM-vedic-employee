@@ -46,12 +46,6 @@ export const routes = [
     element: <LeaveManagement />,
   },
   {
-    name: "reports",
-    path: "reports",
-    icon: <TbReportAnalytics {...icon} />,
-    element: <Home />,
-  },
-  {
     name: "settings",
     path: "settings",
     icon: <FaCog {...icon} />, 
