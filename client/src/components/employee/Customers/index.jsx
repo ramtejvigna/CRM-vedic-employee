@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Eye } from "lucide-react";
 import { useStore } from "../../../store";
 import { useNavigate } from "react-router-dom";
+import EmptyState from "./EmptyState";
 import CheckBoxListPage from "./CheckBoxList";
 
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-64">
     <div className="relative w-16 h-16">
       <div className="absolute top-0 left-0 w-full h-full">
-        <motion.div 
+        <motion.div
           className="w-16 h-16 border-4 border-blue-500 rounded-full border-t-transparent"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -47,16 +48,16 @@ export const Customers = () => {
         const response = await axios.get(
           `https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`
         );
-        
+
         const formattedData = {
-          assignedCustomers: Array.isArray(response.data.assignedCustomers) 
-            ? response.data.assignedCustomers 
+          assignedCustomers: Array.isArray(response.data.assignedCustomers)
+            ? response.data.assignedCustomers
             : [],
-          completed: Array.isArray(response.data.completed) 
-            ? response.data.completed 
+          completed: Array.isArray(response.data.completed)
+            ? response.data.completed
             : []
         };
-        
+
         setCustomerData(formattedData);
       } catch (error) {
         console.error("Error fetching customer data:", error);
@@ -76,7 +77,7 @@ export const Customers = () => {
   const renderTable = (customers, fromSection, nextSection) => {
     const validCustomers = Array.isArray(customers) ? customers : [];
     const assignedOrCompletedHeader = fromSection === "completed" ? "Completed On" : "Assigned On";
-    
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -130,8 +131,8 @@ export const Customers = () => {
                       {customer.babyGender}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {fromSection === "completed" 
-                        ? new Date(customer.completedOn).toLocaleDateString() 
+                      {fromSection === "completed"
+                        ? new Date(customer.completedOn).toLocaleDateString()
                         : new Date(customer.assignedOn).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -158,16 +159,15 @@ export const Customers = () => {
                   </motion.tr>
                 ))
               ) : (
-                <motion.tr
+                <td colSpan={6}>
+                  <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
                 >
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-300">
-                    No customers available in this section
-                  </td>
-                </motion.tr>
+                  <EmptyState />
+                </motion.div>
+                </td>
               )}
             </AnimatePresence>
           </tbody>
@@ -183,7 +183,7 @@ export const Customers = () => {
 
     const customers = customerData[activeTab] || [];
     const nextSection = activeTab === "assignedCustomers" ? "completed" : "assignedCustomers";
-    
+
     return (
       <AnimatePresence mode="wait">
         <motion.div
@@ -214,11 +214,10 @@ export const Customers = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab)}
-              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${
-                activeTab === tab
+              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${activeTab === tab
                   ? "bg-blue-500 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-              }`}
+                }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, " $1")}
               {tab === "assignedCustomers" && assignedCustomersCount > 0 && (
