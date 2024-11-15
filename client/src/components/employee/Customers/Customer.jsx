@@ -60,6 +60,10 @@ const Customer = () => {
     setActiveDropdown(activeDropdown === pdfId ? null : pdfId);
   };
 
+  const handleStarClick = (rating) => {
+    setSelectedRating(rating);
+  };
+
   const handleActionClick = async (action, pdf) => {
     setActiveDropdown(null);
     if (action === 'view') {
@@ -203,7 +207,7 @@ const Customer = () => {
       try {
         // Send pdfId and rating in the body of the PUT request
         const response = await axios.put(
-          `${api}/api/feedback`, // No need to pass pdfId in the URL
+          `https://vedic-backend-neon.vercel.app/api/feedback`, // No need to pass pdfId in the URL
           {
             pdfId: selectedPdf._id,  // Pass the pdfId in the body
             rating: selectedRating,   // Pass the selected rating
@@ -266,6 +270,29 @@ const Customer = () => {
     </div>
   <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
   {/* Customer Name in Large Font */}
+
+  {showConfirmModal && (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
+            <p className="mb-6">Are you sure you want to move this Customer to completed?</p>
+            <div className="flex justify-end space-x-4">
+                <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={confirmMoveToCompleted}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                    Confirm
+                </button>
+            </div>
+      </div>
+    </div>
+)}
   
 {/* Bordered Box around Customer Info */}
 <h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
@@ -547,7 +574,13 @@ const Customer = () => {
 
         {showFeedbackModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg w-80 text-center">
+    <div className="bg-white p-6 rounded-lg w-80 text-center relative">
+    <button
+        onClick={() => { setShowFeedbackModal(false); setSelectedRating(0); }}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-1"
+      >
+        ✖
+      </button>
       <h2 className="text-xl font-semibold mb-4">Feedback For Pdf</h2>
       <div className="flex justify-center mb-4">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -563,17 +596,12 @@ const Customer = () => {
       <div>
         <button
           onClick={handleSubmitFeedback}
-          className="bg-green-500 text-white py-2 px-4 rounded-md mt-4 w-full hover:bg-green-600"
+          className="bg-blue-500 text-white py-2 px-4 rounded-md mt-4 w-full hover:bg-blue-600"
         >
           Submit
         </button>
         {/* Close icon */}
-        <button
-          onClick={() => { setShowFeedbackModal(false); setSelectedRating(0); }}
-          className="absolute top-0 right-0 text-xl text-gray-500 hover:text-gray-700 p-2"
-        >
-          ✖
-        </button>
+      
       </div>
     </div>
   </div>
