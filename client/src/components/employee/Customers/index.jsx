@@ -8,6 +8,18 @@ import { useNavigate } from "react-router-dom";
 import EmptyState from "./EmptyState";
 import CheckBoxListPage from "./CheckBoxList";
 
+const formatDateTime = (dateString) => {
+  if (!dateString) return "No Date";
+  
+  const date = new Date(dateString);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  
+  return `${month}${day}, ${year}`;
+};
+
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-64">
     <div className="relative w-16 h-16">
@@ -149,13 +161,13 @@ export const Customers = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {fromSection === "completed"
-                        ? new Date(customer.completedOn).toLocaleDateString()
-                        : new Date(customer.assignedOn).toLocaleDateString()}
+                        ? formatDateTime(customer.completedOn)
+                        : formatDateTime(customer.assignedOn)}
                     </td>
                     {fromSection === "assignedCustomers" && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                         {customer.deadline
-                          ? new Date(customer.deadline).toLocaleDateString()
+                          ? formatDateTime(customer.deadline)
                           : "No Deadline"}
                       </td>
                     )}
