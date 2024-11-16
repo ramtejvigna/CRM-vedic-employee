@@ -285,6 +285,24 @@ const AddNameModal = ({ isOpen, onClose, onAdd }) => {
     );
 };
 
+const FilterDropdown = ({ label, options = [], value, onChange }) => (
+    <div className="flex flex-col space-y-1">
+        <label className="text-sm font-medium text-gray-700">{label}:</label>
+        <select
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 bg-white"
+        >
+            <option value="">All</option>
+            {options.map((option) => (
+                <option key={option} value={option}>
+                    {option}
+                </option>
+            ))}
+        </select>
+    </div>
+);
+
 const BabyDatabase = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -315,25 +333,31 @@ const BabyDatabase = () => {
             const response = await axios.get("https://vedic-backend-neon.vercel.app/api/names");
             setBabyNames(response.data);
 
+            // Extract unique values with proper null checking and sorting
+            const extractUniqueValues = (field) => {
+                return [...new Set(response.data
+                    .map(item => item[field])
+                    .filter(value => value && value.trim() !== ''))]
+                    .sort((a, b) => a.localeCompare(b));
+            };
+
             const uniqueValues = {
-                zodiacs: [...new Set(response.data.map(name => name.zodiac).filter(Boolean))],
-                nakshatras: [...new Set(response.data.map(name => name.nakshatra).filter(Boolean))],
-                elements: [...new Set(response.data.map(name => name.element).filter(Boolean))],
-                bookNames: [...new Set(response.data.map(name => name.bookName).filter(Boolean))]
+                zodiacs: extractUniqueValues('zodiac'),
+                nakshatras: extractUniqueValues('nakshatra'),
+                elements: extractUniqueValues('element'),
+                bookNames: extractUniqueValues('bookName')
             };
 
             setFilterOptions(uniqueValues);
         } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch baby names", {
-                onClose: () => { }, // Empty callback to prevent undefined error
-                toastId: 'fetch-error' // Unique ID to prevent duplicate toasts
-            });
+            toast.error("Failed to fetch baby names");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
 
+    console.log(filterOptions)
     useEffect(() => {
         fetchBabyNames();
 
@@ -343,43 +367,44 @@ const BabyDatabase = () => {
         };
     }, []);
 
+    const filteredNames = babyNames.filter(baby => {
+        const matchesSearch = !searchTerm || 
+            (baby.nameEnglish?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             baby.nameDevanagari?.includes(searchTerm));
 
-    const FilterDropdown = ({ label, options, value, onChange }) => (
-        <div className="flex items-center space-x-2">
-            <label className="text-gray-700">{label}:</label>
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
-            >
-                <option value="">All</option>
-                {options.sort().map((option) => (
-                    <option key={option} value={option}>
-                        {option}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
+        const matchesGender = genderFilter === 'all' || 
+            baby.gender?.toLowerCase() === genderFilter.toLowerCase();
 
-    const filteredNames = babyNames.filter(
-        (baby) =>
-            (baby.nameEnglish.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                baby.nameDevanagari.includes(searchTerm)) &&
-            (genderFilter === 'all' || baby.gender.toLowerCase() === genderFilter) &&
-            (startingLetterFilter === '' || baby.nameEnglish.toLowerCase().startsWith(startingLetterFilter.toLowerCase())) &&
-            (selectedFilters.zodiac === '' || baby.zodiac === selectedFilters.zodiac) &&
-            (selectedFilters.nakshatra === '' || baby.nakshatra === selectedFilters.nakshatra) &&
-            (selectedFilters.element === '' || baby.element === selectedFilters.element) &&
-            (selectedFilters.bookName === '' || baby.bookName === selectedFilters.bookName)
-    );
+        const matchesStartingLetter = !startingLetterFilter || 
+            baby.nameEnglish?.toLowerCase().startsWith(startingLetterFilter.toLowerCase());
+
+        const matchesZodiac = !selectedFilters.zodiac || 
+            baby.zodiac?.toLowerCase() === selectedFilters.zodiac.toLowerCase();
+
+        const matchesNakshatra = !selectedFilters.nakshatra || 
+            baby.nakshatra?.toLowerCase() === selectedFilters.nakshatra.toLowerCase();
+
+        const matchesElement = !selectedFilters.element || 
+            baby.element?.toLowerCase() === selectedFilters.element.toLowerCase();
+
+        const matchesBookName = !selectedFilters.bookName || 
+            baby.bookName?.toLowerCase() === selectedFilters.bookName.toLowerCase();
+
+        return matchesSearch && 
+               matchesGender && 
+               matchesStartingLetter && 
+               matchesZodiac && 
+               matchesNakshatra && 
+               matchesElement && 
+               matchesBookName;
+    });
 
     const handleFilterChange = (filterType, value) => {
         setSelectedFilters(prev => ({
             ...prev,
             [filterType]: value
         }));
-        setPage(0);
+        setPage(0); // Reset to first page when filter changes
     };
 
     const handleChangePage = (newPage) => {
@@ -490,6 +515,73 @@ const BabyDatabase = () => {
 
     const csvData = filteredNames.map(({ _id, _v, ...rest }) => rest);
 
+    const renderFilters = () => (
+        <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6 p-4 rounded-lg bg-white shadow-sm"
+        >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Gender Filter */}
+                <div className="flex flex-col space-y-1">
+                    <label className="text-sm font-medium text-gray-700">Gender:</label>
+                    <select
+                        value={genderFilter}
+                        onChange={(e) => handleGenderFilter(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 bg-white"
+                    >
+                        <option value="all">All</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                {/* Starting Letter Filter */}
+                <div className="flex flex-col space-y-1">
+                    <label className="text-sm font-medium text-gray-700">Starting Letter:</label>
+                    <input
+                        type="text"
+                        value={startingLetterFilter}
+                        onChange={handleStartingLetterFilter}
+                        maxLength={1}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+                    />
+                </div>
+
+                {/* Dropdown Filters */}
+                <FilterDropdown
+                    label="Rashi"
+                    options={filterOptions.zodiacs}
+                    value={selectedFilters.zodiac}
+                    onChange={(value) => handleFilterChange('zodiac', value)}
+                />
+
+                <FilterDropdown
+                    label="Nakshatra"
+                    options={filterOptions.nakshatras}
+                    value={selectedFilters.nakshatra}
+                    onChange={(value) => handleFilterChange('nakshatra', value)}
+                />
+
+                <FilterDropdown
+                    label="Element"
+                    options={filterOptions.elements}
+                    value={selectedFilters.element}
+                    onChange={(value) => handleFilterChange('element', value)}
+                />
+
+                <FilterDropdown
+                    label="Book Name"
+                    options={filterOptions.bookNames}
+                    value={selectedFilters.bookName}
+                    onChange={(value) => handleFilterChange('bookName', value)}
+                />
+            </div>
+        </motion.div>
+    );
+
     return (
         <div className="p-4 md:p-8 min-h-screen">
             <ToastContainer
@@ -581,69 +673,7 @@ const BabyDatabase = () => {
                 onAdd={handleAddName}
             />
 
-            {showFilters && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mb-6 p-4 rounded-lg bg-white bg-opacity-70 shadow-sm"
-                >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="flex flex-col space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Gender:</label>
-                            <select
-                                value={genderFilter}
-                                onChange={(e) => handleGenderFilter(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
-                            >
-                                <option value="all">All</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                            <label className="text-gray-700">Starting Letter:</label>
-                            <input
-                                type="text"
-                                value={startingLetterFilter}
-                                onChange={handleStartingLetterFilter}
-                                maxLength={1}
-                                className="w-12 px-2 py-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
-                            />
-                        </div>
-
-                        <FilterDropdown
-                            label="Rashi"
-                            options={filterOptions.zodiacs}
-                            value={selectedFilters.zodiac}
-                            onChange={(value) => handleFilterChange('zodiac', value)}
-                        />
-
-                        <FilterDropdown
-                            label="Nakshatra"
-                            options={filterOptions.nakshatras}
-                            value={selectedFilters.nakshatra}
-                            onChange={(value) => handleFilterChange('nakshatra', value)}
-                        />
-
-                        <FilterDropdown
-                            label="Element"
-                            options={filterOptions.elements}
-                            value={selectedFilters.element}
-                            onChange={(value) => handleFilterChange('element', value)}
-                        />
-
-                        <FilterDropdown
-                            label="Book Name"
-                            options={filterOptions.bookNames}
-                            value={selectedFilters.bookName}
-                            onChange={(value) => handleFilterChange('bookName', value)}
-                        />
-                    </div>
-                </motion.div>
-            )}
+            {showFilters && renderFilters()}
 
             <div className='overflow-x-auto'>
                 <motion.div

@@ -75,9 +75,25 @@ export const Customers = () => {
   };
 
   const renderTable = (customers, fromSection, nextSection) => {
-    const validCustomers = Array.isArray(customers) ? customers : [];
-    const assignedOrCompletedHeader = fromSection === "completed" ? "Completed On" : "Assigned On";
-
+    const validCustomers = Array.isArray(customers) ? [...customers] : [];
+  
+    // Sort customers by deadline if in the "assignedCustomers" section
+    if (fromSection === "assignedCustomers") {
+      validCustomers.sort((a, b) => {
+        const deadlineA = new Date(a.deadline);
+        const deadlineB = new Date(b.deadline);
+  
+        // Handle cases where the deadline is not provided
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+  
+        return deadlineA - deadlineB;
+      });
+    }
+  
+    const assignedOrCompletedHeader =
+      fromSection === "completed" ? "Completed On" : "Assigned On";
+  
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -95,7 +111,8 @@ export const Customers = () => {
                 "Whatsapp number",
                 "Baby Gender",
                 assignedOrCompletedHeader,
-                "Actions"
+                ...(fromSection === "assignedCustomers" ? ["Deadline"] : []), // Add Deadline only for Assigned Customers
+                "Actions",
               ].map((header) => (
                 <th
                   key={header}
@@ -135,6 +152,13 @@ export const Customers = () => {
                         ? new Date(customer.completedOn).toLocaleDateString()
                         : new Date(customer.assignedOn).toLocaleDateString()}
                     </td>
+                    {fromSection === "assignedCustomers" && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        {customer.deadline
+                          ? new Date(customer.deadline).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                    )}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <motion.button
@@ -143,12 +167,12 @@ export const Customers = () => {
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
                           onClick={() => {
                             setSelectedCustomer(customer);
-                            navigate('viewDetailsIn', {
+                            navigate("viewDetailsIn", {
                               state: {
                                 customerData: customer,
                                 fromSection: fromSection,
                                 section: nextSection,
-                              }
+                              },
                             });
                           }}
                         >
@@ -161,12 +185,12 @@ export const Customers = () => {
               ) : (
                 <td colSpan={6}>
                   <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
-                >
-                  <EmptyState />
-                </motion.div>
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
+                  >
+                    <EmptyState />
+                  </motion.div>
                 </td>
               )}
             </AnimatePresence>
@@ -174,7 +198,7 @@ export const Customers = () => {
         </table>
       </motion.div>
     );
-  };
+  };    
 
   const renderContent = () => {
     if (isLoading) {
