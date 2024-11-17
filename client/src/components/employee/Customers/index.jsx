@@ -89,13 +89,11 @@ export const Customers = () => {
   const renderTable = (customers, fromSection, nextSection) => {
     const validCustomers = Array.isArray(customers) ? [...customers] : [];
   
-    // Sort customers by deadline if in the "assignedCustomers" section
     if (fromSection === "assignedCustomers") {
       validCustomers.sort((a, b) => {
         const deadlineA = new Date(a.deadline);
         const deadlineB = new Date(b.deadline);
   
-        // Handle cases where the deadline is not provided
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;
   
@@ -118,12 +116,14 @@ export const Customers = () => {
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
               {[
+                "S. No.",
                 "Customer ID",
                 "Customer Name",
                 "Whatsapp number",
                 "Baby Gender",
                 assignedOrCompletedHeader,
-                ...(fromSection === "assignedCustomers" ? ["Deadline"] : []), // Add Deadline only for Assigned Customers
+                ...(fromSection === "assignedCustomers" ? ["Deadline"] : []),
+                "PDF Generated",
                 "Actions",
               ].map((header) => (
                 <th
@@ -138,7 +138,7 @@ export const Customers = () => {
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             <AnimatePresence mode="wait" initial={false}>
               {validCustomers.length > 0 ? (
-                validCustomers.map((customer) => (
+                validCustomers.map((customer, index) => (
                   <motion.tr
                     key={customer._id}
                     initial={{ opacity: 0 }}
@@ -147,6 +147,9 @@ export const Customers = () => {
                     transition={{ duration: 0.2 }}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150 ease-in-out"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {index + 1}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                       {customer.customerID}
                     </td>
@@ -171,6 +174,9 @@ export const Customers = () => {
                           : "No Deadline"}
                       </td>
                     )}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      {customer.pdfGenerated.length || 0}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <motion.button
@@ -195,15 +201,17 @@ export const Customers = () => {
                   </motion.tr>
                 ))
               ) : (
-                <td colSpan={6}>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
-                  >
-                    <EmptyState />
-                  </motion.div>
-                </td>
+                <tr>
+                  <td colSpan={9}>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center p-4 py-8 text-gray-500 dark:text-gray-300"
+                    >
+                      <EmptyState />
+                    </motion.div>
+                  </td>
+                </tr>
               )}
             </AnimatePresence>
           </tbody>
@@ -250,10 +258,11 @@ export const Customers = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab)}
-              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${activeTab === tab
+              className={`relative px-4 py-2 text-sm rounded-lg transition-colors duration-150 ease-in-out ${
+                activeTab === tab
                   ? "bg-blue-500 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                }`}
+              }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, " $1")}
               {tab === "assignedCustomers" && assignedCustomersCount > 0 && (

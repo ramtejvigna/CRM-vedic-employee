@@ -4,6 +4,7 @@ import axios from "axios";
 import { Search, Upload, Edit, Save, Filter, Download, Loader2, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import { CSVLink } from 'react-csv';
+import {LoadingSpinner} from "./LoadingSpinner"
 import 'react-toastify/dist/ReactToastify.css';
 
 const AddNameModal = ({ isOpen, onClose, onAdd }) => {
@@ -357,7 +358,6 @@ const BabyDatabase = () => {
         }
     };
 
-    console.log(filterOptions)
     useEffect(() => {
         fetchBabyNames();
 
@@ -470,7 +470,7 @@ const BabyDatabase = () => {
 
         try {
             // Send the POST request with the formData
-            await axios.post("https://vedic-backend-neon.vercel.app/uploadCsvNames", formData, {
+            await axios.post("http://localhost:8000/uploadCsvNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -684,20 +684,16 @@ const BabyDatabase = () => {
                 >
                     <table className="min-w-full divide-y min-h-full divide-gray-200">
                         {loading ? (
-                            <div className="absolute inset-0 top-20 flex items-center justify-center bg-white bg-opacity-80 rounded-lg">
-                                <div className="text-center">
-                                    <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-                                </div>
-                            </div>
+                            <LoadingSpinner />
                         ) : (
                             <>
                                 <thead className="bg-gray-50">
                                     <tr>
                                         {[
-                                            'Gender',
                                             'Name (English)',
                                             'Name (Devanagari)',
                                             'Meaning',
+                                            'Gender',
                                             'Numerology',
                                             'Zodiac',
                                             'Rashi',
@@ -733,17 +729,7 @@ const BabyDatabase = () => {
                                             >
                                                 {editingName && editingName._id === baby._id ? (
                                                     <>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <select
-                                                                value={editingName.gender}
-                                                                onChange={(e) => setEditingName({ ...editingName, gender: e.target.value })}
-                                                                className="w-full border border-gray-300 rounded-md px-2 py-1"
-                                                            >
-                                                                <option value="male">Male</option>
-                                                                <option value="female">Female</option>
-                                                                <option value="unisex">Unisex</option>
-                                                            </select>
-                                                        </td>
+                    
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <input
                                                                 value={editingName.nameEnglish}
@@ -764,6 +750,17 @@ const BabyDatabase = () => {
                                                                 onChange={(e) => setEditingName({ ...editingName, meaning: e.target.value })}
                                                                 className="w-full border border-gray-300 rounded-md px-2 py-1"
                                                             />
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <select
+                                                                value={editingName.gender}
+                                                                onChange={(e) => setEditingName({ ...editingName, gender: e.target.value })}
+                                                                className="w-full border border-gray-300 rounded-md px-2 py-1"
+                                                            >
+                                                                <option value="male">Male</option>
+                                                                <option value="female">Female</option>
+                                                                <option value="unisex">Unisex</option>
+                                                            </select>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <input
@@ -874,10 +871,10 @@ const BabyDatabase = () => {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <td className="px-6 py-4 whitespace-nowrap capitalize">{baby.gender}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.nameEnglish}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.nameDevanagari}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.meaning}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap capitalize">{baby.gender}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.numerology}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.zodiac}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">{baby.rashi}</td>
