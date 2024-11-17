@@ -4,7 +4,7 @@ import axios from "axios";
 import { Search, Upload, Edit, Save, Filter, Download, Loader2, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import { CSVLink } from 'react-csv';
-import {LoadingSpinner} from "./LoadingSpinner"
+import { LoadingSpinner } from "./LoadingSpinner"
 import 'react-toastify/dist/ReactToastify.css';
 
 const AddNameModal = ({ isOpen, onClose, onAdd }) => {
@@ -368,35 +368,35 @@ const BabyDatabase = () => {
     }, []);
 
     const filteredNames = babyNames.filter(baby => {
-        const matchesSearch = !searchTerm || 
+        const matchesSearch = !searchTerm ||
             (baby.nameEnglish?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             baby.nameDevanagari?.includes(searchTerm));
+                baby.nameDevanagari?.includes(searchTerm));
 
-        const matchesGender = genderFilter === 'all' || 
+        const matchesGender = genderFilter === 'all' ||
             baby.gender?.toLowerCase() === genderFilter.toLowerCase();
 
-        const matchesStartingLetter = !startingLetterFilter || 
+        const matchesStartingLetter = !startingLetterFilter ||
             baby.nameEnglish?.toLowerCase().startsWith(startingLetterFilter.toLowerCase());
 
-        const matchesZodiac = !selectedFilters.zodiac || 
+        const matchesZodiac = !selectedFilters.zodiac ||
             baby.zodiac?.toLowerCase() === selectedFilters.zodiac.toLowerCase();
 
-        const matchesNakshatra = !selectedFilters.nakshatra || 
+        const matchesNakshatra = !selectedFilters.nakshatra ||
             baby.nakshatra?.toLowerCase() === selectedFilters.nakshatra.toLowerCase();
 
-        const matchesElement = !selectedFilters.element || 
+        const matchesElement = !selectedFilters.element ||
             baby.element?.toLowerCase() === selectedFilters.element.toLowerCase();
 
-        const matchesBookName = !selectedFilters.bookName || 
+        const matchesBookName = !selectedFilters.bookName ||
             baby.bookName?.toLowerCase() === selectedFilters.bookName.toLowerCase();
 
-        return matchesSearch && 
-               matchesGender && 
-               matchesStartingLetter && 
-               matchesZodiac && 
-               matchesNakshatra && 
-               matchesElement && 
-               matchesBookName;
+        return matchesSearch &&
+            matchesGender &&
+            matchesStartingLetter &&
+            matchesZodiac &&
+            matchesNakshatra &&
+            matchesElement &&
+            matchesBookName;
     });
 
     const handleFilterChange = (filterType, value) => {
@@ -514,6 +514,8 @@ const BabyDatabase = () => {
     };
 
     const csvData = filteredNames.map(({ _id, _v, ...rest }) => rest);
+
+    console.log(csvData)
 
     const renderFilters = () => (
         <motion.div
@@ -638,6 +640,21 @@ const BabyDatabase = () => {
                             data={csvData}
                             filename="filtered_baby_names.csv"
                             className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
+                            enclosingCharacter={`"`}
+                            onClick={(event, done) => {
+                                const utf8Bom = '\ufeff'; // UTF-8 BOM
+                                const csvContent = utf8Bom + csvData.map(row => row.join(",")).join("\n");
+                                console.log(csv)
+                                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", "filtered_baby_names.csv");
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                done(false); // Prevents default CSVLink action
+                            }}
                         >
                             <Download className="h-5 w-5 mr-2" />
                             <span className="text-sm md:text-base">Export</span>
@@ -646,8 +663,19 @@ const BabyDatabase = () => {
 
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <a
-                            href="/baby_names_records.csv"
-                            download="baby_names_template.csv"
+                            href="#"
+                            onClick={() => {
+                                const utf8Bom = '\ufeff'; // UTF-8 BOM
+                                const templateData = "bookName,gender,nameEnglish,nameDevanagari,meaning,numerology,zodiac,rashi,nakshatra,planetaryinfluence,element,pageNo,syllableCount,characterSignificance,mantraRef,relatedFestival,extraNote,researchTag"; // Example template content
+                                const blob = new Blob([utf8Bom + templateData], { type: "text/csv;charset=utf-8;" });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", "baby_names_template.csv");
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
                             className="bg-slate-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
                         >
                             <Download className="h-5 w-5 mr-2" />
@@ -665,6 +693,7 @@ const BabyDatabase = () => {
                         <span className="text-sm md:text-base">Add New</span>
                     </motion.button>
                 </div>
+
             </div>
 
             <AddNameModal
@@ -729,7 +758,7 @@ const BabyDatabase = () => {
                                             >
                                                 {editingName && editingName._id === baby._id ? (
                                                     <>
-                    
+
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <input
                                                                 value={editingName.nameEnglish}
