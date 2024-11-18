@@ -598,7 +598,9 @@ const BabyDatabase = () => {
                 containerId="main-toast"
             />
             <h1 className="text-2xl md:text-4xl font-bold mb-8 md:mb-12">Baby Names Database</h1>
-
+            {filteredNames.length > 0 && (
+                <h1 className='text-lg pb-5'>Showing {filteredNames.length} results</h1>
+            )}
             <div className="mb-6 space-y-4">
                 {/* Search and Filter Section */}
                 <div className="flex flex-col md:flex-row gap-4">
