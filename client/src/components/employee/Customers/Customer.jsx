@@ -438,82 +438,82 @@ const Customer = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">PDFs Generated</h2>
-              {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') && (
-                <button
-                  onClick={handleNavigate}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  <FilePlus2 />
-                </button>
-              )}
-            </div>  <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="px-4 py-2 text-left">PDF</th>
-                    <th className="px-4 py-2 text-left">Generated</th>
-                    <th className="px-4 py-2 text-center">
-                      <MessageCircle className="inline h-4 w-4" />
-                    </th>
-                    <th className="px-4 py-2 text-center">
-                      <Mail className="inline h-4 w-4" />
-                    </th>
-                    <th className="px-4 py-2 text-center">Feedback</th>
-                    <th className="px-4 py-2 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pdfs.map((pdf) => (
-                    <tr key={pdf._id} className="border-b">
-                      <td className="px-4 py-2">
-                        <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
-                          <FileText className="h-4 w-4 text-blue-600" />
-                        </button>
-                      </td>
-                      <td className="px-4 py-2">
-                        <div className="flex flex-col">
-                          <span className="text-sm">{new Date(pdf.createdAt).toLocaleDateString()}</span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(pdf.createdAt).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <div className={`h-3 w-3 rounded-full ${pdf.whatsappStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <span className="text-sm font-medium">
-                          {pdf.rating === 0
-                            ? "-"
-                            : pdf.rating === 5
-                              ? "Outstanding"
-                              : pdf.rating === 4
-                                ? "Good"
-                                : pdf.rating === 3
-                                  ? "Satisfactory"
-                                  : pdf.rating === 2
-                                    ? "Needs Improvement"
-                                    : "Poor"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right relative">
-                        <div className="flex items-center justify-end space-x-2">
-                          <div className="relative">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleDropdown(pdf._id);
-                              }}
-                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
-                            >
-                              <MoreHorizontal className="h-5 w-5" />
-                            </button>
+<div className="bg-bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col overflow-y-auto relative rounded-xl shadow-lg p-6 mb-4 flex flex-col">
+<div className="flex justify-between items-center mb-4">
+    <h2 className="text-lg font-semibold">PDFs Generated</h2>
+    {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') && (
+      <button
+        onClick={handleNavigate}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        <FilePlus2 />
+      </button>
+    )}
+  </div>  <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
+    <table className="w-full">
+      <thead>
+        <tr className="border-b">
+          <th className="px-4 py-2 text-left">PDF</th>
+          <th className="px-4 py-2 text-left">Generated</th>
+          <th className="px-4 py-2 text-center">
+            <MessageCircle className="inline h-4 w-4" />
+          </th>
+          <th className="px-4 py-2 text-center">
+            <Mail className="inline h-4 w-4" />
+          </th>
+          <th className="px-4 py-2 text-center">Feedback</th>
+          <th className="px-4 py-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pdfs.map((pdf) => (
+          <tr key={pdf._id} className="border-b">
+            <td className="px-4 py-2">
+              <button onClick={() => handleShowPdf(pdf.babyNames, pdf.additionalBabyNames)}>
+                <FileText className="h-4 w-4 text-blue-600" />
+              </button>
+            </td>
+            <td className="px-4 py-2">
+              <div className="flex flex-col">
+                <span className="text-sm">{new Date(pdf.createdAt).toLocaleDateString()}</span>
+                <span className="text-xs text-gray-500">
+                  {new Date(pdf.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-center">
+              <div className={`h-3 w-3 rounded-full ${pdf.whatsappStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
+            </td>
+            <td className="px-4 py-2 text-center">
+              <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
+            </td>
+            <td className="px-4 py-2 text-center">
+              <span className="text-sm font-medium">
+                {pdf.rating === 0
+                  ? "-"
+                  : pdf.rating === 5
+                  ? "Outstanding"
+                  : pdf.rating === 4
+                  ? "Good"
+                  : pdf.rating === 3
+                  ? "Satisfactory"
+                  : pdf.rating === 2
+                  ? "Needs Improvement"
+                  : "Poor"}
+              </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-right relative">
+              <div className="flex items-center justify-end space-x-2">
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDropdown(pdf._id);
+                    }}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </button>
 
                             {activeDropdown === pdf._id && (
                               <>
