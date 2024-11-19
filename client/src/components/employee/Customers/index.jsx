@@ -45,7 +45,7 @@ export const Customers = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `http://localhost:8000/customers/employees/${employeeId}/customers`
+          `https://vedic-backend-neon.vercel.app/customers/employees/${employeeId}/customers`
         );
         
         const formattedData = {
