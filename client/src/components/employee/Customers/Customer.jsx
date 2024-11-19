@@ -431,7 +431,7 @@ const Customer = () => {
                 </div>
               </div>
 
-<div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
+<div className="bg-bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col overflow-y-auto relative rounded-xl shadow-lg p-6 mb-4 flex flex-col">
 <div className="flex justify-between items-center mb-4">
     <h2 className="text-lg font-semibold">PDFs Generated</h2>
     {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') && (
@@ -462,7 +462,7 @@ const Customer = () => {
         {pdfs.map((pdf) => (
           <tr key={pdf._id} className="border-b">
             <td className="px-4 py-2">
-              <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
+              <button onClick={() => handleShowPdf(pdf.babyNames, pdf.additionalBabyNames)}>
                 <FileText className="h-4 w-4 text-blue-600" />
               </button>
             </td>
