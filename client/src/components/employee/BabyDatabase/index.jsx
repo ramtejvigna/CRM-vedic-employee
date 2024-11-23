@@ -470,7 +470,7 @@ const BabyDatabase = () => {
 
         try {
             // Send the POST request with the formData
-            await axios.post("http://localhost:8000/uploadCsvNames", formData, {
+            await axios.post("https://vedic-backend-neon.vercel.app/uploadCsvNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

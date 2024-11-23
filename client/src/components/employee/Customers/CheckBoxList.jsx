@@ -464,6 +464,7 @@ const handleGeneratePdf = async () => {
           customerId: customerData._id,
           additionalBabyNames: additionalBabyNames,
           generatedBy: employee.firstName,
+          userId: Cookies.get('employeeId')
       });
 
       toast.success("PDF Generated Successfully");
