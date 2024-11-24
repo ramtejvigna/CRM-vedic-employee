@@ -53,7 +53,7 @@ const Customer = () => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedPdf, setSelectedPdf] = useState(null);
-
+  const [feedbackLoadingStates, setFeedbackLoadingStates] = useState(false);
 
 
 
@@ -203,10 +203,13 @@ const Customer = () => {
   };
 
   const handleSubmitFeedback = async () => {
+    setFeedbackLoadingStates((prev) => ({ ...prev, [pdfId]: true })); 
+
     if (selectedRating > 0 && selectedPdf) {
       console.log(selectedRating, selectedPdf._id);
       try {
         // Send pdfId and rating in the body of the PUT request
+
         const response = await axios.put(
           `https://vedic-backend-neon.vercel.app/api/feedback`, // No need to pass pdfId in the URL
           {
@@ -217,9 +220,13 @@ const Customer = () => {
         // Reset form and close modal
         setSelectedRating(0);
         setShowFeedbackModal(false);
+        await fetchPdfs();
       } catch (error) {
         console.error('Error submitting feedback:', error.message);
         alert('An error occurred while submitting feedback.');
+      }finally{
+        setFeedbackLoadingStates((prev) => ({ ...prev, [pdfId]: false })); 
+
       }
     } else {
       alert('Please select a rating');
@@ -490,20 +497,25 @@ const Customer = () => {
               <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
             </td>
             <td className="px-4 py-2 text-center">
-              <span className="text-sm font-medium">
-                {pdf.rating === 0
-                  ? "-"
-                  : pdf.rating === 5
-                  ? "Outstanding"
-                  : pdf.rating === 4
-                  ? "Good"
-                  : pdf.rating === 3
-                  ? "Satisfactory"
-                  : pdf.rating === 2
-                  ? "Needs Improvement"
-                  : "Poor"}
+              <span className="text-sm font-medium flex justify-center items-center h-full">
+                {feedbackLoadingStates[pdf._id] ? (
+                  <div className="w-4 h-4 border-2 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+                ) : pdf.rating === 0 ? (
+                  "-"
+                ) : pdf.rating === 5 ? (
+                  "Outstanding"
+                ) : pdf.rating === 4 ? (
+                  "Good"
+                ) : pdf.rating === 3 ? (
+                  "Satisfactory"
+                ) : pdf.rating === 2 ? (
+                  "Needs Improvement"
+                ) : (
+                  "Poor"
+                )}
               </span>
             </td>
+
             <td className="px-6 py-4 whitespace-nowrap text-right relative">
               <div className="flex items-center justify-end space-x-2">
              <div className="relative">

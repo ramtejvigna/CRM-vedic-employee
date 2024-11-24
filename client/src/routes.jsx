@@ -26,7 +26,7 @@ export const routes = [
   {
     name: "customers",
     path: "customers",
-    icon: <FaUserLarge {...icon} />, 
+    icon: <FaUser {...icon} />, 
   },
   {
     name: "Todo",
