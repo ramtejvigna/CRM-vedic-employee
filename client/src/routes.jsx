@@ -1,4 +1,5 @@
-import { FaUsers, FaUserLarge, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
+import { FaUsers, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
+import { FaUserLarge } from "react-icons/fa6"
 import { MdOutlineTaskAlt } from "react-icons/md";
 import { TbReportAnalytics } from "react-icons/tb";
 import { BiSolidBabyCarriage } from "react-icons/bi";
