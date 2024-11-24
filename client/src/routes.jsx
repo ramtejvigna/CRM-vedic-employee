@@ -1,4 +1,4 @@
-import { FaUsers, FaUserMd, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
+import { FaUsers, FaUserLarge, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
 import { MdOutlineTaskAlt } from "react-icons/md";
 import { TbReportAnalytics } from "react-icons/tb";
 import { BiSolidBabyCarriage } from "react-icons/bi";
@@ -25,7 +25,7 @@ export const routes = [
   {
     name: "customers",
     path: "customers",
-    icon: <FaUserMd {...icon} />, 
+    icon: <FaUserLarge {...icon} />, 
   },
   {
     name: "Todo",
