@@ -657,11 +657,11 @@ const handleGeneratePdf = async () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(English)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">BookName</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(English)</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(Devangari)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Numerology</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Zodiac</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Rashi</th>
@@ -688,11 +688,11 @@ const handleGeneratePdf = async () => {
                     className="rounded"
                   />
                 </td>
-                <td className="px-4 py-2">{item.nameEnglish}</td>
-                <td className="px-4 py-2">{item.meaning}</td>
-                <td className="px-4 py-2">{item.gender}</td>
                 <td className="px-4 py-2">{item.bookName}</td>
+                <td className="px-4 py-2">{item.gender}</td>
+                <td className="px-4 py-2">{item.nameEnglish}</td>
                 <td className="px-4 py-2">{item.nameDevanagari}</td>
+                <td className="px-4 py-2">{item.meaning}</td>
                 <td className="px-4 py-2">{item.numerology}</td>
                 <td className="px-4 py-2">{item.zodiac}</td>
                 <td className="px-4 py-2">{item.rashi}</td>
