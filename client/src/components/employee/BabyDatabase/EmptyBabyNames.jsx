@@ -109,6 +109,17 @@ const EmptyBabyNames = () => {
             >
                 We couldn't find any baby names matching your search criteria. Try adjusting your filters or try a different search term.
             </motion.p>
+
+            <motion.button
+                className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+            >
+                Clear Filters
+            </motion.button>
         </motion.div>
     );
 };

@@ -11,7 +11,7 @@ const CustomerAstroDetails = ({ customerId }) => {
 
   const fetchAstroData = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/customers/${customerId}/astro`);
+      const response = await fetch(`https://vedic-backend-neon.vercel.app/api/customers/${customerId}/astro`);
       if (response.ok) {
         const data = await response.json();
         setAstroDetails(data);
@@ -52,7 +52,7 @@ const CustomerAstroDetails = ({ customerId }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/customers/${customerId}/astro`, {
+      const response = await fetch(`https://vedic-backend-neon.vercel.app/api/customers/${customerId}/astro`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFields),

@@ -1,291 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from "axios";
-import { Search, Upload, Edit, Save, Filter, Download, Loader2, Plus } from 'lucide-react';
+import { Search, Upload, Edit, Save, Filter, Download, Loader2, Plus, Send } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import { CSVLink } from 'react-csv';
 import { LoadingSpinner } from "./LoadingSpinner"
 import 'react-toastify/dist/ReactToastify.css';
 import EmptyBabyNames from './EmptyBabyNames';
-
-const AddNameModal = ({ isOpen, onClose, onAdd }) => {
-    const [newName, setNewName] = useState({
-        bookName: '',
-        gender: 'male',
-        nameEnglish: '',
-        nameDevanagari: '',
-        meaning: '',
-        numerology: '',
-        zodiac: '',
-        rashi: '',
-        nakshatra: '',
-        planetaryInfluence: '',
-        element: '',
-        pageNo: '',
-        syllableCount: '',
-        characterSignificance: '',
-        mantraRef: '',
-        relatedFestival: '',
-        extraNote: '',
-        researchTag: ''
-    });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await onAdd(newName);
-            onClose();
-            setNewName({
-                bookName: '',
-                gender: 'male',
-                nameEnglish: '',
-                nameDevanagari: '',
-                meaning: '',
-                numerology: '',
-                zodiac: '',
-                rashi: '',
-                nakshatra: '',
-                planetaryInfluence: '',
-                element: '',
-                pageNo: '',
-                syllableCount: '',
-                characterSignificance: '',
-                mantraRef: '',
-                relatedFestival: '',
-                extraNote: '',
-                researchTag: ''
-            });
-        } catch (error) {
-            console.error('Error adding name:', error);
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white p-6 rounded-lg w-full max-w-2xl max-h-[40rem] overflow-y-auto"
-            >
-                <h2 className="text-2xl font-bold mb-4">Add New Name</h2>
-                <form onSubmit={handleSubmit} className="space-y-6 p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Basic Information */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Book Name</label>
-                            <input
-                                type="text"
-                                value={newName.bookName}
-                                onChange={(e) => setNewName({ ...newName, bookName: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Gender</label>
-                            <select
-                                value={newName.gender}
-                                onChange={(e) => setNewName({ ...newName, gender: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                required
-                            >
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="unisex">Unisex</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Name (English)</label>
-                            <input
-                                type="text"
-                                value={newName.nameEnglish}
-                                onChange={(e) => setNewName({ ...newName, nameEnglish: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Name (Devanagari)</label>
-                            <input
-                                type="text"
-                                value={newName.nameDevanagari}
-                                onChange={(e) => setNewName({ ...newName, nameDevanagari: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Meaning</label>
-                            <input
-                                type="text"
-                                value={newName.meaning}
-                                onChange={(e) => setNewName({ ...newName, meaning: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                required
-                            />
-                        </div>
-
-                        {/* Astrological Information */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Zodiac</label>
-                            <input
-                                type="text"
-                                value={newName.zodiac}
-                                onChange={(e) => setNewName({ ...newName, zodiac: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Rashi</label>
-                            <input
-                                type="text"
-                                value={newName.rashi}
-                                onChange={(e) => setNewName({ ...newName, rashi: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Nakshatra</label>
-                            <input
-                                type="text"
-                                value={newName.nakshatra}
-                                onChange={(e) => setNewName({ ...newName, nakshatra: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Planetary Influence</label>
-                            <input
-                                type="text"
-                                value={newName.planetaryInfluence}
-                                onChange={(e) => setNewName({ ...newName, planetaryInfluence: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Element</label>
-                            <input
-                                type="text"
-                                value={newName.element}
-                                onChange={(e) => setNewName({ ...newName, element: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        {/* Technical Details */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Page No.</label>
-                            <input
-                                type="text"
-                                value={newName.pageNo}
-                                onChange={(e) => setNewName({ ...newName, pageNo: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Numerology</label>
-                            <input
-                                type="text"
-                                value={newName.numerology}
-                                onChange={(e) => setNewName({ ...newName, numerology: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Syllable Count</label>
-                            <input
-                                type="text"
-                                value={newName.syllableCount}
-                                onChange={(e) => setNewName({ ...newName, syllableCount: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        {/* Additional Information */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Character Significance</label>
-                            <input
-                                type="text"
-                                value={newName.characterSignificance}
-                                onChange={(e) => setNewName({ ...newName, characterSignificance: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Mantra Reference</label>
-                            <input
-                                type="text"
-                                value={newName.mantraRef}
-                                onChange={(e) => setNewName({ ...newName, mantraRef: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Related Festival</label>
-                            <input
-                                type="text"
-                                value={newName.relatedFestival}
-                                onChange={(e) => setNewName({ ...newName, relatedFestival: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                            />
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Extra Notes</label>
-                            <textarea
-                                value={newName.extraNote}
-                                onChange={(e) => setNewName({ ...newName, extraNote: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                rows="3"
-                            />
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Research Tags</label>
-                            <input
-                                type="text"
-                                value={newName.researchTag}
-                                onChange={(e) => setNewName({ ...newName, researchTag: e.target.value })}
-                                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                placeholder="Separate tags with commas"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-4 mt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            Add Name
-                        </button>
-                    </div>
-                </form>
-            </motion.div>
-        </div>
-    );
-};
+import AddNameModal from './AddNameModel';
+import RequestConfirmationModal from './RequestConfirmationModal';
+import Cookies from "js-cookie";
 
 const FilterDropdown = ({ label, options = [], value, onChange }) => (
     <div className="flex flex-col space-y-1">
@@ -316,6 +40,10 @@ const BabyDatabase = () => {
     const [babyNames, setBabyNames] = useState([]);
     const [editingName, setEditingName] = useState(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+    const [hasRequestedAccess, setHasRequestedAccess] = useState(false);
+    const [checkAdminAcceptance, setAdminAcceptance] = useState(false);
+    const employeeId = Cookies.get("employeeId");
 
     const [filterOptions, setFilterOptions] = useState({
         zodiacs: [],
@@ -359,14 +87,48 @@ const BabyDatabase = () => {
         }
     };
 
+    
+    const requestedAccess = async () => {
+        try {
+            const response = await axios.get("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+                params: { employeeId }
+            });
+
+            if (response.data.requested) {
+                setHasRequestedAccess(true);
+            }
+        } catch (error) {
+            console.error(err);
+            toast.error("Failed");
+        }
+    }
+
+    const checkAcceptance = async () => {
+        try {
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/employees/adminAcceptance`, {
+                params: { employeeId } // Pass employeeId as a query parameter
+            });
+    
+            if (response.data.accepted) {
+                setAdminAcceptance(true);
+            } else {
+                setAdminAcceptance(false);
+            }
+        } catch (err) {
+            toast.error('Failed to check Admin Acceptance');
+        }
+    };    
+
     useEffect(() => {
+        requestedAccess();
+        checkAcceptance();
         fetchBabyNames();
 
         // Cleanup function to dismiss all toasts when component unmounts
         return () => {
             toast.dismiss();
         };
-    }, []);
+    }, [employeeId]);
 
     const filteredNames = babyNames.filter(baby => {
         const matchesSearch = !searchTerm ||
@@ -445,6 +207,30 @@ const BabyDatabase = () => {
         }
     };
 
+    const handleRequestAccess = async () => {
+        try {
+            const response = await axios.post("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+                employeeId: employeeId
+            });
+
+            if (response.data.success) {
+                setHasRequestedAccess(true);
+                toast.success("Request sent successfully!", {
+                    onClose: () => { },
+                    toastId: 'request-success'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to send request", {
+                onClose: () => { },
+                toastId: 'request-error'
+            });
+        } finally {
+            setIsRequestModalOpen(false);
+        }
+    };
+
     const handleStartingLetterFilter = (event) => {
         setStartingLetterFilter(event.target.value);
         setPage(0);
@@ -515,8 +301,6 @@ const BabyDatabase = () => {
     };
 
     const csvData = filteredNames.map(({ _id, _v, ...rest }) => rest);
-
-    console.log(csvData)
 
     const renderFilters = () => (
         <motion.div
@@ -624,18 +408,39 @@ const BabyDatabase = () => {
                         <Filter className="h-5 w-5 mr-2" />
                         <span>Filters</span>
                     </motion.button>
+                    <motion.button
+                        whileHover={!hasRequestedAccess && { scale: 1.05 }}
+                        whileTap={!hasRequestedAccess && { scale: 0.95 }}
+                        onClick={() => setIsRequestModalOpen(true)}
+                        disabled={hasRequestedAccess}
+                        className={`px-4 py-2 rounded-lg text-white transition duration-300 flex items-center justify-center bg-black`}
+                    >
+                        <Send className="h-5 w-5 mr-2" />
+                        <span className="text-sm md:text-base">
+                            {hasRequestedAccess ? 'Requested' : 'Request Access'}
+                        </span>
+                    </motion.button>
                 </div>
 
                 {/* Action Buttons Section */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
                     <motion.label
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
+                        whileHover={checkAdminAcceptance ? { scale: 1.05 } : {}}
+                        whileTap={checkAdminAcceptance ? { scale: 0.95 } : {}}
+                        className={`${!checkAdminAcceptance
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-blue-500 hover:shadow-lg cursor-pointer'
+                            } text-white px-4 py-2 rounded-lg shadow-md transition duration-300 flex items-center justify-center`}
                     >
                         <Upload className="h-5 w-5 mr-2" />
                         <span className="text-sm md:text-base">Upload</span>
-                        <input type="file" accept=".csv" onChange={handleCsvUpload} className="hidden" />
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleCsvUpload}
+                            className="hidden"
+                            disabled={!checkAdminAcceptance}
+                        />
                     </motion.label>
 
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -645,7 +450,7 @@ const BabyDatabase = () => {
                             className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
                             enclosingCharacter={`"`}
                             onClick={(event, done) => {
-                                const utf8Bom = '\ufeff'; // UTF-8 BOM
+                                const utf8Bom = '\ufeff';
                                 const csvContent = utf8Bom + csvData.map(row => row.join(",")).join("\n");
                                 const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
                                 const url = URL.createObjectURL(blob);
@@ -655,11 +460,11 @@ const BabyDatabase = () => {
                                 document.body.appendChild(link);
                                 link.click();
                                 document.body.removeChild(link);
-                                done(false); // Prevents default CSVLink action
+                                done(false);
                                 toast.success("Exported Baby Names successfully", {
                                     onClose: () => { },
                                     toastId: 'export-success'
-                                })
+                                });
                             }}
                         >
                             <Download className="h-5 w-5 mr-2" />
@@ -671,8 +476,8 @@ const BabyDatabase = () => {
                         <a
                             href="#"
                             onClick={() => {
-                                const utf8Bom = '\ufeff'; // UTF-8 BOM
-                                const templateData = "bookName,gender,nameEnglish,nameDevanagari,meaning,numerology,zodiac,rashi,nakshatra,planetaryinfluence,element,pageNo,syllableCount,characterSignificance,mantraRef,relatedFestival,extraNote,researchTag"; // Example template content
+                                const utf8Bom = '\ufeff';
+                                const templateData = "bookName,gender,nameEnglish,nameDevanagari,meaning,numerology,zodiac,rashi,nakshatra,planetaryinfluence,element,pageNo,syllableCount,characterSignificance,mantraRef,relatedFestival,extraNote,researchTag";
                                 const blob = new Blob([utf8Bom + templateData], { type: "text/csv;charset=utf-8;" });
                                 const url = URL.createObjectURL(blob);
                                 const link = document.createElement("a");
@@ -681,10 +486,6 @@ const BabyDatabase = () => {
                                 document.body.appendChild(link);
                                 link.click();
                                 document.body.removeChild(link);
-                                toast.success("Downloaded Baby Names Template", {
-                                    onClose: () => { },
-                                    toastId: 'template-success'
-                                })
                             }}
                             className="bg-slate-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
                         >
@@ -694,16 +495,19 @@ const BabyDatabase = () => {
                     </motion.div>
 
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="px-4 py-2 rounded-lg bg-green-600 text-white transition duration-300 flex items-center justify-center"
+                        whileHover={checkAdminAcceptance ? { scale: 1.05 } : {}}
+                        whileTap={checkAdminAcceptance ? { scale: 0.95 } : {}}
+                        onClick={() => !checkAdminAcceptance && setIsAddModalOpen(true)}
+                        className={`px-4 py-2 rounded-lg text-white transition duration-300 flex items-center justify-center ${!checkAdminAcceptance
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                        disabled={!checkAdminAcceptance}
                     >
                         <Plus className="h-5 w-5 mr-2" />
                         <span className="text-sm md:text-base">Add New</span>
                     </motion.button>
                 </div>
-
             </div>
 
             <AddNameModal
@@ -953,7 +757,7 @@ const BabyDatabase = () => {
                 </motion.div>
             </div>
 
-            {filteredNames.length !== 0 && !loading && (
+            {!loading && (
                 <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-lg px-4 py-3">
                     <div className="flex items-center">
                         <span className="mr-2 text-sm">Rows per page:</span>
@@ -986,6 +790,12 @@ const BabyDatabase = () => {
                     </div>
                 </div>
             )}
+
+            <RequestConfirmationModal
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                onConfirm={handleRequestAccess}
+            />
         </div>
     );
 };
