@@ -5,13 +5,14 @@ import Cookies from 'js-cookie';
 import { Mail, Phone, ArrowRight, Lock } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useStore } from '../../../store';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
+  const {userInfo , setUserInfo} = useStore();
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -22,6 +23,11 @@ const SignIn = () => {
       
       Cookies.set('token', token, { expires: 1 });
       Cookies.set('employeeId', employeeId, { expires: 1 });
+
+      console.log(response.data)
+      if (JSON.stringify(userInfo) !== JSON.stringify(response.data)) {
+        setUserInfo(response.data);
+    }
       
       toast.success('🎉 Login successful! Redirecting...', {
         position: "top-right",

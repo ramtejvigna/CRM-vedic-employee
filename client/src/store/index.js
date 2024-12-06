@@ -8,4 +8,10 @@ export const useStore = create((set) => ({
     setOpenSidenav: (state) => set({ openSidenav: state }),
     activeRoute: "Dashboard",  // Default to Dashboard
     setActiveRoute: (route) => set({ activeRoute: route }),
+
+    userInfo : undefined,
+    setUserInfo : (data) => set((state) => ({...state , userInfo : data})),
+
+    onlineUsers : [] ,
+    setOnlineUsers : (data) => set((state) => ({...state , onlineUsers : data })),
 }))
