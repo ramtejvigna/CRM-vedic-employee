@@ -3,13 +3,51 @@ import { motion } from 'framer-motion';
 import axios from "axios";
 import { Search, Upload, Edit, Save, Filter, Download, Loader2, Plus, Send } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
-import { CSVLink } from 'react-csv';
 import { LoadingSpinner } from "./LoadingSpinner"
 import 'react-toastify/dist/ReactToastify.css';
 import EmptyBabyNames from './EmptyBabyNames';
 import AddNameModal from './AddNameModel';
 import RequestConfirmationModal from './RequestConfirmationModal';
+import ExcelTemplateButton from "./ExcelTempleteButton";
 import Cookies from "js-cookie";
+import { utils , writeFile } from "xlsx"
+
+const ExcelDownloadButton = ({ data }) => {
+    const handleDownload = () => {
+        try {
+            // Convert data to worksheet
+            const ws = utils.json_to_sheet(data);
+            
+            // Create workbook and append worksheet
+            const wb = utils.book_new();
+            utils.book_append_sheet(wb, ws, "Baby Names");
+            
+            // Save file
+            writeFile(wb, "filtered_baby_names.xlsx");
+            
+            toast.success("Exported Baby Names successfully", {
+                onClose: () => { },
+                toastId: 'export-success'
+            });
+        } catch (error) {
+            console.error("Export error:", error);
+            toast.error("Failed to export data", {
+                onClose: () => { },
+                toastId: 'export-error'
+            });
+        }
+    };
+
+    return (
+        <button
+            onClick={handleDownload}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
+        >
+            <Download className="h-5 w-5 mr-2" />
+            <span className="text-sm md:text-base">Export</span>
+        </button>
+    );
+};
 
 const FilterDropdown = ({ label, options = [], value, onChange }) => (
     <div className="flex flex-col space-y-1">
@@ -59,6 +97,7 @@ const BabyDatabase = () => {
     });
 
     const fetchBabyNames = async () => {
+        setLoading(true);
         try {
             const response = await axios.get("https://vedic-backend-neon.vercel.app/api/names");
             setBabyNames(response.data);
@@ -79,11 +118,10 @@ const BabyDatabase = () => {
             };
 
             setFilterOptions(uniqueValues);
+            setLoading(false);
         } catch (err) {
             console.error(err);
             toast.error("Failed to fetch baby names");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -241,27 +279,30 @@ const BabyDatabase = () => {
     };
 
     // Handle CSV upload
-    const handleCsvUpload = async (event) => {
+    const handleExcelUpload = async (event) => {
         const file = event.target.files[0];
 
-        // Ensure a file is selected and is of type CSV
-        if (!file || file.type !== "text/csv") {
-            toast.error("Please upload a valid CSV file.", {
+        // Check if file is an Excel file
+        const validTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel' // .xls
+        ];
+
+        if (!file || !validTypes.includes(file.type)) {
+            toast.error("Please upload a valid Excel file (.xlsx or .xls)", {
                 toastId: 'invalid-file-type'
             });
             return;
         }
 
         const formData = new FormData();
-        formData.append('csv', file);
+        formData.append('excel', file);
 
         try {
-            // Send the POST request with the formData
-            await axios.post("https://vedic-backend-neon.vercel.app/uploadCsvNames", formData, {
+            await axios.post("https://vedic-backend-neon.vercel.app/uploadExcelNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            // Fetch updated data and notify the user
             fetchBabyNames();
             toast.success("File uploaded successfully!", {
                 onClose: () => { },
@@ -300,7 +341,7 @@ const BabyDatabase = () => {
         }
     };
 
-    const csvData = filteredNames.map(({ _id, _v, ...rest }) => rest);
+    const csvData = filteredNames.map(({ _id, __v, ...rest }) => rest);
 
     const renderFilters = () => (
         <motion.div
@@ -436,63 +477,16 @@ const BabyDatabase = () => {
                         <span className="text-sm md:text-base">Upload</span>
                         <input
                             type="file"
-                            accept=".csv"
-                            onChange={handleCsvUpload}
+                            accept=".xlsx,.xls"
+                            onChange={handleExcelUpload}
                             className="hidden"
                             disabled={!checkAdminAcceptance}
                         />
                     </motion.label>
 
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <CSVLink
-                            data={csvData}
-                            filename="filtered_baby_names.csv"
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
-                            enclosingCharacter={`"`}
-                            onClick={(event, done) => {
-                                const utf8Bom = '\ufeff';
-                                const csvContent = utf8Bom + csvData.map(row => row.join(",")).join("\n");
-                                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-                                const url = URL.createObjectURL(blob);
-                                const link = document.createElement("a");
-                                link.setAttribute("href", url);
-                                link.setAttribute("download", "filtered_baby_names.csv");
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                done(false);
-                                toast.success("Exported Baby Names successfully", {
-                                    onClose: () => { },
-                                    toastId: 'export-success'
-                                });
-                            }}
-                        >
-                            <Download className="h-5 w-5 mr-2" />
-                            <span className="text-sm md:text-base">Export</span>
-                        </CSVLink>
-                    </motion.div>
+                    <ExcelDownloadButton data={csvData} />
 
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <a
-                            href="#"
-                            onClick={() => {
-                                const utf8Bom = '\ufeff';
-                                const templateData = "bookName,gender,nameEnglish,nameDevanagari,meaning,numerology,zodiac,rashi,nakshatra,planetaryinfluence,element,pageNo,syllableCount,characterSignificance,mantraRef,relatedFestival,extraNote,researchTag";
-                                const blob = new Blob([utf8Bom + templateData], { type: "text/csv;charset=utf-8;" });
-                                const url = URL.createObjectURL(blob);
-                                const link = document.createElement("a");
-                                link.setAttribute("href", url);
-                                link.setAttribute("download", "baby_names_template.csv");
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }}
-                            className="bg-slate-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center"
-                        >
-                            <Download className="h-5 w-5 mr-2" />
-                            <span className="text-sm md:text-base">Template</span>
-                        </a>
-                    </motion.div>
+                    <ExcelTemplateButton />
 
                     <motion.button
                         whileHover={checkAdminAcceptance ? { scale: 1.05 } : {}}
@@ -525,7 +519,7 @@ const BabyDatabase = () => {
                     transition={{ duration: 0.5 }}
                     className="bg-white rounded-lg shadow-xl"
                 >
-                    {filteredNames.length !== 0 && !loading && (
+                    {filteredNames.length !== 0 && (
                         <table className="min-w-full divide-y min-h-full divide-gray-200">
                             {loading ? (
                                 <LoadingSpinner />
