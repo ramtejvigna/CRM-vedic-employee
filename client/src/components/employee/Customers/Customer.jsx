@@ -49,11 +49,14 @@ const Customer = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [mailUrl, setMailUrl] = useState(null);
+  const [whatsappUrl,setWhatsappUrl]=useState(null);
   const [pdfId, setPdfId] = useState(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [feedbackLoadingStates, setFeedbackLoadingStates] = useState(false);
+  const [mailLoader,setMailLoder]=useState(null);
+  const [whatsapploader,setWhatsappLoader]=useState(null);
 
 
 
@@ -73,7 +76,8 @@ const Customer = () => {
       await handleSetPdfUrl(pdf.babyNames, pdf.additionalBabyNames);
       setPdfId(pdf._id);
     } else if (action === 'whatsapp') {
-
+      await handleSetPdfUrlForWhatsapp(pdf.babyNames, pdf.additionalBabyNames);
+      setPdfId(pdf._id);
     } else if (action === 'feedback') {
       if (pdf.whatsappStatus || pdf.mailStatus) {
         // If at least one status is true, show the feedback modal
@@ -138,14 +142,30 @@ const Customer = () => {
     }
   };
 
+  const handleSetPdfUrlForWhatsapp = async (babyNames, additionalBabyNames) => {
+    try {
+        const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
+        setWhatsappUrl(generatedPdfUrl);
+    } catch (error) {
+        console.error("Error generating PDF URL:", error);
+        alert("Error generating PDF URL");
+    }
+};
+
   // Watch for changes to mailUrl and pdfId and send mail if both are available
   useEffect(() => {
     const sendMailAndFetchPdfs = async () => {
       if (mailUrl && pdfId) {
         try {
+          setMailLoder(pdfId)
           await handleSendMail(mailUrl, pdfId, customerData.email);
+          toast.success("Email Sent Successfully");
+          setMailUrl(null);
+          setMailLoder(null);
           await fetchPdfs(); // Re-fetch PDFs after sending mail
         } catch (error) {
+          setMailLoder(null);
+          setMailUrl(null);
           console.error("Error sending mail:", error);
         }
       }
@@ -153,6 +173,28 @@ const Customer = () => {
 
     sendMailAndFetchPdfs();
   }, [mailUrl, pdfId]);
+
+  useEffect(() => {
+    const sendWhatsappAndFetchPdfs = async () => {
+        if (whatsappUrl && pdfId) {
+            console.log(whatsappUrl)
+            try {
+                setWhatsappLoader(pdfId);
+                await handleSendWhatsApp(whatsappUrl, pdfId, customerDetails.whatsappNumber);
+                setWhatsappLoader(null);
+                toast.success("Pdf Url Sent Successfully Through whatsapp");
+                setWhatsappUrl(null);
+                await fetchPdfs(); 
+            } catch (error) {
+              setWhatsappLoader(null);
+              setWhatsappUrl(null);
+                console.error("Error sending mail:", error);
+            }
+        }
+    };
+
+    sendWhatsappAndFetchPdfs();
+}, [whatsappUrl, pdfId]);
 
   const handleShowPdf = async (babyNames, additionalBabyNames) => {
     const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
@@ -234,6 +276,7 @@ const Customer = () => {
   };
 
   const handleNavigate = () => {
+    
     navigate("generate-pdf", {
       state: {
         customerDetails,
@@ -491,11 +534,35 @@ const Customer = () => {
               </div>
             </td>
             <td className="px-4 py-2 text-center">
-              <div className={`h-3 w-3 rounded-full ${pdf.whatsappStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
+              <div className="h-3 w-3 mx-auto">
+                {whatsapploader === pdf._id ? (
+                  // Blue loader
+                  <div className="h-3 w-3 rounded-full animate-spin border-2 border-blue-500 border-t-transparent"></div>
+                ) : (
+                  // Status indicator based on pdf.mailStatus
+                  <div
+                    className={`h-3 w-3 rounded-full ${
+                      pdf.whatsappStatus ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                )}
+              </div>
             </td>
-            <td className="px-4 py-2 text-center">
-              <div className={`h-3 w-3 rounded-full ${pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'} mx-auto`} />
-            </td>
+              <td className="px-4 py-2 text-center">
+                <div className="h-3 w-3 mx-auto">
+                  {mailLoader===pdf._id ? (
+                    // Blue loader
+                    <div className="h-3 w-3 rounded-full animate-spin border-2 border-blue-500 border-t-transparent"></div>
+                  ) : (
+                    // Status indicator based on pdf.mailStatus
+                    <div
+                      className={`h-3 w-3 rounded-full ${
+                        pdf.mailStatus ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    />
+                  )}
+                </div>
+              </td>
             <td className="px-4 py-2 text-center">
               <span className="text-sm font-medium flex justify-center items-center h-full">
                 {feedbackLoadingStates[pdf._id] ? (

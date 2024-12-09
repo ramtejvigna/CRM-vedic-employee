@@ -50,37 +50,44 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const pdfBlob = await response.blob(); // Convert the response to a Blob
+            const pdfBlob = await response.blob();
             const base64Pdf = await blobToBase64(pdfBlob);
-    
     await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-email", {
       email,
       base64Pdf,
       uniqueId,
     });
-
-    alert("PDF sent to email");
   } catch (error) {
     console.error("Error sending PDF to email", error);
-    alert("Error sending email");
   }
 };
 
 
 
 export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
-  if (!phoneNumber || !pdfUrl || !uniqueId) {
+  console.log(phoneNumber , uniqueId)
+  if (!phoneNumber || !uniqueId) {
     alert("Provide a valid phone number and ensure the PDF is generated.");
     return;
   }
-
   try {
-    await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-whatsapp", {
+
+    const response = await fetch(pdfUrl);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const pdfBlob = await response.blob();
+    const base64Pdf = await blobToBase64(pdfBlob);
+
+    const res = await axios.post("http://localhost:9000/api/send-pdf-whatsapp", {
       phoneNumber,
-      pdfUrl,
+      base64Pdf,
       uniqueId,
-    });
-    alert("PDF sent to WhatsApp");
+    } , {withCredentials : true});
+
+    if(res.status === 200) {
+        window.open(`https://wa.me/+919059578959?text=${encodeURIComponent(res.data.firebasePdfUrl)}`);
+    }
   } catch (error) {
     console.error("Error sending PDF via WhatsApp", error);
     alert("Error sending WhatsApp message");
