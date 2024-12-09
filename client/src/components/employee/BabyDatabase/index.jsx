@@ -103,7 +103,7 @@ const BabyDatabase = () => {
     const fetchBabyNames = async () => {
         setLoading(true);
         try {
-            const response = await axios.get("https://vedic-backend-neon.vercel.app/api/names");
+            const response = await axios.get("http://localhost:9000/api/names");
             setBabyNames(response.data);
 
             // Extract unique values with proper null checking and sorting
@@ -135,7 +135,7 @@ const BabyDatabase = () => {
     
     const requestedAccess = async () => {
         try {
-            const response = await axios.get("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+            const response = await axios.get("http://localhost:9000/employees/requestBabyNames", {
                 params: { employeeId }
             });
 
@@ -143,14 +143,14 @@ const BabyDatabase = () => {
                 setHasRequestedAccess(true);
             }
         } catch (error) {
-            console.error(err);
+            console.error(error);
             toast.error("Failed");
         }
     }
 
     const checkAcceptance = async () => {
         try {
-            const response = await axios.get(`https://vedic-backend-neon.vercel.app/employees/adminAcceptance`, {
+            const response = await axios.get(`http://localhost:9000/employees/adminAcceptance`, {
                 params: { employeeId } // Pass employeeId as a query parameter
             });
     
@@ -245,7 +245,8 @@ const BabyDatabase = () => {
 
     const handleAddName = async (newName) => {
         try {
-            await axios.post("https://vedic-backend-neon.vercel.app/api/names", newName);
+            await axios.post("http://localhost:9000/api/names", { newName, employeeId });
+            await checkAcceptance();
             await fetchBabyNames();
             toast.success("Name added successfully!", {
                 onClose: () => { },
@@ -263,7 +264,7 @@ const BabyDatabase = () => {
 
     const handleRequestAccess = async () => {
         try {
-            const response = await axios.post("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+            const response = await axios.post("http://localhost:9000/employees/requestBabyNames", {
                 employeeId: employeeId
             });
 
@@ -297,29 +298,31 @@ const BabyDatabase = () => {
     // Handle CSV upload
     const handleExcelUpload = async (event) => {
         const file = event.target.files[0];
-
+    
         // Check if file is an Excel file
         const validTypes = [
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
             'application/vnd.ms-excel' // .xls
         ];
-
+    
         if (!file || !validTypes.includes(file.type)) {
             toast.error("Please upload a valid Excel file (.xlsx or .xls)", {
                 toastId: 'invalid-file-type'
             });
             return;
         }
-
+    
         const formData = new FormData();
-        formData.append('excel', file);
-
+        formData.append('excel', file); // Append the file
+        formData.append('employeeId', employeeId); // Append the employeeId
+    
         try {
-            await axios.post("https://vedic-backend-neon.vercel.app/uploadExcelNames", formData, {
+            await axios.post("http://localhost:9000/uploadExcelNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-
-            fetchBabyNames();
+    
+            await checkAcceptance();
+            await fetchBabyNames();
             toast.success("File uploaded successfully!", {
                 onClose: () => { },
                 toastId: 'upload-success'
@@ -332,6 +335,7 @@ const BabyDatabase = () => {
             });
         }
     };
+    
 
 
     // Handle editing
@@ -341,7 +345,7 @@ const BabyDatabase = () => {
 
     const saveEdit = async () => {
         try {
-            await axios.put(`https://vedic-backend-neon.vercel.app/updateBabyName/${editingName._id}`, editingName);
+            await axios.put(`http://localhost:9000/updateBabyName/${editingName._id}`, editingName);
             setEditingName(null);
             fetchBabyNames();
             toast.success("Baby name updated successfully!", {
@@ -521,7 +525,7 @@ const BabyDatabase = () => {
                     <motion.button
                         whileHover={checkAdminAcceptance ? { scale: 1.05 } : {}}
                         whileTap={checkAdminAcceptance ? { scale: 0.95 } : {}}
-                        onClick={() => !checkAdminAcceptance && setIsAddModalOpen(true)}
+                        onClick={() => checkAdminAcceptance && setIsAddModalOpen(true)}
                         className={`px-4 py-2 rounded-lg text-white transition duration-300 flex items-center justify-center ${!checkAdminAcceptance
                                 ? 'bg-gray-400 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700'
