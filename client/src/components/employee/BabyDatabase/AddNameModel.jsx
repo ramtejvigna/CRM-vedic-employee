@@ -9,7 +9,7 @@ const AddNameModal = ({ isOpen, onClose, onAdd }) => {
         nakshatra: [],
         planet: [],
         element: [],
-        bookName: [],
+        bookname: [],
         festival: []
     });
 
