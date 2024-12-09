@@ -245,7 +245,7 @@ const BabyDatabase = () => {
 
     const handleAddName = async (newName) => {
         try {
-            await axios.post("https://vedic-backend-neon.vercel.app/api/names", { newName, employeeId });
+            await axios.post("https://vedic-backend-neon.vercel.app/api/names", { newName: newName, employeeId: employeeId });
             await checkAcceptance();
             await fetchBabyNames();
             toast.success("Name added successfully!", {
