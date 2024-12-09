@@ -46,9 +46,9 @@ export const routes = [
     icon: <GiThreeLeaves {...icon} />,
     element: <LeaveManagement />,
   },
-  {
-    name: "settings",
-    path: "settings",
-    icon: <FaCog {...icon} />, 
-  },
+  // {
+  //   name: "settings",
+  //   path: "settings",
+  //   icon: <FaCog {...icon} />, 
+  // },
 ];

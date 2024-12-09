@@ -87,13 +87,17 @@ const BabyDatabase = () => {
         zodiacs: [],
         nakshatras: [],
         elements: [],
-        bookNames: []
+        bookNames: [],
+        planetaryInfluence: [],
+        relatedFestival: []
     });
     const [selectedFilters, setSelectedFilters] = useState({
         zodiac: '',
         nakshatra: '',
         element: '',
-        bookName: ''
+        bookName: '',
+        planetaryInfluence: '',
+        relatedFestival: ''
     });
 
     const fetchBabyNames = async () => {
@@ -114,14 +118,17 @@ const BabyDatabase = () => {
                 zodiacs: extractUniqueValues('zodiac'),
                 nakshatras: extractUniqueValues('nakshatra'),
                 elements: extractUniqueValues('element'),
-                bookNames: extractUniqueValues('bookName')
+                bookNames: extractUniqueValues('bookName'),
+                planetaryInfluence: extractUniqueValues('planetaryInfluence'),
+                relatedFestival: extractUniqueValues('relatedFestival')
             };
 
             setFilterOptions(uniqueValues);
-            setLoading(false);
         } catch (err) {
             console.error(err);
             toast.error("Failed to fetch baby names");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -191,13 +198,22 @@ const BabyDatabase = () => {
         const matchesBookName = !selectedFilters.bookName ||
             baby.bookName?.toLowerCase() === selectedFilters.bookName.toLowerCase();
 
+        const matchesPlanetary = !selectedFilters.planetaryInfluence ||
+            baby.planetaryInfluence?.toLowerCase() === selectedFilters.planetaryInfluence.toLowerCase();
+
+        const matchesRelatedFestival = !selectedFilters.relatedFestival ||
+            baby.relatedFestival?.toLowerCase() === selectedFilters.relatedFestival.toLowerCase();
+
+
         return matchesSearch &&
             matchesGender &&
             matchesStartingLetter &&
             matchesZodiac &&
             matchesNakshatra &&
             matchesElement &&
-            matchesBookName;
+            matchesBookName &&
+            matchesPlanetary &&
+            matchesRelatedFestival;
     });
 
     const handleFilterChange = (filterType, value) => {
@@ -405,6 +421,20 @@ const BabyDatabase = () => {
                     options={filterOptions.bookNames}
                     value={selectedFilters.bookName}
                     onChange={(value) => handleFilterChange('bookName', value)}
+                />
+
+                <FilterDropdown
+                    label="Planetary Influence"
+                    options={filterOptions.planetaryInfluence}
+                    value={selectedFilters.planetaryInfluence}
+                    onChange={(value) => handleFilterChange('planetaryInfluence', value)}
+                />
+
+                <FilterDropdown
+                    label="Related Festivals"
+                    options={filterOptions.relatedFestival}
+                    value={selectedFilters.relatedFestival}
+                    onChange={(value) => handleFilterChange('relatedFestival', value)}
                 />
             </div>
         </motion.div>
