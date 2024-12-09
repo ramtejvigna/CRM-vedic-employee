@@ -103,7 +103,7 @@ const BabyDatabase = () => {
     const fetchBabyNames = async () => {
         setLoading(true);
         try {
-            const response = await axios.get("http://localhost:9000/api/names");
+            const response = await axios.get("https://vedic-backend-neon.vercel.app/api/names");
             setBabyNames(response.data);
 
             // Extract unique values with proper null checking and sorting
@@ -135,7 +135,7 @@ const BabyDatabase = () => {
     
     const requestedAccess = async () => {
         try {
-            const response = await axios.get("http://localhost:9000/employees/requestBabyNames", {
+            const response = await axios.get("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
                 params: { employeeId }
             });
 
@@ -150,7 +150,7 @@ const BabyDatabase = () => {
 
     const checkAcceptance = async () => {
         try {
-            const response = await axios.get(`http://localhost:9000/employees/adminAcceptance`, {
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/employees/adminAcceptance`, {
                 params: { employeeId } // Pass employeeId as a query parameter
             });
     
@@ -245,7 +245,7 @@ const BabyDatabase = () => {
 
     const handleAddName = async (newName) => {
         try {
-            await axios.post("http://localhost:9000/api/names", { newName, employeeId });
+            await axios.post("https://vedic-backend-neon.vercel.app/api/names", { newName, employeeId });
             await checkAcceptance();
             await fetchBabyNames();
             toast.success("Name added successfully!", {
@@ -264,7 +264,7 @@ const BabyDatabase = () => {
 
     const handleRequestAccess = async () => {
         try {
-            const response = await axios.post("http://localhost:9000/employees/requestBabyNames", {
+            const response = await axios.post("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
                 employeeId: employeeId
             });
 
@@ -317,7 +317,7 @@ const BabyDatabase = () => {
         formData.append('employeeId', employeeId); // Append the employeeId
     
         try {
-            await axios.post("http://localhost:9000/uploadExcelNames", formData, {
+            await axios.post("https://vedic-backend-neon.vercel.app/uploadExcelNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
     
@@ -345,7 +345,7 @@ const BabyDatabase = () => {
 
     const saveEdit = async () => {
         try {
-            await axios.put(`http://localhost:9000/updateBabyName/${editingName._id}`, editingName);
+            await axios.put(`https://vedic-backend-neon.vercel.app/updateBabyName/${editingName._id}`, editingName);
             setEditingName(null);
             fetchBabyNames();
             toast.success("Baby name updated successfully!", {

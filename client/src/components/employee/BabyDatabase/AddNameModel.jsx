@@ -37,7 +37,7 @@ const AddNameModal = ({ isOpen, onClose, onAdd }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:9000/categories');
+                const response = await fetch('https://vedic-backend-neon.vercel.app/categories');
                 const data = await response.json();
                 setCategoryData(data);
             } catch (error) {
