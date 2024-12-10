@@ -17,7 +17,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { FaAngleLeft,FaAngleRight,FaArrowLeft } from "react-icons/fa";
-
 export const handleDownload = (pdfUrl, uniqueId) => {
   if (!pdfUrl) {
     alert('No PDF URL found. Please generate the PDF first.');
@@ -65,7 +64,7 @@ export const handleSendMail = async (pdfUrl, uniqueId, email) => {
 
 
 export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
-  console.log(phoneNumber , uniqueId)
+  
   if (!phoneNumber || !uniqueId) {
     alert("Provide a valid phone number and ensure the PDF is generated.");
     return;
@@ -86,7 +85,7 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
     } , {withCredentials : true});
 
     if(res.status === 200) {
-const message = `Dear User,
+      const message = `Dear User,
 
 Greetings from CRM-Vedics!
 
@@ -98,7 +97,7 @@ Warm regards,
 CRM-Vedics Team`;
 
 window.open(`https://wa.me/+919059578959?text=${encodeURIComponent(message)}`);
-        }
+    }
   } catch (error) {
     console.error("Error sending PDF via WhatsApp", error);
     alert("Error sending WhatsApp message");
@@ -114,18 +113,26 @@ const CheckBoxListPage = () => {
   const [phoneNumber, setPhoneNumber] = useState(customerData?.whatsappNumber || "");
   const [names, setNames] = useState([]);
   const [filteredNames, setFilteredNames] = useState([]);
+  const [filters, setFilters] = useState({
+    gender: customerData?.babyGender || "",
+    startingLetter: customerData?.preferredStartingLetter || "",
+    book: "",
+    meaning: "",
+    zodiac: "",
+    nakshatra: "",
+    element: "",
+  });
+  const [tags, setTags] = useState([]);
+  const [uniqueValues, setUniqueValues] = useState({
+    zodiacs: [],
+    nakshatras: [],
+    elements: [],
+    bookNames: [],
+  });
   const [selectedItems, setSelectedItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);  
   const [isLoading, setIsLoading] = useState(false);
-  const [genderFilter, setGenderFilter] = useState(customerData?.babyGender || "");
-  const [startingLetterFilter, setStartingLetterFilter] = useState(customerData?.preferredStartingLetter || "");
-  const [bookFilter, setBookFilter] = useState("");
-  const [meaningFilter, setMeaningFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [tags, setTags] = useState([
-    { type: 'gender', label: `Gender: ${customerData?.babyGender}`, value: customerData?.babyGender },
-    { type: 'startingLetter', label: `Starting Letter: ${customerData?.preferredStartingLetter}`, value: customerData?.preferredStartingLetter }
-  ]);
+   const [showFilters, setShowFilters] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isModalOpen, setModalOpen] = useState(false);
     const [numberOfNames, setNumberOfNames] = useState();
@@ -238,223 +245,95 @@ useEffect(() => {
     axios
       .get("https://vedic-backend-neon.vercel.app/api/names")
       .then((response) => {
-        setNames(response.data);
-        filterNames({
-          gender: genderFilter,
-          startingLetter: startingLetterFilter,
-          book: bookFilter,
-          meaning: meaningFilter,
-          allNames: response.data,
-        });
+        const allNames = response.data;
+
+        const extractUniqueValues = (field) =>
+          [...new Set(allNames.map((item) => item[field]).filter(Boolean))].sort(
+            (a, b) => a.localeCompare(b)
+          );
+
+        const uniqueValues = {
+          zodiacs: extractUniqueValues("zodiac"),
+          nakshatras: extractUniqueValues("nakshatra"),
+          elements: extractUniqueValues("element"),
+          bookNames: extractUniqueValues("bookName"),
+        };
+
+        setNames(allNames);
+        setUniqueValues(uniqueValues);
+        filterNames({ allNames, filters })
               })
       .catch((error) => console.error("Error fetching names:", error));
   }, [customerData?.babyGender, customerData?.preferredStartingLetter]);
 
-  const removeTag = (type) => {
-    // Remove the tag from the tags list
-    const updatedTags = tags.filter((tag) => tag.type !== type);
-    setTags(updatedTags);
-  
-    // Handle removing the corresponding filter
-    switch (type) {
-      case "gender":
-        setGenderFilter("");  // Remove gender filter
-        break;
-      case "startingLetter":
-        setStartingLetterFilter("");  // Remove starting letter filter
-        break;
-      case "book":
-        setBookFilter("");  // Remove book filter
-        break;
-      case "meaning":
-        setMeaningFilter("");  // Remove meaning filter
-        break;
-      default:
-        break;
-    }
-  
-    // Reapply filters based on the remaining tags
-    filterNames({
-      gender: type === "gender" ? "" : genderFilter,
-      startingLetter: type === "startingLetter" ? "" : startingLetterFilter,
-      book: type === "book" ? "" : bookFilter,
-      meaning: type === "meaning" ? "" : meaningFilter,
-      allNames: names, // Ensure you always pass the complete list of names
-    });
-  };
-  
-  
 
-  // Update the filterNames function to ensure it always reflects current filter states
-  const filterNames = ({ gender, startingLetter, book, meaning, allNames }) => {
-    let filtered = allNames;
-  
-    // Apply filters with the updated values passed in
-    if (gender) {
-      filtered = filtered.filter((item) => item.gender === gender);
-    }
-    if (startingLetter) {
-    // Normalize startingLetter to lowercase
-    const lowerCaseLetter = startingLetter.toLowerCase();
-    // Filter items based on the first character
-    filtered = filtered.filter((item) => 
-        item.nameEnglish.charAt(0).toLowerCase() === lowerCaseLetter // Compare both in lowercase
-    );
-  }
-
-    if (book) {
-      filtered = filtered.filter((item) =>
-        item.bookName?.toLowerCase().includes(book.toLowerCase())
+  const filterNames = ({ allNames, filters }) => {
+    const filtered = Object.keys(filters).reduce((result, key) => {
+      if (!filters[key]) return result; // Skip if no filter value
+      if (key === "startingLetter") {
+        return result.filter((item) =>
+          item.nameEnglish.charAt(0).toLowerCase() === filters[key].toLowerCase()
+        );
+      }
+      return result.filter((item) =>
+        item[key]?.toLowerCase().includes(filters[key].toLowerCase())
       );
-    }
-    
-    if (meaning) {
-      filtered = filtered.filter((item) =>
-        item.meaning?.toLowerCase().includes(meaning.toLowerCase())
-      );
-    }
-  
-    // Set filtered names and reset pagination
+    }, allNames);
     setFilteredNames(filtered);
-    setCurrentPage(1);
   };
-  
-
-// Update the input handling for gender
-// Gender change handler
-const handleGenderChange = (e) => {
-  const selectedGender = e.target.value;
-  
-  // Update the tag for gender
-  const updatedTags = tags.filter(tag => tag.type !== 'gender');
-  if (selectedGender) {
-    updatedTags.push({ type: 'gender', label: `Gender: ${selectedGender}`, value: selectedGender });
-  }
-  setTags(updatedTags);
-
-  // Set the gender filter
-  setGenderFilter(selectedGender);
-
-  // Pass the updated gender filter directly to `filterNames`
-  filterNames({
-    gender: selectedGender,
-    startingLetter: startingLetterFilter,
-    book: bookFilter,
-    meaning: meaningFilter,
-    allNames: names
-  });
-};
 
 
-// Starting letter change handler
-const handleStartingLetterChange = (e) => {
-  const letter = e.target.value;
+  useEffect(() => {
+    const newTags = Object.entries(filters)
+      .filter(([key, value]) => value) // Only include active filters
+      .map(([key, value]) => ({
+        type: key,
+        label: `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`,
+      }));
+    setTags(newTags);
+  }, [filters]);
 
-  // Update the tag for starting letter
-  const updatedTags = tags.filter(tag => tag.type !== 'startingLetter');
-  if (letter) {
-    updatedTags.push({ type: 'startingLetter', label: `Starting Letter: ${letter}`, value: letter });
-  }
-  setTags(updatedTags);
-
-  // Set the starting letter filter
-  setStartingLetterFilter(letter);
-
-  // Pass the updated filters
-  filterNames({
-    gender: genderFilter,
-    startingLetter: letter,
-    book: bookFilter,
-    meaning: meaningFilter,
-    allNames: names
-  });
-};
-
-
-// Book filter change handler
-const handleBookChange = (e) => {
-  const book = e.target.value;
-
-  // Update the book filter
-  setBookFilter(book);
-
-  // Update the tag for book
-  const updatedTags = tags.filter(tag => tag.type !== 'book');
-  if (book) {
-    updatedTags.push({ type: 'book', label: `Book: ${book}`, value: book });
-  }
-  setTags(updatedTags);
-
-  // Pass updated filters to `filterNames` to ensure the correct state is applied
-  filterNames({
-    gender: genderFilter,
-    startingLetter: startingLetterFilter,
-    book: book,
-    meaning: meaningFilter,
-    allNames: names
-  });
-};
-
-
-const handleMeaningChange = (e) => {
-  const meaning = e.target.value;
-
-  // Update the meaning filter
-  setMeaningFilter(meaning);
-
-  // Update the tag for meaning
-  const updatedTags = tags.filter(tag => tag.type !== 'meaning');
-  if (meaning) {
-    updatedTags.push({ type: 'meaning', label: `Meaning: ${meaning}`, value: meaning });
-  }
-  setTags(updatedTags);
-
-  // Pass updated filters to `filterNames` to ensure the correct state is applied
-  filterNames({
-    gender: genderFilter,
-    startingLetter: startingLetterFilter,
-    book: bookFilter,
-    meaning: meaning,
-    allNames: names
-  });
-};
-
-
-  
-  
-
-  // Function to remove a tag and its associated filter
-  const handleResetFilters = () => {
-    console.log("Resetting filters...");
-    // Reset additional filters
-    setBookFilter("");
-    setMeaningFilter("");
-
-    // Reset gender and starting letter filters
-    setGenderFilter(customerData?.babyGender || "");
-    setStartingLetterFilter(customerData?.preferredStartingLetter || "");
-
-    // Reset tags
-    const defaultTags = [
-        { label: `Gender: ${customerData?.babyGender}`, type: "gender" },
-        { label: `Starting Letter: ${customerData?.preferredStartingLetter}`, type: "startingLetter" },
-    ];
-    setTags(defaultTags);
-    console.log("Tags after reset:", defaultTags);
-
-    // Reset selected items
-    setSelectedItems([]);
-    console.log("Selected items after reset:", []);
-
-    // Reapply filters
+  const removeTag = (type) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [type]: "",
+    }));
     filterNames({
-        gender: customerData?.babyGender || "",
-        startingLetter: customerData?.preferredStartingLetter || "",
-        book: "",
-        meaning: "",
-        allNames: names // Ensure you pass the original names to filter from
+      allNames: names,
+      filters: { ...filters, [type]: "" },
     });
-};
+  };
+
+
+
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
+    filterNames({
+      allNames: names,
+      filters: { ...filters, [key]: value },
+    });
+  };
+
+  const handleResetFilters = () => {
+    const defaultFilters = {
+      gender: customerData?.babyGender || "",
+      startingLetter: customerData?.preferredStartingLetter || "",
+      book: "",
+      meaning: "",
+      zodiac: "",
+      nakshatra: "",
+      element: "",
+    };
+    setFilters(defaultFilters);
+    setTags([]);
+    filterNames({ allNames: names, filters: defaultFilters });
+  };
+
+
 
   
 
@@ -474,24 +353,18 @@ const handleGeneratePdf = async () => {
       alert("No items selected!");
       return;
   }
-
   try {
       setIsLoading(true);
-      const response = await axios.post("https://vedic-backend-neon.vercel.app/api/create-pdf", {
+      const response = await axios.post(`${api}/api/create-pdf`, {
           names: selectedItems.map((item) => item._id), // Use item._id instead of item.name
           customerId: customerData._id,
           additionalBabyNames: additionalBabyNames,
-          generatedBy: employee.firstName,
+          generatedBy:"Manager",
           userId: Cookies.get('employeeId')
       });
-
       toast.success("PDF Generated Successfully");
-
       setSelectedItems([]);
-
-      // Delay navigation to allow the toast to be visible
       setTimeout(() => {
-
           navigate(-1);
       }, 3000); // Adjust the timeout duration as needed (3000 ms = 3 seconds)
   } catch (error) {
@@ -534,13 +407,15 @@ const handleGeneratePdf = async () => {
       
       <button 
         onClick={()=>{navigate(-1)}}
-        className="top-4 left-4 flex items-center text-gray-500 hover:text-gray-700"
+        className="top-4 left-4 flex mb-3 items-center text-gray-500 hover:text-gray-700"
       >
-        <FaArrowLeft size={20} />
-        <span className="ml-2"></span>
+        <FaArrowLeft size={15} />
+        <span className="ml-2">Customer Details</span>
+
       </button>
-      <h1 className="text-4xl font-bold mb-20">Baby Names</h1>
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+      <h1 className="text-4xl font-bold mb-6">Baby Names</h1>
+
+      <div className="mb-5 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     {/* Search and Filter Section */}
     <div className="flex items-center space-x-4 w-full sm:w-auto">
         <div className="relative w-full sm:w-64">
@@ -577,91 +452,124 @@ const handleGeneratePdf = async () => {
       
 {showFilters && (
   <div className="bg-white p-4 rounded-lg mb-6 shadow-md">
-    <h2 className="text-xl font-semibold mb-4">Filters</h2>
-
-    {/* Filter Input Fields */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {/* Book Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Book</label>
-        <input
-          type="text"
-          value={bookFilter}
-          onChange={handleBookChange} 
-          className="mt-1 p-2 block w-full border rounded-md"
-        />
-      </div>
-
-      {/* Meaning Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Meaning</label>
-        <input
-          type="text"
-          value={meaningFilter}
-          onChange={handleMeaningChange} 
-          className="mt-1 p-2 block w-full border rounded-md"
-        />
-      </div>
-
-      {/* Gender Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Gender</label>
-        <select
-          value={genderFilter}
-          onChange={handleGenderChange} 
-          className="mt-1 p-2 block w-full border rounded-md"
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-      </div>
-
-      {/* Starting Letter Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Starting Letter</label>
-        <input
-          type="text"
-          value={startingLetterFilter}
-          onChange={handleStartingLetterChange} 
-          maxLength={1}
-          className="mt-1 p-2 block w-full border rounded-md"
-        />
-      </div>
-    </div>
-
-    {/* Tags Display Area */}
-    <div className="mt-4">
-      {tags.length > 0 && (
-        <div className="flex flex-wrap space-x-2 mb-4">
-          {tags.map((tag, index) => (
-            <span
-              key={index}
-              className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full flex items-center space-x-2"
-            >
-              <span>{tag.label}</span>
-              <button
-                className="ml-2 text-red-500 hover:text-red-700"
-                onClick={() => removeTag(tag.type)}
-              >
-                &#10005;
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-
-    {/* Reset button */}
-    <div className="flex justify-end mt-4">
-      <button
-        onClick={handleResetFilters}
-        className="bg-red-500 text-white px-4 py-2 rounded"
+  <h2 className="text-xl font-semibold mb-4">Filters</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    {/* Gender Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Gender</label>
+      <select
+        value={filters.gender}
+        onChange={(e) => handleFilterChange("gender", e.target.value)}
+        className="mt-1 p-2 block w-full border rounded-md"
       >
-        Reset
-      </button>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+    {/* Starting Letter Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Starting Letter</label>
+      <input
+        type="text"
+        value={filters.startingLetter}
+        onChange={(e) => handleFilterChange("startingLetter", e.target.value)}
+        maxLength={1}
+        className="mt-1 p-2 block w-full border rounded-md"
+      />
+    </div>
+    {/* Book Name Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Book</label>
+      <select
+        value={filters.book}
+        onChange={(e) => handleFilterChange("book", e.target.value)}
+        className="mt-1 p-2 block w-full border rounded-md"
+      >
+        <option value="">Select Book</option>
+        {uniqueValues.bookNames.map((book, index) => (
+          <option key={index} value={book}>
+            {book}
+          </option>
+        ))}
+      </select>
+    </div>
+    {/* Zodiac Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Zodiac</label>
+      <select
+        value={filters.zodiac}
+        onChange={(e) => handleFilterChange("zodiac", e.target.value)}
+        className="mt-1 p-2 block w-full border rounded-md"
+      >
+        <option value="">Select Zodiac</option>
+        {uniqueValues.zodiacs.map((zodiac, index) => (
+          <option key={index} value={zodiac}>
+            {zodiac}
+          </option>
+        ))}
+      </select>
+    </div>
+    {/* Nakshatra Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Nakshatra</label>
+      <select
+        value={filters.nakshatra}
+        onChange={(e) => handleFilterChange("nakshatra", e.target.value)}
+        className="mt-1 p-2 block w-full border rounded-md"
+      >
+        <option value="">Select Nakshatra</option>
+        {uniqueValues.nakshatras.map((nakshatra, index) => (
+          <option key={index} value={nakshatra}>
+            {nakshatra}
+          </option>
+        ))}
+      </select>
+    </div>
+    {/* Element Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Element</label>
+      <select
+        value={filters.element}
+        onChange={(e) => handleFilterChange("element", e.target.value)}
+        className="mt-1 p-2 block w-full border rounded-md"
+      >
+        <option value="">Select Element</option>
+        {uniqueValues.elements.map((element, index) => (
+          <option key={index} value={element}>
+            {element}
+          </option>
+        ))}
+      </select>
     </div>
   </div>
+  {tags.length > 0 && (
+    <div className="flex flex-wrap space-x-2 mt-4">
+      {tags.map((tag, index) => (
+        <span
+          key={index}
+          className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full flex items-center space-x-2"
+        >
+          <span>{tag.label}</span>
+          <button
+            className="ml-2 text-red-500 hover:text-red-700"
+            onClick={() => removeTag(tag.type)}
+          >
+            &#10005;
+          </button>
+        </span>
+      ))}
+    </div>
+  )}
+  <div className="flex justify-end mt-4">
+    <button
+      onClick={handleResetFilters}
+      className="bg-red-500 text-white px-4 py-2 rounded"
+    >
+      Reset
+    </button>
+  </div>
+</div>
 )}
 
 
@@ -676,16 +584,16 @@ const handleGeneratePdf = async () => {
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Select</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(English)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(Devangari)</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Meaning</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Gender</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">BookName</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name(Devangari)</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Numerology</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Zodiac</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Rashi</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Nakshatra</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Planetary Influence</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Element</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">BookName</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Page No</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Syllable Count</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Character Significance</th>
@@ -707,16 +615,16 @@ const handleGeneratePdf = async () => {
                   />
                 </td>
                 <td className="px-4 py-2">{item.nameEnglish}</td>
-                <td className="px-4 py-2">{item.nameDevanagari}</td>
                 <td className="px-4 py-2">{item.meaning}</td>
                 <td className="px-4 py-2">{item.gender}</td>
+                <td className="px-4 py-2">{item.bookName}</td>
+                <td className="px-4 py-2">{item.nameDevanagari}</td>
                 <td className="px-4 py-2">{item.numerology}</td>
                 <td className="px-4 py-2">{item.zodiac}</td>
                 <td className="px-4 py-2">{item.rashi}</td>
                 <td className="px-4 py-2">{item.nakshatra}</td>
                 <td className="px-4 py-2">{item.planetaryInfluence}</td>
                 <td className="px-4 py-2">{item.element}</td>
-                <td className="px-4 py-2">{item.bookName}</td>
                 <td className="px-4 py-2">{item.pageNo}</td>
                 <td className="px-4 py-2">{item.syllableCount}</td>
                 <td className="px-4 py-2">{item.characterSignificance}</td>
@@ -909,16 +817,9 @@ const handleGeneratePdf = async () => {
   </div>
 )}
 
+  </div>
 
-
-
-
-
-
-            </div>
-      
-    
-    </div>
+   </div>
   );
 };
 
