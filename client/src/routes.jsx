@@ -1,4 +1,5 @@
-import { FaUsers, FaUser, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
+import { FaUsers, FaHome, FaTasks, FaMoneyBillWave, FaEdit, FaChartLine, FaCog } from "react-icons/fa";
+import { FaUserLarge } from "react-icons/fa6"
 import { MdOutlineTaskAlt } from "react-icons/md";
 import { TbReportAnalytics } from "react-icons/tb";
 import { BiSolidBabyCarriage } from "react-icons/bi";
@@ -25,7 +26,7 @@ export const routes = [
   {
     name: "customers",
     path: "customers",
-    icon: <FaUser {...icon} />, 
+    icon: <FaUserLarge {...icon} />, 
   },
   {
     name: "Todo",
@@ -45,9 +46,9 @@ export const routes = [
     icon: <GiThreeLeaves {...icon} />,
     element: <LeaveManagement />,
   },
-  {
-    name: "settings",
-    path: "settings",
-    icon: <FaCog {...icon} />, 
-  },
+  // {
+  //   name: "settings",
+  //   path: "settings",
+  //   icon: <FaCog {...icon} />, 
+  // },
 ];

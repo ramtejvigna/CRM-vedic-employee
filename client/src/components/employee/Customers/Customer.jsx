@@ -2,20 +2,20 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Edit,
-  FileText,
-  MessageCircle,
-  Mail,
-  ThumbsUp,
-  MoreHorizontal,
-  Check,
-  X,
-  ChevronDown,
-  Eye,
-  AlertCircle,
-  ArrowLeft,
-  Star,
-  FilePlus2,
+    Edit,
+    FileText,
+    MessageCircle,
+    Mail,
+    ThumbsUp,
+    MoreHorizontal,
+    Check,
+    X,
+    ChevronDown,
+    Eye,
+    AlertCircle,
+    ArrowLeft,
+    Star,
+    FilePlus2,
 } from 'lucide-react';
 import axios, { formToJSON } from 'axios';
 import { handleDownload, handleSendMail, handleSendWhatsApp } from './CheckBoxList';
@@ -23,7 +23,7 @@ import { generatePdf } from './pdfDisplayComponent';
 import PDFViewer from './PDFviewer';
 import { toast, ToastContainer } from 'react-toastify';
 
-
+import CustomerAstroDetails from './CustomerAstroDetails';
 
 const Customer = () => {
   const [pdfsLoading, setPdfsLoading] = useState(false);
@@ -57,7 +57,6 @@ const Customer = () => {
   const [feedbackLoadingStates, setFeedbackLoadingStates] = useState(false);
   const [mailLoader,setMailLoder]=useState(null);
   const [whatsapploader,setWhatsappLoader]=useState(null);
-
 
 
   const toggleDropdown = (pdfId) => {
@@ -245,30 +244,23 @@ const Customer = () => {
   };
 
   const handleSubmitFeedback = async () => {
-    setFeedbackLoadingStates((prev) => ({ ...prev, [pdfId]: true })); 
-
     if (selectedRating > 0 && selectedPdf) {
-      console.log(selectedRating, selectedPdf._id);
+      console.log(selectedRating,selectedPdf._id);
       try {
         // Send pdfId and rating in the body of the PUT request
-
         const response = await axios.put(
           `https://vedic-backend-neon.vercel.app/api/feedback`, // No need to pass pdfId in the URL
           {
             pdfId: selectedPdf._id,  // Pass the pdfId in the body
             rating: selectedRating,   // Pass the selected rating
           }
-        );
+        );        
         // Reset form and close modal
         setSelectedRating(0);
         setShowFeedbackModal(false);
-        await fetchPdfs();
       } catch (error) {
         console.error('Error submitting feedback:', error.message);
         alert('An error occurred while submitting feedback.');
-      }finally{
-        setFeedbackLoadingStates((prev) => ({ ...prev, [pdfId]: false })); 
-
       }
     } else {
       alert('Please select a rating');
@@ -298,76 +290,84 @@ const Customer = () => {
 
   return (
 
-    <>
     <div className="min-h-screen p-4 sm:p-8">
-    <div className="flex items-center mb-6">
-         <button
-           onClick={() => navigate(-1)}
-           className="flex items-center text-gray-900 hover:text-blue-500"
-         >
-           <ArrowLeft size={20} className="mr-2" /> {/* Back arrow icon */}
-         </button>
-         <h2 className="text-lg font-semibold">Customer Details</h2>
-       </div>
+      <div className="flex items-center mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-900 hover:text-blue-500"
+        >
+          <ArrowLeft size={20} className="mr-2" /> {/* Back arrow icon */}
+        </button>
+        <h2 className="text-lg font-semibold">Customer Details</h2>
 
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-2xl font-medium ml-4">{customerDetails.customerName}</p>
-        {customerDetails.customerStatus !== 'completed' && (
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Move to Completed
-          </button>
-        )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
-        {showConfirmModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-              <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
-              <p className="mb-6">Are you sure you want to move this Customer to completed?</p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmMoveToCompleted}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="flex justify-between items-center mb-4">
+    <p className="text-2xl font-medium ml-4">{customerDetails.customerName
+    }</p>
+    {customerDetails.customerStatus !== 'completed' && (
+        <button
+            onClick={() => setShowConfirmModal(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+            Move to Completed
+        </button>
+    )}
+</div>
 
-        <h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
+  <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
+  {/* Customer Name in Large Font */}
+
+  {showConfirmModal && (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4">Confirm Action</h2>
+            <p className="mb-6">Are you sure you want to move this Customer to completed?</p>
+            <div className="flex justify-end space-x-4">
+                <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={confirmMoveToCompleted}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                    Confirm
+                </button>
+            </div>
+      </div>
+    </div>
+)}
+  
+{/* Bordered Box around Customer Info */}
+<h2 className="text-lg font-semibold mb-4">Customer Summary</h2>
 
         {/* Grid Layout for Customer Info */}
-        <div className="grid grid-cols-2 md:grid-cols-5 ">
+        <div className="grid grid-cols-2 md:grid-cols-4 ">
           {[
             { label: "customer Id", value: customerDetails.customerID },
-            { label: "Requested On", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
+            { label: "date Joined", value: new Date(customerDetails.createdDateTime).toLocaleDateString() },
             { label: "Contact No", value: customerDetails.whatsappNumber },
-            { label: "Deadline", value:new Date(customerDetails.deadline).toLocaleDateString() || "N/A" },
-            { label: "Email", value: customerDetails.email || "N/A" }
-
+            { label: "Email", value: customerDetails.email }
           ].map((item, index) => (
             <div key={index} className="flex flex-col">
+
+              {/* Label with Full-width HR Line */}
               <p className="text-sm font-bold text-gray-500 capitalize">{item.label}</p>
               <hr className="my-3 border-gray-300 w-full" />
+
+              {/* Value with Full-width HR Line */}
               <p className=" text-gray-900">{item.value}</p>
             </div>
           ))}
         </div>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Baby Details Card */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-4  flex flex-col">
           <h2 className="text-lg font-semibold mb-4">Baby Details</h2>
           <hr className="my-3 border-gray-300 w-full" />
@@ -406,66 +406,19 @@ const Customer = () => {
               <p className="text-sm font-medium text-gray-500">Preferred Starting Letter:</p>
               <p className="mt-1 text-gray-900">{customerDetails.preferredStartingLetter || "N/A"}</p>
             </div>
-            {
-                customerDetails?.referenceName ? (<div>
-                    <p className="text-sm font-medium text-gray-500">Reference Name:</p>
-                    <p className="mt-1 text-gray-900">{customerDetails.referenceName || "N/A"}</p>
-                  </div>) : null
-            }
-            {
-                customerDetails?.additionalPreferences ? (<div>
-                    <p className="text-sm font-medium text-gray-500">Additional Preferences:</p>
-                    <p className="mt-1 text-gray-900">{customerDetails.additionalPreferences || "N/A"}</p>
-                  </div>) : null
-            }
 
+            {/* Horizontal Line */}
             <div className="col-span-2 my-4">
-              <hr className="border-t border-gray-200" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Zodiac Sign:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Leo"}</p>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-500">Nakshatra:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ashwini"}</p>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-500">Numerology No :</p>
-              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "3"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Lucky Colour:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "blue"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Gemstone:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Ruby"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Destiny Number:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "7"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Lucky Day:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "friday"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Lucky God:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.zodiacSign || "Lord Shiva"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Lucky Metal:</p>
-              <p className="mt-1 text-gray-900">{customerDetails.nakshatra || "Gold"}</p>
-            </div>
-          </div>
+        <hr className="border-t border-gray-200" />
+      </div>
+      <CustomerAstroDetails customerId={customerId} />
+    </div>
         </div>
-
+        {/* Right Column */}
         <div className="space-y-6">
+          {/* Payment Data Card */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col">
-            <h2 className="text-lg font-medium mb-4">Payment Details</h2>
+            <h2 className="text-lg font-medium mb-4">Payment Data</h2>
             <hr className="my-3 border-gray-300 w-full" />
 
                 <div className="space-y-4">
@@ -478,17 +431,17 @@ const Customer = () => {
                     <p className="mt-1">{customerDetails?.paymentTime || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Amount Paid</p>
-                    <p className="mt-1">{customerDetails?.amountPaid || "N/A"}</p>
+                    <p className="text-sm font-medium text-gray-500">Astro Offer</p>
+                    <p className="mt-1">{customerDetails?.offer || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Source ({customerDetails?.leadSource})</p>
-                    <p className="mt-1">{customerDetails?.socialMediaId || "N/A"}</p>
+                    <p className="text-sm font-medium text-gray-500">Source (Instagram Lead)</p>
+                    <p className="mt-1">{customerDetails?.otherSource || "N/A"}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col overflow-y-auto relative" style={{ height: '345px' }} ><div className="flex justify-between items-center mb-4">
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-4 flex flex-col overflow-y-auto relative" style={{ height: '420px' }} ><div className="flex justify-between items-center mb-4">
     <h2 className="text-lg font-semibold">PDFs Generated</h2>
     {(customerDetails.customerStatus === 'inProgress' || customerDetails.customerStatus === 'inWorking') && (
       <button
@@ -498,9 +451,9 @@ const Customer = () => {
         <FilePlus2 />
       </button>
     )}
-
-  </div>
-   <div className="overflow-visible">
+    
+  </div> 
+   <div className="overflow-visible"> {/* Changed this to allow dropdowns to overflow */}
     <table className="w-full">
       <thead>
         <tr className="border-b">
@@ -516,12 +469,12 @@ const Customer = () => {
           <th className="px-4 py-2 text-gray-500 text-center">Actions</th>
         </tr>
       </thead>
-
+      
       <tbody>
         {pdfs.map((pdf) => (
           <tr key={pdf._id} className="border-b">
             <td className="px-4 py-2">
-              <button onClick={() => handleShowPdf(pdf.babyNames, pdf.additionalBabyNames)}>
+              <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
                 <FileText className="h-4 w-4 text-blue-600" />
               </button>
             </td>
@@ -564,25 +517,20 @@ const Customer = () => {
                 </div>
               </td>
             <td className="px-4 py-2 text-center">
-              <span className="text-sm font-medium flex justify-center items-center h-full">
-                {feedbackLoadingStates[pdf._id] ? (
-                  <div className="w-4 h-4 border-2 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
-                ) : pdf.rating === 0 ? (
-                  "-"
-                ) : pdf.rating === 5 ? (
-                  "Outstanding"
-                ) : pdf.rating === 4 ? (
-                  "Good"
-                ) : pdf.rating === 3 ? (
-                  "Satisfactory"
-                ) : pdf.rating === 2 ? (
-                  "Needs Improvement"
-                ) : (
-                  "Poor"
-                )}
+              <span className="text-sm font-medium">
+                {pdf.rating === 0
+                  ? "-"
+                  : pdf.rating === 5
+                  ? "Outstanding"
+                  : pdf.rating === 4
+                  ? "Good"
+                  : pdf.rating === 3
+                  ? "Satisfactory"
+                  : pdf.rating === 2
+                  ? "Needs Improvement"
+                  : "Poor"}
               </span>
             </td>
-
             <td className="px-6 py-4 whitespace-nowrap text-right relative">
               <div className="flex items-center justify-end space-x-2">
              <div className="relative">
@@ -637,7 +585,7 @@ const Customer = () => {
 </div>
             </div>
           </div>
-
+      
             <div className="mt-8">
             {showViewer && (
                 <PDFViewer
@@ -647,7 +595,7 @@ const Customer = () => {
                     email={customerDetails.email}
                     enabledRow={enabledRow}
                     pdfId={enabledRow}
-                    onClose={handleClose}
+                    onClose={handleClose} // Pass the close handler
                 />
             )}
         </div>
@@ -680,14 +628,14 @@ const Customer = () => {
         >
           Submit
         </button>
+        {/* Close icon */}
+      
       </div>
     </div>
   </div>
 )}
-
+    
     </div>
-    <ToastContainer />
-    </>
     );
 };
 

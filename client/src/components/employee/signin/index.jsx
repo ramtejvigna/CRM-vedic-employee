@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Mail, Phone, ArrowRight, Lock } from 'lucide-react';
+import {  ArrowRight, Lock } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,6 +22,7 @@ const SignIn = () => {
       
       Cookies.set('token', token, { expires: 1 });
       Cookies.set('employeeId', employeeId, { expires: 1 });
+
       
       toast.success('🎉 Login successful! Redirecting...', {
         position: "top-right",

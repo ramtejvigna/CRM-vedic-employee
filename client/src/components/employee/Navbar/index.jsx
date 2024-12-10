@@ -10,20 +10,25 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { setOpenSidenav } = useStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // State to control user dropdown
-  const { activeRoute, isDarkMode, toggleDarkMode } = useStore(); // Access theme state and toggle function
+  const { activeRoute, isDarkMode } = useStore(); // Access theme state and toggle function
   const token = Cookies.get('token')
+
+
   const handleLogout = async () => {
+
+    
     try {
       const response = await fetch('https://vedic-backend-neon.vercel.app/logout', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token }) 
       });
-
+  
       if (response.ok) {
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        navigate('/signin'); // Redirect to sign-in page after logout
+        navigate('/signin');
       } else {
         toast.error('Logout failed');
       }
@@ -31,6 +36,7 @@ const Navbar = () => {
       toast.error('Logout failed');
     }
   };
+
 
   return (
     <nav className={`${isDarkMode ? 'bg-gray-900 text-white' : ' text-gray-900'}`}>
@@ -75,13 +81,6 @@ const Navbar = () => {
                     aria-orientation="vertical"
                     aria-labelledby="user-menu"
                   >
-                    <Link
-                      to="/profile"
-                      className={`block px-4 py-2 text-sm ${isDarkMode ? 'text-white' : 'text-gray-700'} hover:bg-gray-100`}
-                      role="menuitem"
-                    >
-                      Profile
-                    </Link>
                     <p
                       onClick={handleLogout}
                       className={`block px-4 py-2 text-sm cursor-pointer ${isDarkMode ? 'text-white' : 'text-gray-700'} hover:bg-gray-100`}
