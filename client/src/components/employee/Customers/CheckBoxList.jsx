@@ -86,8 +86,19 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
     } , {withCredentials : true});
 
     if(res.status === 200) {
-        window.open(`https://wa.me/+919059578959?text=${encodeURIComponent(res.data.firebasePdfUrl)}`);
-    }
+const message = `Dear User,
+
+Greetings from CRM-Vedics!
+
+We are pleased to share your suggested baby names PDF. You can access it using the following link: ${res.data.firebasePdfUrl}
+
+Thank you for choosing CRM-Vedics. We hope this information meets your expectations. If you have any questions or need further assistance, please do not hesitate to contact us.
+
+Warm regards,  
+CRM-Vedics Team`;
+
+window.open(`https://wa.me/+919059578959?text=${encodeURIComponent(message)}`);
+        }
   } catch (error) {
     console.error("Error sending PDF via WhatsApp", error);
     alert("Error sending WhatsApp message");
