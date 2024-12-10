@@ -117,10 +117,10 @@ export const Customers = () => {
             <tr>
               {[
                 "S. No.",
+                "Application ID",
                 "Customer ID",
                 "Customer Name",
                 "Whatsapp number",
-                "Baby Gender",
                 assignedOrCompletedHeader,
                 ...(fromSection === "assignedCustomers" ? ["Deadline"] : []),
                 "PDF Generated",
@@ -151,6 +151,9 @@ export const Customers = () => {
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {customer.applicationID}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                       {customer.customerID}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
@@ -158,9 +161,6 @@ export const Customers = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {customer.whatsappNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {customer.babyGender}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {fromSection === "completed"

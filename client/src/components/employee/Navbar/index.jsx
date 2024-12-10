@@ -75,13 +75,6 @@ const Navbar = () => {
                     aria-orientation="vertical"
                     aria-labelledby="user-menu"
                   >
-                    <Link
-                      to="/profile"
-                      className={`block px-4 py-2 text-sm ${isDarkMode ? 'text-white' : 'text-gray-700'} hover:bg-gray-100`}
-                      role="menuitem"
-                    >
-                      Profile
-                    </Link>
                     <p
                       onClick={handleLogout}
                       className={`block px-4 py-2 text-sm cursor-pointer ${isDarkMode ? 'text-white' : 'text-gray-700'} hover:bg-gray-100`}

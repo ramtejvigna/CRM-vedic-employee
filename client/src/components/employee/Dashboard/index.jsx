@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Typography } from "@material-tailwind/react";
 import { StatisticsCard } from "../../cards";
-import { StatisticsChart } from "../../charts";
-import { ClockIcon } from "@heroicons/react/24/solid";
-import { statisticsChartsData } from "../../../data";
 import axios from "axios";
 import Cookies from "js-cookie"
+import EmployeeProfile from "./EmployeeProfile";
 
 export function Home() {
   const [statisticsCardsData, setStatisticsCardsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const employeeId = Cookies.get('employeeId');
+  const [employee, setEmployee] = useState({});
+
+  const fetchEmployeeData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/employees/get-employee?id=${employeeId}`);
+      setEmployee(response.data.employee);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching card data : ", error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCardData = async () => {
@@ -24,6 +34,7 @@ export function Home() {
       }
     };
 
+    fetchEmployeeData();
     fetchCardData();
     // Refresh data every 5 minutes
     const interval = setInterval(fetchCardData, 5 * 60 * 1000);
@@ -50,24 +61,7 @@ export function Home() {
               ))}
             </div>
 
-
-            <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-              {statisticsChartsData.map((props) => (
-                <StatisticsChart
-                  key={props.title}
-                  {...props}
-                  footer={
-                    <Typography
-                      variant="small"
-                      className="flex items-center font-normal text-blue-gray-600"
-                    >
-                      <ClockIcon strokeWidth={2} className="h-4 w-4 text-blue-gray-400" />
-                      &nbsp;{props.footer}
-                    </Typography>
-                  }
-                />
-              ))}
-            </div>
+            <EmployeeProfile employee={employee} />
           </div>
         )}
       </div>

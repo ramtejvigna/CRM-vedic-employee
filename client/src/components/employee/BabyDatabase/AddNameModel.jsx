@@ -112,7 +112,7 @@ const AddNameModal = ({ isOpen, onClose, onAdd }) => {
                 <form onSubmit={handleSubmit} className="space-y-6 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Dropdowns for collections */}
-                        {renderSelect('bookName', 'Book Name', categoryData.bookName, true)}
+                        {renderSelect('bookName', 'Book Name', categoryData.bookname, true)}
                         {renderSelect('gender', 'Gender', categoryData.gender, true)}
                         
                         {/* Text inputs */}
