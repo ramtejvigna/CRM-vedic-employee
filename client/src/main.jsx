@@ -15,7 +15,6 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@material-tailwind/react";
 import "./index.css";
-import { SocketProvider } from "./context/SocketContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
