@@ -20,9 +20,7 @@ import { SocketProvider } from "./context/SocketContext";
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <ThemeProvider>
-        <SocketProvider>
           <App />
-        </SocketProvider>
       </ThemeProvider>
     </BrowserRouter>
 );
