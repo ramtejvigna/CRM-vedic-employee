@@ -59,6 +59,7 @@ const Customer = () => {
   const [whatsapploader,setWhatsappLoader]=useState(null);
 
 
+
   const toggleDropdown = (pdfId) => {
     setActiveDropdown(activeDropdown === pdfId ? null : pdfId);
   };
@@ -176,7 +177,6 @@ const Customer = () => {
   useEffect(() => {
     const sendWhatsappAndFetchPdfs = async () => {
         if (whatsappUrl && pdfId) {
-            console.log(whatsappUrl)
             try {
                 setWhatsappLoader(pdfId);
                 await handleSendWhatsApp(whatsappUrl, pdfId, customerDetails.whatsappNumber);

@@ -78,7 +78,7 @@ export const handleSendWhatsApp = async (pdfUrl, uniqueId, phoneNumber) => {
     const pdfBlob = await response.blob();
     const base64Pdf = await blobToBase64(pdfBlob);
 
-    const res = await axios.post("http://localhost:9000/api/send-pdf-whatsapp", {
+    const res = await axios.post("https://vedic-backend-neon.vercel.app/api/send-pdf-whatsapp", {
       phoneNumber,
       base64Pdf,
       uniqueId,
@@ -96,7 +96,7 @@ Thank you for choosing CRM-Vedics. We hope this information meets your expectati
 Warm regards,  
 CRM-Vedics Team`;
 
-window.open(`https://wa.me/+919059578959?text=${encodeURIComponent(message)}`);
+window.open(`https://wa.me/+91${phoneNumber}?text=${encodeURIComponent(message)}`);
     }
   } catch (error) {
     console.error("Error sending PDF via WhatsApp", error);
