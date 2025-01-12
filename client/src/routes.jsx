@@ -10,7 +10,7 @@ import { element } from "prop-types";
 import Tasks from "./components/employee/Tasks";
 import LeaveManagement from "./components/employee/LeaveApply";
 import BabyDatabase from "./components/employee/BabyDatabase";
-
+import CustomerTable from "./components/employee/CustomerView";
 
 const icon = {
   className: "text-xl",
@@ -45,6 +45,12 @@ export const routes = [
     path: "leave",
     icon: <GiThreeLeaves {...icon} />,
     element: <LeaveManagement />,
+  },
+  {
+    name: "Customer's View",
+    path: "customersView",
+    icon:<FaUsers {...icon}/>,
+    element: <CustomerTable />,
   },
   // {
   //   name: "settings",
