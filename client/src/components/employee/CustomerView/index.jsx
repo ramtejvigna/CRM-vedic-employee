@@ -12,7 +12,6 @@ function CustomerTable() {
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                console.log(employeeId);
                 const response = await axios.get(`https://vedic-backend-neon.vercel.app/customers/assigned/${employeeId}`); // Adjust API endpoint as necessary
                 const filteredCustomers = response.data.data.filter(
                     (customer) => customer.customerStatus !== 'newRequests'  &&
