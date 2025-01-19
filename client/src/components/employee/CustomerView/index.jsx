@@ -13,7 +13,7 @@ function CustomerTable() {
         const fetchCustomers = async () => {
             try {
                 console.log(employeeId);
-                const response = await axios.get(`http://localhost:9000/customers/assigned/${employeeId}`); // Adjust API endpoint as necessary
+                const response = await axios.get(`https://vedic-backend-neon.vercel.app/customers/assigned/${employeeId}`); // Adjust API endpoint as necessary
                 const filteredCustomers = response.data.data.filter(
                     (customer) => customer.customerStatus !== 'newRequests'  &&
                         customer.customerStatus !== 'rejected'
