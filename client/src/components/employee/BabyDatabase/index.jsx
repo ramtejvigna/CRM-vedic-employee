@@ -150,7 +150,7 @@ const BabyDatabase = () => {
 
     const checkAcceptance = async () => {
         try {
-            const response = await axios.get(`https://vedic-backend-neon.vercel.app/employees/adminAcceptance`, {
+            const response = await axios.get(`https://vedic-backend-neon.vercel.app/api/employees/adminAcceptance`, {
                 params: { employeeId } // Pass employeeId as a query parameter
             });
     
