@@ -135,7 +135,7 @@ const BabyDatabase = () => {
     
     const requestedAccess = async () => {
         try {
-            const response = await axios.get("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+            const response = await axios.get("https://vedic-backend-neon.vercel.app/api/employees/requestBabyNames", {
                 params: { employeeId }
             });
 
@@ -264,7 +264,7 @@ const BabyDatabase = () => {
 
     const handleRequestAccess = async () => {
         try {
-            const response = await axios.post("https://vedic-backend-neon.vercel.app/employees/requestBabyNames", {
+            const response = await axios.post("https://vedic-backend-neon.vercel.app/api/employees/requestBabyNames", {
                 employeeId: employeeId
             });
 
