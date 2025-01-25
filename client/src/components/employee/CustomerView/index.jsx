@@ -98,30 +98,6 @@ function CustomerTable() {
         setIsEditingNote(prev => ({ ...prev, [customerID]: !prev[customerID] }));
     };
 
-    const handleUpdateNote = async (customerID) => {
-        const updatedNote = editedNotes[customerID];
-        if (!updatedNote) return;
-
-        try {
-            await axios.patch(`https://vedic-backend-neon.vercel.app/customers/updateNote/${customerID}`, { note: updatedNote });
-            setCustomers((prevCustomers) =>
-                prevCustomers.map((customer) =>
-                    customer.customerID === customerID
-                        ? { ...customer, note: updatedNote }
-                        : customer
-                )
-            );
-
-            setEditedNotes((prevNotes) => {
-                const updatedNotes = { ...prevNotes };
-                delete updatedNotes[customerID];
-                return updatedNotes;
-            });
-        } catch (error) {
-            console.error('Error updating note:', error);
-        }
-    };
-
     const FilterBadge = ({ active, onClick, children }) => (
         <button
             onClick={onClick}

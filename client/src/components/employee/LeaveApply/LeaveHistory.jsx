@@ -7,9 +7,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Typography,
-  Box,
-  Button,
 } from "@mui/material";
 import { Info as InfoIcon, Close as CloseIcon, CalendarToday as CalendarIcon, AccessTime as AccessTimeIcon } from "@mui/icons-material";
 import axios from "axios";
@@ -19,7 +16,6 @@ import EmptyState from "./Empty";
 import Snackbar from "@mui/material/Snackbar";
 import { Dialog, Transition } from "@headlessui/react";
 import { X } from "lucide-react";
-import { Chip } from "@mui/material";
 
 const LeaveHistory = ({
   leaveHistory,
@@ -80,18 +76,6 @@ const LeaveHistory = ({
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const emptyRows =
-    rowsPerPage -
-    Math.min(rowsPerPage, leaveHistory.length - page * rowsPerPage);
 
   if (loading) {
     return (

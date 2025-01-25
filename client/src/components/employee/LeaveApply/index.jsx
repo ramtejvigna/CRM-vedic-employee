@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Card,
-  CardContent,
   Typography,
   Chip,
   Dialog,
@@ -17,23 +10,17 @@ import {
   DialogActions,
   Snackbar,
   IconButton,
-  Tooltip,
   ThemeProvider,
   createTheme,
   CssBaseline,
   Box,
-  Avatar,
-  Grid,
-  LinearProgress,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
   Calendar,
   Clock,
   FileText,
-  AlertCircle,
   CheckCircle,
   ChevronDown,
 } from "lucide-react";
