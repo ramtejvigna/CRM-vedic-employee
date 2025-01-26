@@ -14,7 +14,7 @@ import {
   Eye,
   AlertCircle,
   ArrowLeft,
-  Star,
+  Search,
   FilePlus2,
 } from 'lucide-react';
 import axios, { formToJSON } from 'axios';
