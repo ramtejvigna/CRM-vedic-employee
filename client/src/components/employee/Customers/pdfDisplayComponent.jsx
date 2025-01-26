@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts } from 'pdf-lib';
 import pdfTemplate from "../../../assets/Template.pdf";
 
 // Extracted generatePdf function to reuse it elsewhere
-export const generatePdf = async (babyNames,additionalBabyNames) => {
+export const generatePdf = async (babyNames,additionalBabyNames,customerDetails,astroDetails) => {
   try {
     const pdfTemplateBytes = await fetch(pdfTemplate).then(res => {
       if (!res.ok) throw new Error('Network response was not ok');
@@ -20,19 +20,22 @@ export const generatePdf = async (babyNames,additionalBabyNames) => {
     let currentPage = secondPage; 
     // Static data
     const staticData = {
-      gender: 'Girl',
-      zodiacSign: 'Cancer',
-      nakshatra: 'Punarvasu',
-      gemstone: 'Pearl',
-      destinyNumber: 6,
-      luckyColour: 'White',
-      birthDate: '02/08/2024',
-      birthTime: '10:05 PM',
-      numerology: 2,
-      luckyDay: 'Sunday',
-      luckyGod: 'Shiva',
-      luckyMetal: 'Silver',
-  };
+      gender: customerDetails.babyGender || "N/A",
+      zodiacSign: astroDetails.zodiacSign || "N/A",
+      nakshatra: astroDetails.nakshatra || "N/A",
+      gemstone: astroDetails.gemstone || "N/A",
+      destinyNumber: astroDetails.destinyNumber || "N/A",
+      luckyColour: astroDetails.luckyColour || "N/A",
+      birthDate: customerDetails.babyBirthDate
+        ? new Date(customerDetails.babyBirthDate).toLocaleDateString()
+        : "N/A",
+      birthTime: customerDetails.babyBirthTime || "N/A",
+      numerology: astroDetails.numerologyNo || "N/A",
+      luckyDay: astroDetails.luckyDay || "N/A",
+      luckyGod: astroDetails.luckyGod || "N/A",
+      luckyMetal: astroDetails.luckyMetal || "N/A",
+    };
+    
 
     // Embed static data on the first page
     let textYPosition = 620;

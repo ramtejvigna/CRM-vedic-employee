@@ -57,6 +57,7 @@ const Customer = () => {
   const [feedbackLoadingStates, setFeedbackLoadingStates] = useState(false);
   const [mailLoader,setMailLoder]=useState(null);
   const [whatsapploader,setWhatsappLoader]=useState(null);
+  const [astroDetails, setAstroDetails] = useState(null);
 
 
 
@@ -71,12 +72,12 @@ const Customer = () => {
   const handleActionClick = async (action, pdf) => {
     setActiveDropdown(null);
     if (action === 'view') {
-      handleShowPdf(pdf.babyNames, pdf.additionalBabyNames);
+      handleShowPdf(pdf.babyNames, pdf.additionalBabyNames,customerDetails,astroDetails);
     } else if (action === 'mail') {
-      await handleSetPdfUrl(pdf.babyNames, pdf.additionalBabyNames);
+      await handleSetPdfUrl(pdf.babyNames, pdf.additionalBabyNames,customerDetails,astroDetails);
       setPdfId(pdf._id);
     } else if (action === 'whatsapp') {
-      await handleSetPdfUrlForWhatsapp(pdf.babyNames, pdf.additionalBabyNames);
+      await handleSetPdfUrlForWhatsapp(pdf.babyNames, pdf.additionalBabyNames,customerDetails,astroDetails);
       setPdfId(pdf._id);
     } else if (action === 'feedback') {
       if (pdf.whatsappStatus || pdf.mailStatus) {
@@ -132,9 +133,9 @@ const Customer = () => {
 
 
 
-  const handleSetPdfUrl = async (babyNames, additionalBabyNames) => {
+  const handleSetPdfUrl = async (babyNames, additionalBabyNames,customerDetails,astroDetails) => {
     try {
-      const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
+      const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames,customerDetails,astroDetails);
       setMailUrl(generatedPdfUrl);
     } catch (error) {
       console.error("Error generating PDF URL:", error);
@@ -142,9 +143,9 @@ const Customer = () => {
     }
   };
 
-  const handleSetPdfUrlForWhatsapp = async (babyNames, additionalBabyNames) => {
+  const handleSetPdfUrlForWhatsapp = async (babyNames, additionalBabyNames,customerDetails,astroDetails) => {
     try {
-        const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames);
+        const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames,customerDetails,astroDetails);
         setWhatsappUrl(generatedPdfUrl);
     } catch (error) {
         console.error("Error generating PDF URL:", error);
@@ -195,11 +196,22 @@ const Customer = () => {
     sendWhatsappAndFetchPdfs();
 }, [whatsappUrl, pdfId]);
 
-  const handleShowPdf = async (babyNames, additionalBabyNames) => {
-    const generatedPdfUrl = await generatePdf(babyNames, additionalBabyNames); // Call the generatePdf function
-    setPdfUrl(generatedPdfUrl); // Set the URL state
-    setShowViewer(true);
-  };
+const handleShowPdf = async (babyNames, additionalBabyNames, customerDetails, astroDetails) => {
+  if (!astroDetails || !astroDetails.zodiacSign) {
+    console.error("AstroDetails are incomplete or undefined.");
+    return toast.error("Astrology details are missing.");
+  }
+
+  const generatedPdfUrl = await generatePdf(
+    babyNames,
+    additionalBabyNames,
+    customerDetails,
+    astroDetails
+  );
+  setPdfUrl(generatedPdfUrl);
+  setShowViewer(true);
+};
+
 
   const handleClose = () => {
     setShowViewer(false); // Hide the PDF viewer
@@ -265,6 +277,10 @@ const Customer = () => {
     } else {
       alert('Please select a rating');
     }
+  };
+
+  const handleAstroDetailsUpdate = (details) => {
+    setAstroDetails(details);
   };
 
   const handleNavigate = () => {
@@ -411,7 +427,7 @@ const Customer = () => {
             <div className="col-span-2 my-4">
         <hr className="border-t border-gray-200" />
       </div>
-      <CustomerAstroDetails customerId={customerId} />
+      <CustomerAstroDetails customerId={customerId}  onAstroDetailsFetched={handleAstroDetailsUpdate} />
     </div>
         </div>
         {/* Right Column */}
@@ -474,7 +490,7 @@ const Customer = () => {
         {pdfs.map((pdf) => (
           <tr key={pdf._id} className="border-b">
             <td className="px-4 py-2">
-              <button onClick={() => handleShowPdf(pdf.babyNames, pdf._id)}>
+              <button onClick={() => handleShowPdf(pdf.babyNames, pdf.additionalBabyNames,customerDetails,astroDetails)}>
                 <FileText className="h-4 w-4 text-blue-600" />
               </button>
             </td>

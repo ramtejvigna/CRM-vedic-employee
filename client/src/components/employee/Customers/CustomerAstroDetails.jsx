@@ -3,7 +3,7 @@ import { Edit, X } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CustomerAstroDetails = ({ customerId }) => {
+const CustomerAstroDetails = ({ customerId,onAstroDetailsFetched}) => {
   const [astroDetails, setAstroDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -16,6 +16,9 @@ const CustomerAstroDetails = ({ customerId }) => {
         const data = await response.json();
         setAstroDetails(data);
         setEditableAstroDetails(data);
+        if (onAstroDetailsFetched) {
+          onAstroDetailsFetched(data); // Pass data to the parent
+        }
       }
       setLoading(false);
     } catch (error) {
