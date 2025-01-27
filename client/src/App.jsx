@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import AdminDashboard from "./components/admin-dashboard";
 import EmployeeManagement from "./components/employee";
 import ProtectedRoute from "./ProtectedRoute";
 import Cookies from 'js-cookie'
@@ -46,12 +45,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/signin" replace />} />
         <Route path="/signin" element={<SignIn />} />
-
-        {/* Admin Routes */}
-        <Route 
-          path="/admin/*" 
-          element={<ProtectedRoute component={AdminDashboard} isAdminRoute={true} />} 
-        />
 
         {/* Employee Routes */}
         <Route 

@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('https://vedic-backend-neon.vercel.app/login', { email, phone });
+      const response = await axios.post('https://vedic-backend-neon.vercel.app/login', { email, password });
       const token = response.data.token;
       const employeeId = response.data.userId;
       
@@ -101,14 +101,13 @@ const SignIn = () => {
               />
             </div>
 
-            {/* Phone Input */}
             <div className="relative group">
               <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-5 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                placeholder="Enter your phone number"
+                placeholder="Enter password"
                 required
               />
             </div>

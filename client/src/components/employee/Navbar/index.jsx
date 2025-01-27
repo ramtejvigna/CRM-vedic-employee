@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
-import { FaHome, FaCog, FaChevronDown, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUserCircle } from 'react-icons/fa'; // Import dark/light mode icons
+import { FaHome, FaBars, FaUserCircle } from 'react-icons/fa'; // Import dark/light mode icons
 import { useStore } from '../../../store';
 import NotificationButton from './NotificationButton';
 import { toast } from 'react-toastify';
