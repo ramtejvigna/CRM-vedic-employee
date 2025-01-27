@@ -275,6 +275,12 @@ useEffect(() => {
           item.nameEnglish.charAt(0).toLowerCase() === filters[key].toLowerCase()
         );
       }
+      if (key === "gender") {
+        // Explicitly check for gender match
+        return result.filter((item) =>
+          item.gender?.toLowerCase() === filters[key].toLowerCase()
+        );
+      }
       return result.filter((item) =>
         item[key]?.toLowerCase().includes(filters[key].toLowerCase())
       );
