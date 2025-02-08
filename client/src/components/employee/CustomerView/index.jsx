@@ -32,8 +32,6 @@ function CustomerTable() {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [editedNotes, setEditedNotes] = useState({});
   const [isEditingNote, setIsEditingNote] = useState({});
-
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
@@ -42,23 +40,23 @@ function CustomerTable() {
 
   useEffect(() => {
     const fetchCustomers = async () => {
-        try {
-            const response = await axios.get(`https://vedic-backend-neon.vercel.app/customers/assigned/${employeeId}`);
-            const filteredCustomers = response.data.data.filter(
-                (customer) => customer.customerStatus !== 'newRequests' &&
-                    customer.customerStatus !== 'rejected'
-            );
-            setCustomers(filteredCustomers);
-            setFilteredCustomers(filteredCustomers);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching customers:', error);
-            setLoading(false);
-        }
+      try {
+        const response = await axios.get(`https://vedic-backend-neon.vercel.app/customers/assigned/${employeeId}`);
+        const filteredCustomers = response.data.data.filter(
+          (customer) => customer.customerStatus !== 'newRequests' &&
+            customer.customerStatus !== 'rejected'
+        );
+        setCustomers(filteredCustomers);
+        setFilteredCustomers(filteredCustomers);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+        setLoading(false);
+      }
     };
 
     fetchCustomers();
-}, [employeeId]);
+  }, [employeeId]);
 
   useEffect(() => {
     const applyFiltersAndSearch = () => {
@@ -69,26 +67,22 @@ function CustomerTable() {
         const searchLower = searchTerm.toLowerCase();
         result = result.filter(
           (customer) =>
-            customer.customerID?.toLowerCase().includes(searchLower) ||
-            customer.customerName?.toLowerCase().includes(searchLower) ||
-            customer.socialMediaId?.toLowerCase().includes(searchLower)
+            (customer.customerID?.toLowerCase() || "").includes(searchLower) ||
+            (customer.customerName?.toLowerCase() || "").includes(searchLower) ||
+            (customer.socialMediaId?.toLowerCase() || "").includes(searchLower)
         );
       }
 
-      // Apply status filters
+      // Apply status filter
       if (filters.status !== "all") {
-        result = result.filter((customer) =>
-          filters.status === "completed"
-            ? customer.customerStatus === "completed"
-            : customer.customerStatus !== "completed"
-        );
+        result = result.filter((customer) => customer.customerStatus === filters.status);
       }
 
-      // Apply PDF filters
+      // Apply PDF filter
       if (filters.hasPdf !== "all") {
         result = result.filter((customer) =>
           filters.hasPdf === "yes"
-            ? customer.pdfGenerated?.length > 0
+            ? customer.pdfGenerated && customer.pdfGenerated.length > 0
             : !customer.pdfGenerated || customer.pdfGenerated.length === 0
         );
       }
@@ -97,6 +91,7 @@ function CustomerTable() {
       if (filters.dateRange.startDate && filters.dateRange.endDate) {
         const startDate = new Date(filters.dateRange.startDate);
         const endDate = new Date(filters.dateRange.endDate);
+        endDate.setHours(23, 59, 59, 999);
 
         result = result.filter((customer) => {
           if (!customer.paymentDate) return false;
@@ -112,6 +107,13 @@ function CustomerTable() {
 
     applyFiltersAndSearch();
   }, [searchTerm, filters, customers, itemsPerPage]);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [filterType]: value
+    }));
+  };
 
   // Get current page items
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -138,22 +140,14 @@ function CustomerTable() {
     }));
   };
 
-  const handleEditToggle = (customerID) => {
-    if (isEditingNote[customerID]) {
-      const updatedCustomers = customers.map((customer) =>
-        customer.customerID === customerID
-          ? { ...customer, note: editedNotes[customerID] || "" }
-          : customer
-      );
-      setCustomers(updatedCustomers);
-
-      setEditedNotes((prev) => {
-        const newState = { ...prev };
-        delete newState[customerID];
-        return newState;
-      });
+  const handleEditToggle = (customerID, currentNote) => {
+    if (!isEditingNote[customerID]) {
+      // When entering edit mode, initialize with current note
+      setEditedNotes((prev) => ({
+        ...prev,
+        [customerID]: currentNote || ""
+      }));
     }
-
     setIsEditingNote((prev) => ({ ...prev, [customerID]: !prev[customerID] }));
   };
 
@@ -171,35 +165,38 @@ function CustomerTable() {
   };
 
   const handleUpdateNote = async (customerID) => {
-    const updatedNote = editedNotes[customerID];
-    if (!updatedNote) {
-        return;
-    }
     try {
-        // Make API request to update the note in the database
-        const response=await axios.patch(`https://vedic-backend-neon.vercel.app/customers/updateNote/${customerID}`, { note: updatedNote });
-        // Update the customer data locally
-        setCustomers((prevCustomers) =>
-            prevCustomers.map((customer) =>
-                customer.customerID === customerID
-                    ? { ...customer, note: updatedNote }
-                    : customer
-            )
-        );
+      const noteToUpdate = editedNotes[customerID] || ""; // Use empty string if note is cleared
 
-        // Optionally, you can also clear the editedNotes state for this customer
-        setEditedNotes((prevNotes) => {
-            const updatedNotes = { ...prevNotes };
-            delete updatedNotes[customerID];
-            return updatedNotes;
-        });
+      // Make API request to update the note
+      await axios.patch(
+        `https://vedic-backend-neon.vercel.app/customers/updateNote/${customerID}`,
+        { note: noteToUpdate }
+      );
+
+      // Update local state
+      setCustomers((prevCustomers) =>
+        prevCustomers.map((customer) =>
+          customer.customerID === customerID
+            ? { ...customer, note: noteToUpdate }
+            : customer
+        )
+      );
+
+      // Clear edited note state
+      setEditedNotes((prev) => {
+        const newState = { ...prev };
+        delete newState[customerID];
+        return newState;
+      });
+
+      // Exit edit mode
+      setIsEditingNote((prev) => ({ ...prev, [customerID]: false }));
     } catch (error) {
-        console.error('Error updating note:', error);
-    } finally{
-        setIsEditingNote(prev => ({ ...prev, [customerID]: !prev[customerID] }));
-
+      console.error('Error updating note:', error);
+      // You might want to add error handling UI here
     }
-};
+  };
 
   const convertToCSV = (data) => {
     // Define headers based on the table columns
@@ -259,19 +256,6 @@ function CustomerTable() {
 
     window.URL.revokeObjectURL(url);
   };
-
-  const FilterBadge = ({ active, onClick, children }) => (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
-        active
-          ? "bg-blue-500 text-white"
-          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-      }`}
-    >
-      {children}
-    </button>
-  );
 
   if (loading) {
     return (
@@ -336,84 +320,6 @@ function CustomerTable() {
           {/* Filters Section */}
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Status & PDF Filters Group */}
-              <div className="space-y-4">
-                {/* Status Filters */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <Filter className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <span className="font-medium text-gray-700">
-                      Status Filter
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <FilterBadge
-                      active={filters.status === "all"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, status: "all" }))
-                      }
-                    >
-                      All Status
-                    </FilterBadge>
-                    <FilterBadge
-                      active={filters.status === "completed"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, status: "completed" }))
-                      }
-                    >
-                      Completed
-                    </FilterBadge>
-                    <FilterBadge
-                      active={filters.status === "pending"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, status: "pending" }))
-                      }
-                    >
-                      Pending
-                    </FilterBadge>
-                  </div>
-                </div>
-
-                {/* PDF Filters */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-purple-100 rounded-lg">
-                      <FileText className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <span className="font-medium text-gray-700">
-                      PDF Status
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <FilterBadge
-                      active={filters.hasPdf === "all"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, hasPdf: "all" }))
-                      }
-                    >
-                      All PDFs
-                    </FilterBadge>
-                    <FilterBadge
-                      active={filters.hasPdf === "yes"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, hasPdf: "yes" }))
-                      }
-                    >
-                      Has PDFs
-                    </FilterBadge>
-                    <FilterBadge
-                      active={filters.hasPdf === "no"}
-                      onClick={() =>
-                        setFilters((f) => ({ ...f, hasPdf: "no" }))
-                      }
-                    >
-                      No PDFs
-                    </FilterBadge>
-                  </div>
-                </div>
-              </div>
 
               {/* Date Range Filter */}
               <div className="space-y-3">
@@ -523,11 +429,10 @@ function CustomerTable() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${
-                        customer.pdfGenerated?.length
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${customer.pdfGenerated?.length
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-800"
+                        }`}
                     >
                       <FileText className="w-4 h-4 mr-1" />
                       {customer.pdfGenerated ? customer.pdfGenerated.length : 0}
@@ -535,47 +440,46 @@ function CustomerTable() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${
-                        customer.customerStatus === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${customer.customerStatus === "completed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                        }`}
                     >
                       {customer.customerStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                            {isEditingNote[customer.customerID] ? (
-                                // Edit mode - input field
-                                <input
-                                    type="text"
-                                    value={editedNotes[customer.customerID] || ''} // Ensure it uses empty string when cleared
-                                    onChange={(e) => handleNoteChange(e, customer.customerID)} // Correct change handling
-                                    className="px-2 py-1 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                />
-                            ) : (
-                                // Display mode - static note text
-                                <span className="text-gray-700">{customer.note || '-'}</span>
-                            )}
+                    <div className="flex items-center gap-2">
+                      {isEditingNote[customer.customerID] ? (
+                        // Edit mode - input field
+                        <input
+                          type="text"
+                          value={editedNotes[customer.customerID] || ''} // Ensure it uses empty string when cleared
+                          onChange={(e) => handleNoteChange(e, customer.customerID)} // Correct change handling
+                          className="px-2 py-1 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        />
+                      ) : (
+                        // Display mode - static note text
+                        <span className="text-gray-700">{customer.note || '-'}</span>
+                      )}
 
-                            {/* Edit/Save button */}
-                            <button
-                                onClick={() =>
-                                    isEditingNote[customer.customerID]
-                                        ? handleUpdateNote(customer.customerID) // Save note
-                                        : handleEditToggle(customer.customerID) // Toggle edit mode
-                                }
-                                className="px-3 py-1 text-blue-500 rounded-full text-xs hover:text-blue-600 transition-all duration-200"
-                            >
-                                {isEditingNote[customer.customerID] ? (
-                                    <CircleArrowRight /> // Save icon
-                                ) : (
-                                    <Edit /> // Edit icon
-                                )}
-                            </button>
-                        </div>
-                    </td>
+                      {/* Edit/Save button */}
+                      <button
+                        onClick={() =>
+                          isEditingNote[customer.customerID]
+                            ? handleUpdateNote(customer.customerID) // Save note
+                            : handleEditToggle(customer.customerID) // Toggle edit mode
+                        }
+                        className="px-3 py-1 text-blue-500 rounded-full text-xs hover:text-blue-600 transition-all duration-200"
+                      >
+                        {isEditingNote[customer.customerID] ? (
+                          <CircleArrowRight /> // Save icon
+                        ) : (
+                          <Edit /> // Edit icon
+                        )}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -635,11 +539,10 @@ function CustomerTable() {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`px-3 py-1 rounded-lg text-sm ${
-                            currentPage === pageNumber
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-3 py-1 rounded-lg text-sm ${currentPage === pageNumber
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
                         >
                           {pageNumber}
                         </button>
