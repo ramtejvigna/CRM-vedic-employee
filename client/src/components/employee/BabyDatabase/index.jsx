@@ -119,6 +119,7 @@ const BabyDatabase = () => {
                 nakshatras: extractUniqueValues('nakshatra'),
                 elements: extractUniqueValues('element'),
                 bookNames: extractUniqueValues('bookName'),
+                gods: extractUniqueValues('god'),
                 planetaryInfluence: extractUniqueValues('planetaryInfluence'),
                 relatedFestival: extractUniqueValues('relatedFestival')
             };
@@ -317,7 +318,7 @@ const BabyDatabase = () => {
         formData.append('employeeId', employeeId); // Append the employeeId
     
         try {
-            await axios.post("https://vedic-backend-neon.vercel.app/uploadExcelNames", formData, {
+            await axios.post("http://localhost:9000/uploadExcelNames", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
     
@@ -573,6 +574,7 @@ const BabyDatabase = () => {
                                                 'Planetary Influence',
                                                 'Element',
                                                 'Book Name',
+                                                'God',
                                                 'Page No',
                                                 'Syllable Count',
                                                 'Character Significance',
@@ -685,6 +687,13 @@ const BabyDatabase = () => {
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <input
+                                                                    value={editingName.god}
+                                                                    onChange={(e) => setEditingName({ ...editingName, god: e.target.value })}
+                                                                    className="w-full border border-gray-300 rounded-md px-2 py-1"
+                                                                />
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <input
                                                                     value={editingName.pageNo}
                                                                     onChange={(e) => setEditingName({ ...editingName, pageNo: e.target.value })}
                                                                     className="w-full border border-gray-300 rounded-md px-2 py-1"
@@ -754,6 +763,7 @@ const BabyDatabase = () => {
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.planetaryInfluence}</td>
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.element}</td>
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.bookName}</td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">{baby.god ? baby.god : ""}</td>
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.pageNo}</td>
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.syllableCount}</td>
                                                             <td className="px-6 py-4 whitespace-nowrap">{baby.characterSignificance}</td>
