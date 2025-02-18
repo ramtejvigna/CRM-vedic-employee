@@ -427,7 +427,7 @@ const handleShowPdf = async (babyNames, additionalBabyNames, customerDetails, as
             <div className="col-span-2 my-4">
         <hr className="border-t border-gray-200" />
       </div>
-      <CustomerAstroDetails customerId={customerId}  onAstroDetailsFetched={handleAstroDetailsUpdate} />
+      <CustomerAstroDetails customerDetails={customerDetails}  onAstroDetailsFetched={handleAstroDetailsUpdate} />
     </div>
         </div>
         {/* Right Column */}

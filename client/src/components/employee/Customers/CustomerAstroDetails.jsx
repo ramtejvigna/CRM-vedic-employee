@@ -3,22 +3,20 @@ import { Edit, X } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CustomerAstroDetails = ({ customerId,onAstroDetailsFetched}) => {
+const CustomerAstroDetails = ({ customerDetails, onAstroDetailsFetched }) => {
   const [astroDetails, setAstroDetails] = useState(null);
+  const customerId = customerDetails._id;
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editableAstroDetails, setEditableAstroDetails] = useState({});
 
   const fetchAstroData = async () => {
     try {
-      const response = await fetch(`https://vedic-backend-neon.vercel.app/api/customers/${customerId}/astro`);
-      if (response.ok) {
-        const data = await response.json();
-        setAstroDetails(data);
-        setEditableAstroDetails(data);
-        if (onAstroDetailsFetched) {
-          onAstroDetailsFetched(data); // Pass data to the parent
-        }
+
+      setAstroDetails(customerDetails.astroDetails);
+      setEditableAstroDetails(customerDetails.astroDetails);
+      if (onAstroDetailsFetched) {
+        onAstroDetailsFetched(customerDetails.astroDetails); // Pass data to the parent
       }
       setLoading(false);
     } catch (error) {
@@ -86,28 +84,28 @@ const CustomerAstroDetails = ({ customerId,onAstroDetailsFetched}) => {
   }
 
   return (
-    
+
     <div className="relative">
       {/* Astrology Details */}
       <h2 className="text-lg font-medium mb-4">      Astrological Details
       </h2>
-      <button 
-  onClick={() => setIsEditing(true)} 
-  style={{ 
-    position: 'absolute', 
-    top: '0', 
-    right: '-200px',   
-  }} 
-  className="text-white bg-blue-500 hover:bg-blue-700 flex items-center px-3 py-2 rounded"
->
-  <Edit className="mr-2" /> 
-  
-</button>
-  
+      <button
+        onClick={() => setIsEditing(true)}
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '-200px',
+        }}
+        className="text-white bg-blue-500 hover:bg-blue-700 flex items-center px-3 py-2 rounded"
+      >
+        <Edit className="mr-2" />
+
+      </button>
+
 
 
       <div className="grid grid-cols-2 gap-y-4 w-full mt-12  max-w-4xl" style={{ columnGap: '15rem' }}>
-        
+
         <div>
           <p className="text-sm font-medium text-gray-500 whitespace-nowrap">Zodiac Sign:</p>
           <p className="mt-1 text-gray-900 whitespace-nowrap">{astroDetails.zodiacSign || 'N/A'}</p>
@@ -296,9 +294,9 @@ const CustomerAstroDetails = ({ customerId,onAstroDetailsFetched}) => {
           </div>
         </div>
       )}
-      
+
       {/* Toast Container */}
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

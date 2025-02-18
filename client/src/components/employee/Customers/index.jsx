@@ -10,13 +10,26 @@ import CheckBoxListPage from "./CheckBoxList";
 
 const formatDateTime = (dateString) => {
   if (!dateString) return "No Date";
-  
+
   const date = new Date(dateString);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const month = months[date.getMonth()];
   const day = date.getDate();
   const year = date.getFullYear();
-  
+
   return `${month}${day}, ${year}`;
 };
 
@@ -37,7 +50,7 @@ const LoadingSpinner = () => (
 export const Customers = () => {
   const [customerData, setCustomerData] = useState({
     assignedCustomers: [],
-    completed: []
+    completed: [],
   });
   const [activeTab, setActiveTab] = useState("assignedCustomers");
   const [showCheckBoxList, setShowCheckBoxList] = useState(false);
@@ -67,7 +80,7 @@ export const Customers = () => {
             : [],
           completed: Array.isArray(response.data.completed)
             ? response.data.completed
-            : []
+            : [],
         };
 
         setCustomerData(formattedData);
@@ -88,22 +101,22 @@ export const Customers = () => {
 
   const renderTable = (customers, fromSection, nextSection) => {
     const validCustomers = Array.isArray(customers) ? [...customers] : [];
-  
+
     if (fromSection === "assignedCustomers") {
       validCustomers.sort((a, b) => {
         const deadlineA = new Date(a.deadline);
         const deadlineB = new Date(b.deadline);
-  
+
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;
-  
+
         return deadlineA - deadlineB;
       });
     }
-  
+
     const assignedOrCompletedHeader =
       fromSection === "completed" ? "Completed On" : "Assigned On";
-  
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -218,7 +231,7 @@ export const Customers = () => {
         </table>
       </motion.div>
     );
-  };    
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -226,7 +239,8 @@ export const Customers = () => {
     }
 
     const customers = customerData[activeTab] || [];
-    const nextSection = activeTab === "assignedCustomers" ? "completed" : "assignedCustomers";
+    const nextSection =
+      activeTab === "assignedCustomers" ? "completed" : "assignedCustomers";
 
     return (
       <AnimatePresence mode="wait">
@@ -246,7 +260,9 @@ export const Customers = () => {
   const assignedCustomersCount = customerData.assignedCustomers?.length || 0;
 
   return (
-    <div className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? "bg-gray-900" : ""}`}>
+    <div
+      className={`min-h-screen p-4 sm:p-8 ${isDarkMode ? "bg-gray-900" : ""}`}
+    >
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
           Customer Management
@@ -264,7 +280,8 @@ export const Customers = () => {
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, " $1")}
+              {tab.charAt(0).toUpperCase() +
+                tab.slice(1).replace(/([A-Z])/g, " $1")}
               {tab === "assignedCustomers" && assignedCustomersCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white p-1 px-2 rounded-full">
                   {assignedCustomersCount}

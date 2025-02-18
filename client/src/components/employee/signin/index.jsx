@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import {  ArrowRight, Lock } from 'lucide-react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios";
+import Cookies from "js-cookie";
+import { ArrowRight, Lock } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,15 +16,17 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('https://vedic-backend-neon.vercel.app/login', { email, password });
+      const response = await axios.post(
+        "https://vedic-backend-neon.vercel.app/login",
+        { email, password }
+      );
       const token = response.data.token;
       const employeeId = response.data.userId;
-      
-      Cookies.set('token', token, { expires: 1 });
-      Cookies.set('employeeId', employeeId, { expires: 1 });
 
-      
-      toast.success('🎉 Login successful! Redirecting...', {
+      Cookies.set("token", token, { expires: 1 });
+      Cookies.set("employeeId", employeeId, { expires: 1 });
+
+      toast.success("🎉 Login successful! Redirecting...", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -37,11 +39,11 @@ const SignIn = () => {
 
       // Delay navigation slightly to show the success toast
       setTimeout(() => {
-        navigate('/employee/home');
+        navigate("/employee/home");
       }, 1500);
-      
     } catch (error) {
-      toast.error('❌ Invalid credentials. Please try again.', {
+      console.error(error);
+      toast.error("❌ Invalid credentials. Please try again.", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -58,7 +60,7 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex items-center justify-center p-4">
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         limit={2}
@@ -76,14 +78,16 @@ const SignIn = () => {
         <div className="absolute -top-8 -left-8 w-24 h-24 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-24 h-24 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-        
+
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 relative z-10 border border-white/20">
           {/* Header Section */}
           <div className="text-center mb-8">
             <div className="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Lock className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Welcome Back!
+            </h2>
             <p className="text-gray-600">Sign in to access your account</p>
           </div>
 
